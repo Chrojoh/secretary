@@ -2013,20 +2013,133 @@
             updateTrialOptions();
             updateDataStatusDisplay(); // Show initial data counts
             
+            // Auto-load the dataforsite.xlsx file on startup
+            loadDataForSiteFile();
+            
             // Load XLSX library for Excel processing
             if (typeof XLSX === 'undefined') {
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
                 script.onload = function() {
                     console.log('XLSX library loaded successfully');
+                    // Try loading the data file again once XLSX is ready
+                    setTimeout(() => {
+                        loadDataForSiteFile();
+                    }, 1000);
                 };
                 script.onerror = function() {
                     console.error('Failed to load XLSX library');
                     showStatusMessage('Warning: Excel upload functionality may not work. Please refresh the page.', 'warning');
                 };
                 document.head.appendChild(script);
+            } else {
+                // XLSX already loaded, try loading data file
+                setTimeout(() => {
+                    loadDataForSiteFile();
+                }, 500);
             }
         };
+
+        // Auto-load the dataforsite.xlsx file
+        async function loadDataForSiteFile() {
+            try {
+                console.log('Attempting to auto-load dataforsite.xlsx...');
+                
+                // Check if XLSX library is available
+                if (typeof XLSX === 'undefined') {
+                    console.log('XLSX library not ready yet, will retry...');
+                    return;
+                }
+                
+                // Try to read the dataforsite.xlsx file
+                const fileData = await window.fs.readFile('dataforsite.xlsx');
+                console.log('dataforsite.xlsx file loaded, size:', fileData.length, 'bytes');
+                
+                // Parse the workbook
+                const workbook = XLSX.read(fileData, { 
+                    type: 'array',
+                    cellDates: true,
+                    cellStyles: true 
+                });
+                console.log('Workbook sheets:', workbook.SheetNames);
+                
+                // Get the first sheet
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                // Process as array data (no headers)
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                console.log('Raw data rows:', rawData.length);
+                
+                if (rawData.length > 0) {
+                    const processedDogs = [];
+                    const extractedClasses = new Set();
+                    const extractedJudges = new Set();
+                    
+                    // Process each row
+                    rawData.forEach((row, index) => {
+                        if (row && row.length >= 7) {
+                            const regNumber = row[0] ? String(row[0]).trim() : '';
+                            const callName = row[1] ? String(row[1]).trim() : '';
+                            const fullName = row[2] ? String(row[2]).trim() : '';
+                            const fullHandler = row[3] ? String(row[3]).trim() : '';
+                            const firstName = row[4] ? String(row[4]).trim() : '';
+                            const lastName = row[5] ? String(row[5]).trim() : '';
+                            const className = row[6] ? String(row[6]).trim() : '';
+                            const judge = row[7] ? String(row[7]).trim() : '';
+
+                            // Only add valid dog records
+                            if (regNumber && callName && regNumber !== '07-0001-01') { // Skip header-like rows
+                                processedDogs.push({
+                                    regNumber: regNumber,
+                                    callName: callName,
+                                    fullName: fullName,
+                                    handler: fullHandler || `${firstName} ${lastName}`.trim(),
+                                    firstName: firstName,
+                                    lastName: lastName
+                                });
+                            }
+
+                            // Collect classes and judges (skip obvious headers)
+                            if (className && className !== 'Patrol 1' && className !== 'Class' && className.trim().length > 0) {
+                                extractedClasses.add(className);
+                            }
+                            if (judge && judge !== 'Judges' && judge !== 'Judge' && judge.trim().length > 0) {
+                                extractedJudges.add(judge);
+                            }
+                        }
+                    });
+
+                    // Update global data
+                    if (processedDogs.length > 0) {
+                        dogData = processedDogs;
+                        console.log('Loaded', dogData.length, 'dogs from dataforsite.xlsx');
+                    }
+                    
+                    if (extractedClasses.size > 0) {
+                        availableClasses = Array.from(extractedClasses).sort();
+                        console.log('Loaded', availableClasses.length, 'classes:', availableClasses);
+                    }
+                    
+                    if (extractedJudges.size > 0) {
+                        availableJudges = Array.from(extractedJudges).sort();
+                        console.log('Loaded', availableJudges.length, 'judges:', availableJudges.slice(0, 5));
+                    }
+
+                    // Update displays
+                    updateDataStatusDisplay();
+                    
+                    showStatusMessage(`🎉 Auto-loaded dataforsite.xlsx!<br>🐕 ${dogData.length} dogs<br>🏆 ${availableClasses.length} classes<br>👨‍⚖️ ${availableJudges.length} judges`, 'success');
+                    
+                } else {
+                    console.log('No data found in dataforsite.xlsx');
+                }
+                
+            } catch (error) {
+                console.log('Could not auto-load dataforsite.xlsx:', error.message);
+                // This is normal if the file isn't in the project, so no error message to user
+            }
+        }
     </script>
 </body>
 </html>
