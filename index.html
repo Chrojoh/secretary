@@ -609,6 +609,7 @@
                             <div>
                                 <button onclick="showTab('setup', event)" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
                                 <button onclick="showTab('runningOrders', event)" style="width: 100%; margin-bottom: 10px;">Manage Running Orders</button>
+                                <button onclick="document.getElementById('trialSaveName').value = generateTrialName(); document.getElementById('trialSaveName').focus();" style="width: 100%; margin-bottom: 10px; background: #28a745;">💾 Save Trial File</button>
                                 <button onclick="exportAllData()" style="width: 100%;">Export All Data</button>
                             </div>
                         </div>
@@ -619,13 +620,55 @@
             <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
                 <div class="data-upload">
-                    <h3>Data Management</h3>
-                    <div class="form-group">
-                        <label class="label">Upload Excel Data:</label>
-                        <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
-                        <span style="color: #666; font-size: 12px;">Upload your dog database Excel file</span>
+                    <h3>📁 File Management</h3>
+                    
+                    <!-- Save/Load Trial Files -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                        <h4 style="color: #28a745; margin-top: 0;">💾 Save/Load Complete Trial</h4>
+                        <p style="color: #666; margin-bottom: 15px;">Save your entire trial (setup, entries, running orders, scores) to a file that you can reload anytime.</p>
+                        
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <span class="label">Trial Name:</span>
+                            <input type="text" id="trialSaveName" placeholder="e.g., Spring Championship 2024" style="width: 300px;">
+                            <button onclick="saveCompleteTrialFile()" style="background: #28a745;">💾 Save Trial File</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <span class="label">Load Saved Trial:</span>
+                            <input type="file" id="trialLoadFile" accept=".json" onchange="loadCompleteTrialFile()">
+                            <span style="color: #666; font-size: 12px;">Select a previously saved .json trial file</span>
+                        </div>
+                        
+                        <div id="saveLoadStatus"></div>
                     </div>
-                    <div id="dataStatus"></div>
+
+                    <!-- Dog Database Upload -->
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-top: 0;">🐕 Dog Database</h4>
+                        <div class="form-group">
+                            <label class="label">Upload Excel Data:</label>
+                            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
+                            <span style="color: #666; font-size: 12px;">Upload your dog database Excel file</span>
+                        </div>
+                        <div id="dataStatus"></div>
+                        
+                        <!-- Show current data status -->
+                        <div id="currentDataStatus" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>📊 Current Database:</strong>
+                            <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 14px;">
+                                <div>🐕 <span id="dogCount">8</span> dogs</div>
+                                <div>🏆 <span id="classCount">7</span> classes</div>
+                                <div>👨‍⚖️ <span id="judgeCount">5</span> judges</div>
+                            </div>
+                            <button onclick="showDataPreview()" style="margin-top: 10px; padding: 5px 15px; font-size: 12px; background: #17a2b8;">👁️ Preview Data</button>
+                        </div>
+                        
+                        <!-- Data preview area -->
+                        <div id="dataPreview" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto;">
+                            <h5>Data Preview:</h5>
+                            <div id="previewContent"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="initial-question">
@@ -754,6 +797,9 @@
         let trialConfig = [];
         let entryResults = [];
         let runningOrders = {};
+        let scoreSheets = {}; // New: Store score sheets data
+        let judgeNotes = {}; // New: Store judge notes and transcriptions
+        let trialMetadata = {}; // New: Store trial name, dates, club info
         let totalDays = 0;
         let savedDays = 0;
         let currentUser = null;
@@ -871,7 +917,175 @@
             showTab('entry', event);
         }
 
-        // Data Management Functions
+        // Save/Load Complete Trial Functions
+        function saveCompleteTrialFile() {
+            const trialName = document.getElementById('trialSaveName').value.trim();
+            if (!trialName) {
+                alert('Please enter a trial name before saving');
+                return;
+            }
+
+            if (!currentUser) {
+                alert('Please log in before saving trials');
+                return;
+            }
+
+            // Package everything into one comprehensive file
+            const completeTrialData = {
+                // File metadata
+                fileInfo: {
+                    version: "1.0",
+                    createdBy: currentUser.secretaryName,
+                    clubName: currentUser.clubName,
+                    trialName: trialName,
+                    savedDate: new Date().toISOString(),
+                    description: `Complete trial data for ${trialName}`
+                },
+                
+                // Core trial data
+                trialMetadata: {
+                    trialName: trialName,
+                    totalDays: totalDays,
+                    savedDays: savedDays,
+                    setupComplete: savedDays === totalDays,
+                    entryCount: entryResults.length
+                },
+                
+                // All data arrays
+                dogData: dogData,
+                availableClasses: availableClasses,
+                availableJudges: availableJudges,
+                trialConfig: trialConfig,
+                entryResults: entryResults,
+                runningOrders: runningOrders,
+                scoreSheets: scoreSheets,
+                judgeNotes: judgeNotes,
+                
+                // Current state
+                currentState: {
+                    hasRunningOrders: Object.keys(runningOrders).length > 0,
+                    hasEntries: entryResults.length > 0,
+                    hasScoreSheets: Object.keys(scoreSheets).length > 0
+                }
+            };
+
+            // Create downloadable file
+            const jsonString = JSON.stringify(completeTrialData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Generate safe filename
+            const safeTrialName = trialName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const timestamp = new Date().toISOString().split('T')[0];
+            const filename = `trial_${safeTrialName}_${timestamp}.json`;
+            
+            // Download the file
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            // Show success message
+            showSaveLoadMessage(`✅ Trial "${trialName}" saved successfully as ${filename}!<br>You can reload this file anytime to continue working.`, 'success');
+            
+            // Clear the input
+            document.getElementById('trialSaveName').value = '';
+        }
+
+        function loadCompleteTrialFile() {
+            const file = document.getElementById('trialLoadFile').files[0];
+            if (!file) return;
+
+            if (!currentUser) {
+                alert('Please log in before loading trials');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const completeTrialData = JSON.parse(e.target.result);
+                    
+                    // Validate file format
+                    if (!completeTrialData.fileInfo || !completeTrialData.trialConfig) {
+                        throw new Error('Invalid trial file format');
+                    }
+
+                    // Show confirmation dialog with file info
+                    const fileInfo = completeTrialData.fileInfo;
+                    const confirmMessage = `Load Trial: "${fileInfo.trialName}"?\n\n` +
+                        `Created by: ${fileInfo.createdBy} (${fileInfo.clubName})\n` +
+                        `Saved: ${new Date(fileInfo.savedDate).toLocaleString()}\n` +
+                        `Entries: ${completeTrialData.entryResults?.length || 0}\n` +
+                        `Running Orders: ${Object.keys(completeTrialData.runningOrders || {}).length > 0 ? 'Yes' : 'No'}\n\n` +
+                        `This will replace your current trial data.`;
+
+                    if (!confirm(confirmMessage)) {
+                        return;
+                    }
+
+                    // Load all data
+                    dogData = completeTrialData.dogData || [];
+                    availableClasses = completeTrialData.availableClasses || [];
+                    availableJudges = completeTrialData.availableJudges || [];
+                    trialConfig = completeTrialData.trialConfig || [];
+                    entryResults = completeTrialData.entryResults || [];
+                    runningOrders = completeTrialData.runningOrders || {};
+                    scoreSheets = completeTrialData.scoreSheets || {};
+                    judgeNotes = completeTrialData.judgeNotes || {};
+                    
+                    // Restore trial state
+                    if (completeTrialData.trialMetadata) {
+                        totalDays = completeTrialData.trialMetadata.totalDays || 0;
+                        savedDays = completeTrialData.trialMetadata.savedDays || 0;
+                        trialMetadata = completeTrialData.trialMetadata;
+                    }
+
+                    // Update all displays
+                    updateTrialOptions();
+                    updateResultsDisplay();
+                    updateDashboard();
+                    
+                    // Show running orders if they exist
+                    if (Object.keys(runningOrders).length > 0) {
+                        displayRunningOrders();
+                    }
+
+                    // Show success message with loaded data summary
+                    const summary = `
+                        <strong>✅ Trial "${fileInfo.trialName}" loaded successfully!</strong><br>
+                        📊 ${entryResults.length} entries loaded<br>
+                        🐕 ${dogData.length} dogs in database<br>
+                        📅 ${totalDays} trial days configured<br>
+                        ${Object.keys(runningOrders).length > 0 ? '🏃‍♂️ Running orders restored<br>' : ''}
+                        ${Object.keys(scoreSheets).length > 0 ? '📝 Score sheets restored<br>' : ''}
+                    `;
+                    
+                    showSaveLoadMessage(summary, 'success');
+
+                    // If trial setup was complete, show the entry form link
+                    if (savedDays === totalDays && totalDays > 0) {
+                        document.getElementById('entryFormLink').style.display = 'block';
+                    }
+
+                    // Clear the file input
+                    document.getElementById('trialLoadFile').value = '';
+
+                } catch (error) {
+                    showSaveLoadMessage(`❌ Error loading trial file: ${error.message}`, 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showSaveLoadMessage(message, type) {
+            const statusDiv = document.getElementById('saveLoadStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}" style="margin-top: 15px;">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 8000);
+        }
         function loadExcelData() {
             const file = document.getElementById('excelFile').files[0];
             if (!file) return;
@@ -922,7 +1136,18 @@
                 return;
             }
             
-            showStatusMessage("Trial data saved!", "success");
+            // Auto-generate trial name if not set
+            if (!trialMetadata.trialName) {
+                const firstDate = trialConfig.length > 0 ? trialConfig[0].date : new Date().toISOString().split('T')[0];
+                trialMetadata.trialName = `${currentUser.clubName} Trial ${firstDate}`;
+            }
+            
+            // Update metadata
+            trialMetadata.totalDays = totalDays;
+            trialMetadata.savedDays = savedDays;
+            trialMetadata.lastModified = new Date().toISOString();
+            
+            showStatusMessage("Trial configuration saved! Use 'Save Trial File' above to create a downloadable backup.", "success");
         }
 
         // Trial Setup Functions - EXACT from working file
@@ -1746,18 +1971,32 @@
             let activeTrialsHtml = 'No active trials';
             if (trialConfig.length > 0) {
                 const uniqueDates = [...new Set(trialConfig.map(t => t.date))];
-                activeTrialsHtml = `<strong>${uniqueDates.length}</strong> trial days configured`;
+                const trialName = trialMetadata.trialName || 'Current Trial';
+                activeTrialsHtml = `<strong>${trialName}</strong><br>${uniqueDates.length} trial days configured`;
             }
             document.getElementById('activeTrials').innerHTML = activeTrialsHtml;
 
             let recentEntriesHtml = 'No recent entries';
             if (entryResults.length > 0) {
+                const totalEntries = entryResults.length;
                 const recentEntries = entryResults.slice(-3);
-                recentEntriesHtml = recentEntries.map(entry => 
-                    `<div style="margin-bottom: 8px;">${entry.callName} - ${entry.className}</div>`
-                ).join('');
+                recentEntriesHtml = `<strong>${totalEntries}</strong> total entries<br>` + 
+                    recentEntries.map(entry => 
+                        `<div style="margin-bottom: 8px; font-size: 12px;">${entry.callName} - ${entry.className}</div>`
+                    ).join('');
             }
             document.getElementById('recentEntries').innerHTML = recentEntriesHtml;
+        }
+
+        function generateTrialName() {
+            const today = new Date();
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[today.getMonth()];
+            const year = today.getFullYear();
+            
+            const clubShort = currentUser ? currentUser.clubName.split(' ')[0] : 'Club';
+            return `${clubShort} ${month} ${year} Trial`;
         }
 
         function showStatusMessage(message, type) {
@@ -1772,11 +2011,19 @@
         window.onload = function() {
             initializeData();
             updateTrialOptions();
+            updateDataStatusDisplay(); // Show initial data counts
             
             // Load XLSX library for Excel processing
             if (typeof XLSX === 'undefined') {
                 const script = document.createElement('script');
                 script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                script.onload = function() {
+                    console.log('XLSX library loaded successfully');
+                };
+                script.onerror = function() {
+                    console.error('Failed to load XLSX library');
+                    showStatusMessage('Warning: Excel upload functionality may not work. Please refresh the page.', 'warning');
+                };
                 document.head.appendChild(script);
             }
         };
