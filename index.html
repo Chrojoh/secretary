@@ -453,8 +453,9 @@
                 <div class="initial-question">
                     <h3>Data Management</h3>
                     <div class="form-group">
-                        <label class="label">Upload JSON Data:</label>
-                        <input type="file" id="jsonFile" accept=".json" onchange="loadJSONData()">
+                        <label class="label">Upload Excel Data:</label>
+                        <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
+                        <span style="color: #666; font-size: 12px;">Upload Data-for-site.xlsx to load dogs, classes, and judges</span>
                     </div>
                     <div id="dataStatus"></div>
                 </div>
@@ -747,57 +748,13 @@
         }
 
         function addClassToDay(day) {
-            const container = document.getElementById(`classContainer${day}`);
-            const classCount = container.children.length + 1;
-            
-            const newClassDiv = document.createElement('div');
-            newClassDiv.className = 'class-config';
-            newClassDiv.id = `classConfig${day}-${classCount}`;
-            newClassDiv.innerHTML = `
-                <div class="form-group">
-                    <span class="label">Class:</span>
-                    <div class="typeahead-container">
-                        <input type="text" class="typeahead-input" id="class${day}-${classCount}" placeholder="Type to search classes..." 
-                               oninput="handleTypeahead(this, availableClasses)" 
-                               onblur="hideTypeahead(this)" 
-                               onfocus="showTypeahead(this, availableClasses)"
-                               onchange="updateRoundInputs(${day}, ${classCount})" required>
-                        <div class="typeahead-dropdown" id="dropdown-class${day}-${classCount}"></div>
-                    </div>
-                    <span class="label">Number of Rounds:</span>
-                    <input type="number" id="rounds${day}-${classCount}" min="1" max="5" value="2" style="width: 60px;" onchange="updateRoundInputs(${day}, ${classCount})">
-                </div>
-                <div id="roundsContainer${day}-${classCount}" class="rounds-container"></div>
-            `;
-            container.appendChild(newClassDiv);
+            // This function is no longer needed with the new flow
+            // Classes are generated dynamically based on the count input
         }
 
         function updateRoundInputs(day, classIndex) {
-            const className = document.getElementById(`class${day}-${classIndex}`).value;
-            const roundsCount = parseInt(document.getElementById(`rounds${day}-${classIndex}`).value) || 2;
-            const container = document.getElementById(`roundsContainer${day}-${classIndex}`);
-            
-            if (!className) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '';
-            for (let round = 1; round <= roundsCount; round++) {
-                html += `
-                    <div class="form-group" style="margin-left: 20px; background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                        <span class="label">Round ${round} Judge:</span>
-                        <div class="typeahead-container">
-                            <input type="text" class="typeahead-input" id="judge${day}-${classIndex}-${round}" placeholder="Type to search judges..." 
-                                   oninput="handleTypeahead(this, availableJudges)" 
-                                   onblur="hideTypeahead(this)" 
-                                   onfocus="showTypeahead(this, availableJudges)" required>
-                            <div class="typeahead-dropdown" id="dropdown-judge${day}-${classIndex}-${round}"></div>
-                        </div>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
+            // This function is no longer needed with the new flow
+            // Rounds are generated dynamically when class name is entered
         }
 
         // Typeahead/Autocomplete Functions
@@ -915,33 +872,35 @@
                 return;
             }
 
-            const container = document.getElementById(`classContainer${day}`);
-            const classConfigs = container.children;
+            const classCount = parseInt(document.getElementById(`classCount${day}`).value) || 0;
             let dayConfig = [];
 
-            for (let i = 0; i < classConfigs.length; i++) {
-                const classIndex = i + 1;
-                const className = document.getElementById(`class${day}-${classIndex}`).value;
-                const rounds = parseInt(document.getElementById(`rounds${day}-${classIndex}`).value) || 2;
+            for (let c = 1; c <= classCount; c++) {
+                const className = document.getElementById(`className${day}-${c}`).value.trim();
+                const roundCount = parseInt(document.getElementById(`roundCount${day}-${c}`).value) || 0;
+                
+                if (!className) {
+                    alert(`Please enter a class name for Class ${c} on Day ${day}`);
+                    return;
+                }
 
-                if (!className) continue;
+                if (roundCount === 0) {
+                    alert(`Please specify number of rounds for ${className} on Day ${day}`);
+                    return;
+                }
 
                 // Check each round has a judge assigned
-                let allRoundsValid = true;
-                for (let r = 1; r <= rounds; r++) {
-                    const judgeElement = document.getElementById(`judge${day}-${classIndex}-${r}`);
-                    if (!judgeElement || !judgeElement.value) {
+                for (let r = 1; r <= roundCount; r++) {
+                    const judgeElement = document.getElementById(`judge${day}-${c}-${r}`);
+                    if (!judgeElement || !judgeElement.value.trim()) {
                         alert(`Please assign a judge for ${className} Round ${r} on Day ${day}`);
-                        allRoundsValid = false;
-                        break;
+                        return;
                     }
                 }
 
-                if (!allRoundsValid) return;
-
                 // Add each round as a separate config
-                for (let r = 1; r <= rounds; r++) {
-                    const judge = document.getElementById(`judge${day}-${classIndex}-${r}`).value;
+                for (let r = 1; r <= roundCount; r++) {
+                    const judge = document.getElementById(`judge${day}-${c}-${r}`).value.trim();
                     dayConfig.push({
                         day: day,
                         date: date,
@@ -954,7 +913,7 @@
             }
 
             if (dayConfig.length === 0) {
-                alert('Please configure at least one class with judges for Day ' + day);
+                alert('Please configure at least one class with rounds and judges for Day ' + day);
                 return;
             }
 
@@ -1456,6 +1415,13 @@
             initializeData();
             updateTrialSelections();
             setupRegNumberTypeahead();
+            
+            // Load XLSX library for Excel processing
+            if (typeof XLSX === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                document.head.appendChild(script);
+            }
         };
     </script>
 </body>
