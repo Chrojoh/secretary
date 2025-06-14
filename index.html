@@ -557,6 +557,32 @@
                         <p>Attempting to load dataforsite.xlsx automatically...</p>
                     </div>
                     
+                    <!-- Waiver Editor -->
+                    <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #9c27b0;">
+                        <h4 style="color: #7b1fa2; margin-top: 0;">📝 Custom Liability Waiver</h4>
+                        <p style="margin-bottom: 15px; color: #4a148c;">Customize the liability waiver that participants will see in the entry form:</p>
+                        
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label for="waiverEditor" class="label">Waiver Text (HTML supported):</label>
+                            <textarea id="waiverEditor" 
+                                     style="width: 100%; height: 200px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;"
+                                     placeholder="Enter your custom waiver text..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button onclick="previewWaiver()" style="background: #9c27b0; margin-right: 10px;">👁️ Preview Waiver</button>
+                            <button onclick="saveWaiver()" style="background: #4caf50; margin-right: 10px;">💾 Save Waiver</button>
+                            <button onclick="resetWaiverToDefault()" style="background: #ff9800;">🔄 Reset to Default</button>
+                        </div>
+                        
+                        <div id="waiverPreview" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto;">
+                            <h5>Waiver Preview:</h5>
+                            <div id="waiverPreviewContent"></div>
+                        </div>
+                        
+                        <div id="waiverStatus"></div>
+                    </div>
+                    
                     <!-- Save/Load Trial Files -->
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
                         <h4 style="color: #28a745; margin-top: 0;">💾 Save/Load Complete Trial</h4>
@@ -625,19 +651,8 @@
                     <!-- Liability Waiver - Show First -->
                     <div id="waiverSection" style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
                         <h4 style="color: #856404; margin-bottom: 15px;">📋 Liability Waiver and Agreement</h4>
-                        <div style="max-height: 300px; overflow-y: auto; padding: 15px; background: white; border-radius: 5px; margin-bottom: 15px; font-size: 14px; line-height: 1.5;">
-                            <p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
-                            <p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers. I understand that my participation and my dog's participation in this trial is entirely voluntary.</p>
-                            
-                            <p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials, including but not limited to: collision with obstacles or other dogs, falls, sprains, broken bones, and other injuries to both human participants and dogs.</p>
-                            
-                            <p><strong>RELEASE AND HOLD HARMLESS:</strong> In consideration for being permitted to participate in this agility trial, I hereby release, waive, discharge and covenant not to sue the trial-giving club, the trial site, the trial committee, judges, and all their agents, representatives, successors and assigns from liability from any and all claims resulting from injuries, damages or loss which may be sustained by me or my dog while participating in this trial.</p>
-                            
-                            <p><strong>DOG HEALTH AND VACCINATION:</strong> I certify that my dog is healthy, current on vaccinations, and physically capable of participating in dog agility. I agree that my dog will be under my control at all times.</p>
-                            
-                            <p><strong>RULES AND REGULATIONS:</strong> I agree to abide by all trial rules and regulations and understand that failure to do so may result in dismissal from the trial without refund.</p>
-                            
-                            <p><strong>PHOTO/VIDEO RELEASE:</strong> I grant permission for photographs and/or video recordings of me and my dog taken during this trial to be used for promotional purposes.</p>
+                        <div style="max-height: 300px; overflow-y: auto; padding: 15px; background: white; border-radius: 5px; margin-bottom: 15px; font-size: 14px; line-height: 1.5;" id="waiverDisplay">
+                            <!-- Dynamic waiver content will be loaded here -->
                         </div>
                         
                         <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
@@ -734,6 +749,18 @@
         let savedDays = 0;
         let currentUser = null;
         let registeredClubs = [];
+        let customWaiver = `<p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
+<p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers. I understand that my participation and my dog's participation in this trial is entirely voluntary.</p>
+
+<p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials, including but not limited to: collision with obstacles or other dogs, falls, sprains, broken bones, and other injuries to both human participants and dogs.</p>
+
+<p><strong>RELEASE AND HOLD HARMLESS:</strong> In consideration for being permitted to participate in this agility trial, I hereby release, waive, discharge and covenant not to sue the trial-giving club, the trial site, the trial committee, judges, and all their agents, representatives, successors and assigns from liability from any and all claims resulting from injuries, damages or loss which may be sustained by me or my dog while participating in this trial.</p>
+
+<p><strong>DOG HEALTH AND VACCINATION:</strong> I certify that my dog is healthy, current on vaccinations, and physically capable of participating in dog agility. I agree that my dog will be under my control at all times.</p>
+
+<p><strong>RULES AND REGULATIONS:</strong> I agree to abide by all trial rules and regulations and understand that failure to do so may result in dismissal from the trial without refund.</p>
+
+<p><strong>PHOTO/VIDEO RELEASE:</strong> I grant permission for photographs and/or video recordings of me and my dog taken during this trial to be used for promotional purposes.</p>`;
 
         // Initialize Data
         function initializeData() {
@@ -768,6 +795,8 @@
                 email: "demo@example.com",
                 password: "demo123"
             }];
+            
+            console.log('Demo data initialized - Sample dog data:', dogData.slice(0, 3));
         }
 
         // Login Functions
@@ -844,7 +873,7 @@
         async function loadDataForSiteFile() {
             const statusDiv = document.getElementById('autoLoadStatus');
             try {
-                statusDiv.innerHTML = '<h4>🔄 Loading dataforsite.xlsx...</h4>';
+                statusDiv.innerHTML = '<h4>🔄 Auto-loading dataforsite.xlsx...</h4><p>Checking for database file...</p>';
                 
                 const response = await fetch('dataforsite.xlsx', { cache: 'no-cache' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -855,7 +884,7 @@
                 const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
                 
                 if (jsonData.length > 1) {
-                    console.log('Excel structure preview:', jsonData.slice(0, 3));
+                    console.log('Auto-load Excel structure preview:', jsonData.slice(0, 3));
                     
                     const uniqueDogs = new Map();
                     const classesFromData = new Set();
@@ -863,18 +892,19 @@
                     
                     jsonData.slice(1).forEach((row, index) => {
                         if (row && row.length >= 2) {
-                            const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A
-                            const callName = row[1] ? String(row[1]).trim() : '';  // Column B  
-                            const handlerName = row[2] ? String(row[2]).trim() : ''; // Column C
-                            const className = row[8] ? String(row[8]).trim() : ''; // Column I (index 8)
-                            const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K (index 10)
+                            const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A - ID
+                            const callName = row[1] ? String(row[1]).trim() : '';  // Column B - Call Name
+                            const handlerFullName = row[2] ? String(row[2]).trim() : ''; // Column C - Full Name (not handler)
+                            const handlerName = row[3] ? String(row[3]).trim() : ''; // Column D - Handler Name (THIS IS CORRECT)
+                            const className = row[8] ? String(row[8]).trim() : ''; // Column I - Class Name
+                            const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K - Judge Name
                             
-                            // Dog data - ensure we capture all dogs, not just those with dashes
+                            // Dog data - use handler name from Column D
                             if (regNumber && callName && !uniqueDogs.has(regNumber)) {
                                 uniqueDogs.set(regNumber, {
                                     regNumber: regNumber,
                                     callName: callName,
-                                    handler: handlerName || ''
+                                    handler: handlerName || '' // Column D is the actual handler name
                                 });
                             }
                             
@@ -890,8 +920,8 @@
                         }
                     });
 
-                    console.log('Unique dogs found:', uniqueDogs.size);
-                    console.log('Sample dogs:', Array.from(uniqueDogs.values()).slice(0, 5));
+                    console.log('Auto-load - Unique dogs found:', uniqueDogs.size);
+                    console.log('Auto-load - Sample dogs:', Array.from(uniqueDogs.values()).slice(0, 5));
 
                     if (uniqueDogs.size > 10) { // Lowered threshold for testing
                         dogData = Array.from(uniqueDogs.values());
@@ -901,21 +931,24 @@
                         
                         updateDataStatusDisplay();
                         statusDiv.className = 'data-loading-status success';
-                        statusDiv.innerHTML = `<h4>✅ Database auto-loaded!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded</p>`;
-                        setTimeout(() => statusDiv.style.display = 'none', 5000);
+                        statusDiv.innerHTML = `<h4>✅ Database automatically loaded!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded from dataforsite.xlsx</p>`;
+                        setTimeout(() => statusDiv.style.display = 'none', 8000);
                         
-                        console.log('Final dogData:', dogData.slice(0, 5));
-                        console.log('Judges found:', availableJudges);
-                        console.log('Classes found:', availableClasses);
+                        console.log('Auto-load - Final dogData:', dogData.slice(0, 5));
+                        console.log('Auto-load - Judges found:', availableJudges);
+                        console.log('Auto-load - Classes found:', availableClasses);
+                        return true; // Successfully loaded
                     } else {
-                        console.log('Not enough dogs found, using demo data');
+                        console.log('Auto-load - Not enough dogs found, keeping demo data');
                     }
                 }
             } catch (error) {
+                console.log('Auto-load failed:', error);
                 statusDiv.className = 'data-loading-status error';
-                statusDiv.innerHTML = `<h4>⚠️ Auto-load failed</h4><p>Could not load dataforsite.xlsx. Using demo data.</p>`;
+                statusDiv.innerHTML = `<h4>⚠️ Auto-load failed</h4><p>dataforsite.xlsx not found or invalid. Using demo data. Upload manually if needed.</p>`;
                 setTimeout(() => statusDiv.style.display = 'none', 8000);
             }
+            return false; // Failed to load
         }
 
         function loadExcelData() {
@@ -939,18 +972,19 @@
                         
                         jsonData.slice(1).forEach(row => {
                             if (row && row.length >= 2) {
-                                const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A
-                                const callName = row[1] ? String(row[1]).trim() : '';  // Column B
-                                const handlerName = row[2] ? String(row[2]).trim() : ''; // Column C
-                                const className = row[8] ? String(row[8]).trim() : ''; // Column I
-                                const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K
+                                const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A - ID
+                                const callName = row[1] ? String(row[1]).trim() : '';  // Column B - Call Name
+                                const handlerFullName = row[2] ? String(row[2]).trim() : ''; // Column C - Full Name (not handler)
+                                const handlerName = row[3] ? String(row[3]).trim() : ''; // Column D - Handler Name (THIS IS CORRECT)
+                                const className = row[8] ? String(row[8]).trim() : ''; // Column I - Class Name
+                                const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K - Judge Name
                                 
-                                // Dog data - capture all valid entries
+                                // Dog data - use handler name from Column D
                                 if (regNumber && callName && !uniqueDogs.has(regNumber)) {
                                     uniqueDogs.set(regNumber, { 
                                         regNumber, 
                                         callName, 
-                                        handler: handlerName || ''
+                                        handler: handlerName || '' // Column D is the actual handler name
                                     });
                                 }
                                 
@@ -1557,6 +1591,85 @@
             document.getElementById('entryFormSection').style.display = 'none';
         }
 
+        // Waiver Management Functions
+        function initializeWaiver() {
+            document.getElementById('waiverEditor').value = customWaiver;
+            updateWaiverDisplay();
+        }
+
+        function updateWaiverDisplay() {
+            document.getElementById('waiverDisplay').innerHTML = customWaiver;
+        }
+
+        function previewWaiver() {
+            const waiverText = document.getElementById('waiverEditor').value;
+            const previewDiv = document.getElementById('waiverPreview');
+            const previewContent = document.getElementById('waiverPreviewContent');
+            
+            previewContent.innerHTML = waiverText;
+            previewDiv.style.display = 'block';
+            previewDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function saveWaiver() {
+            const waiverText = document.getElementById('waiverEditor').value.trim();
+            if (!waiverText) {
+                alert('Waiver text cannot be empty');
+                return;
+            }
+            
+            customWaiver = waiverText;
+            updateWaiverDisplay();
+            
+            const statusDiv = document.getElementById('waiverStatus');
+            statusDiv.innerHTML = '<div class="alert alert-success">✅ Custom waiver saved successfully!</div>';
+            setTimeout(() => statusDiv.innerHTML = '', 3000);
+        }
+
+        function resetWaiverToDefault() {
+            if (confirm('Reset waiver to default template? This will lose your custom changes.')) {
+                customWaiver = `<p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
+<p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers. I understand that my participation and my dog's participation in this trial is entirely voluntary.</p>
+
+<p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials, including but not limited to: collision with obstacles or other dogs, falls, sprains, broken bones, and other injuries to both human participants and dogs.</p>
+
+<p><strong>RELEASE AND HOLD HARMLESS:</strong> In consideration for being permitted to participate in this agility trial, I hereby release, waive, discharge and covenant not to sue the trial-giving club, the trial site, the trial committee, judges, and all their agents, representatives, successors and assigns from liability from any and all claims resulting from injuries, damages or loss which may be sustained by me or my dog while participating in this trial.</p>
+
+<p><strong>DOG HEALTH AND VACCINATION:</strong> I certify that my dog is healthy, current on vaccinations, and physically capable of participating in dog agility. I agree that my dog will be under my control at all times.</p>
+
+<p><strong>RULES AND REGULATIONS:</strong> I agree to abide by all trial rules and regulations and understand that failure to do so may result in dismissal from the trial without refund.</p>
+
+<p><strong>PHOTO/VIDEO RELEASE:</strong> I grant permission for photographs and/or video recordings of me and my dog taken during this trial to be used for promotional purposes.</p>`;
+                
+                document.getElementById('waiverEditor').value = customWaiver;
+                updateWaiverDisplay();
+                
+                const statusDiv = document.getElementById('waiverStatus');
+                statusDiv.innerHTML = '<div class="alert alert-success">✅ Waiver reset to default template!</div>';
+                setTimeout(() => statusDiv.innerHTML = '', 3000);
+            }
+        } CAREFULLY BEFORE SIGNING</strong></p>
+<p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers. I understand that my participation and my dog's participation in this trial is entirely voluntary.</p>
+
+<p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials, including but not limited to: collision with obstacles or other dogs, falls, sprains, broken bones, and other injuries to both human participants and dogs.</p>
+
+<p><strong>RELEASE AND HOLD HARMLESS:</strong> In consideration for being permitted to participate in this agility trial, I hereby release, waive, discharge and covenant not to sue the trial-giving club, the trial site, the trial committee, judges, and all their agents, representatives, successors and assigns from liability from any and all claims resulting from injuries, damages or loss which may be sustained by me or my dog while participating in this trial.</p>
+
+<p><strong>DOG HEALTH AND VACCINATION:</strong> I certify that my dog is healthy, current on vaccinations, and physically capable of participating in dog agility. I agree that my dog will be under my control at all times.</p>
+
+<p><strong>RULES AND REGULATIONS:</strong> I agree to abide by all trial rules and regulations and understand that failure to do so may result in dismissal from the trial without refund.</p>
+
+<p><strong>PHOTO/VIDEO RELEASE:</strong> I grant permission for photographs and/or video recordings of me and my dog taken during this trial to be used for promotional purposes.</p>`;
+                
+                document.getElementById('waiverEditor').value = customWaiver;
+                updateWaiverDisplay();
+                
+                const statusDiv = document.getElementById('waiverStatus');
+                statusDiv.innerHTML = '<div class="alert alert-success">✅ Waiver reset to default template!</div>';
+                setTimeout(() => statusDiv.innerHTML = '', 3000);
+            }
+        }
+
         // Check for direct entry form access
         function checkDirectEntry() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1875,17 +1988,21 @@
         });
 
         // Initialize application
-        window.onload = function() {
+        window.onload = async function() {
             console.log('🚀 Trial Management System initializing...');
             initializeData();
             updateTrialOptions();
             updateDataStatusDisplay();
             checkDirectEntry();
+            initializeWaiver();
             
-            // Try to auto-load dataforsite.xlsx after a short delay
-            setTimeout(() => {
-                loadDataForSiteFile();
-            }, 1000);
+            // Automatically try to load database on startup
+            console.log('🔄 Attempting automatic database load...');
+            const autoLoaded = await loadDataForSiteFile();
+            
+            if (!autoLoaded) {
+                console.log('⚠️ Auto-load failed, using demo data');
+            }
         };
     </script>
 </body>
