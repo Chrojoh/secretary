@@ -78,48 +78,148 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        
+        /* Trial Setup Styles - Exact from working file */
+        .day-container {
+            border: 2px solid #2c5aa0;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .day-header {
+            background: #2c5aa0;
+            color: white;
+            padding: 10px 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 6px 6px 0 0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .classes-section {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .class-container {
+            border: 1px solid #28a745;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f8fff8;
+        }
+        .class-header {
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 4px 4px 0 0;
+            font-weight: bold;
+        }
+        .rounds-section {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 3px solid #007bff;
+        }
+        .yellow-highlight {
+            background-color: #ffff99 !important;
+        }
+        
         .form-group {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
             gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
         }
         .label {
-            min-width: 120px;
             font-weight: bold;
-            color: #333;
+            margin-right: 10px;
         }
-        input, select, textarea {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
+        
+        /* Typeahead dropdown styles */
+        .typeahead-container {
+            position: relative;
+            display: inline-block;
+        }
+        .typeahead-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            width: 250px;
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
+        .typeahead-input:focus {
             border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
+        .typeahead-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .typeahead-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .typeahead-item:hover, .typeahead-item.highlighted {
+            background: #f8f9fa;
+        }
+        .typeahead-item:last-child {
+            border-bottom: none;
+        }
+        
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        input[type="number"] { width: 100px; }
+        input[type="text"] { width: 250px; }
+        input[type="date"] { width: 180px; }
+        select { width: 250px; }
+        
         button {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
+            font-size: 14px;
             font-weight: bold;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
+        
+        /* Dashboard Styles */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -275,27 +375,11 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .status-message {
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        .status-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .status-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
+        
         .alert {
             padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 8px;
+            margin: 10px 0;
         }
         .alert-success {
             background: #d4edda;
@@ -312,7 +396,91 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-
+        
+        /* Results display improvements */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .results-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .day-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        .day-group-header {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2c5aa0;
+        }
+        .class-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        .class-group-header {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .trial-option {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        .trial-option:hover {
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .trial-option label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .entry-type-options {
+            display: flex;
+            gap: 15px;
+            margin-left: 20px;
+        }
+        .entry-type-options label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        
         /* Responsive design */
         @media (max-width: 768px) {
             .running-order-grid {
@@ -334,74 +502,74 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Section -->
-        <div id="loginSection" class="header" style="display: block;">
-            <h1>Trial Management System</h1>
-            <p>Multi-Club Trial Management Platform</p>
+    <!-- Login Section -->
+    <div id="loginSection" class="header" style="display: block;">
+        <h1>Trial Management System</h1>
+        <p>Multi-Club Trial Management Platform</p>
+        
+        <div class="login-form-container">
+            <div class="nav-tabs" style="margin-bottom: 20px;">
+                <button class="nav-tab active" onclick="showLoginTab('login')">Sign In</button>
+                <button class="nav-tab" onclick="showLoginTab('register')">Register Club</button>
+            </div>
             
-            <div class="login-form-container">
-                <div class="nav-tabs" style="margin-bottom: 20px;">
-                    <button class="nav-tab active" onclick="showLoginTab('login')">Sign In</button>
-                    <button class="nav-tab" onclick="showLoginTab('register')">Register Club</button>
-                </div>
-                
-                <!-- Sign In Form -->
-                <div id="loginForm" class="tab-content active">
-                    <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
-                    <form onsubmit="handleLogin(event)">
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Club Name:</label>
-                            <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
-                        </div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Secretary Name:</label>
-                            <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
-                        </div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Password:</label>
-                            <input type="password" id="loginPassword" placeholder="Enter password" required style="width: 100%; margin-bottom: 20px;">
-                        </div>
-                        <div class="form-group" style="justify-content: center;">
-                            <button type="submit">Sign In</button>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Register Form -->
-                <div id="registerForm" class="tab-content">
-                    <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
-                    <form onsubmit="handleRegister(event)">
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Club Name:</label>
-                            <input type="text" id="registerClubName" placeholder="Enter club name" required style="width: 100%; margin-bottom: 15px;">
-                        </div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Secretary Name:</label>
-                            <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" required style="width: 100%; margin-bottom: 15px;">
-                        </div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Email:</label>
-                            <input type="email" id="registerEmail" placeholder="Enter email address" required style="width: 100%; margin-bottom: 15px;">
-                        </div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Password:</label>
-                            <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" required minlength="6" style="width: 100%; margin-bottom: 15px;">
-                        </div>
-                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                            <label class="label">Confirm Password:</label>
-                            <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required style="width: 100%; margin-bottom: 20px;">
-                        </div>
-                        <div class="form-group" style="justify-content: center;">
-                            <button type="submit">Register Club</button>
-                        </div>
-                    </form>
-                </div>
+            <!-- Sign In Form -->
+            <div id="loginForm" class="tab-content active">
+                <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Club Name:</label>
+                        <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
+                    </div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Secretary Name:</label>
+                        <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
+                    </div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Password:</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password" required style="width: 100%; margin-bottom: 20px;">
+                    </div>
+                    <div class="form-group" style="justify-content: center;">
+                        <button type="submit">Sign In</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerForm" class="tab-content">
+                <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Club Name:</label>
+                        <input type="text" id="registerClubName" placeholder="Enter club name" required style="width: 100%; margin-bottom: 15px;">
+                    </div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Secretary Name:</label>
+                        <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" required style="width: 100%; margin-bottom: 15px;">
+                    </div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Email:</label>
+                        <input type="email" id="registerEmail" placeholder="Enter email address" required style="width: 100%; margin-bottom: 15px;">
+                    </div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Password:</label>
+                        <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" required minlength="6" style="width: 100%; margin-bottom: 15px;">
+                    </div>
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                        <label class="label">Confirm Password:</label>
+                        <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required style="width: 100%; margin-bottom: 20px;">
+                    </div>
+                    <div class="form-group" style="justify-content: center;">
+                        <button type="submit">Register Club</button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- Main Application -->
-        <div id="mainApp" style="display: none;">
+    <!-- Main Application -->
+    <div id="mainApp" style="display: none;">
+        <div class="container">
             <div class="header">
                 <h1>Trial Management System</h1>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -415,12 +583,12 @@
             </div>
 
             <div class="nav-tabs">
-                <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
-                <button class="nav-tab" onclick="showTab('setup')">Trial Setup</button>
-                <button class="nav-tab" onclick="showTab('entry')">Entry Form</button>
-                <button class="nav-tab" onclick="showTab('runningOrders')">Running Orders</button>
-                <button class="nav-tab" onclick="showTab('edit')">Edit Entry</button>
-                <button class="nav-tab" onclick="showTab('results')">Results</button>
+                <button class="nav-tab active" onclick="showTab('dashboard', event)">Dashboard</button>
+                <button class="nav-tab" onclick="showTab('setup', event)">Trial Setup</button>
+                <button class="nav-tab" onclick="showTab('entry', event)">Entry Form</button>
+                <button class="nav-tab" onclick="showTab('runningOrders', event)">Running Orders</button>
+                <button class="nav-tab" onclick="showTab('edit', event)">Edit Entry</button>
+                <button class="nav-tab" onclick="showTab('results', event)">Results</button>
             </div>
 
             <!-- Dashboard Tab -->
@@ -439,8 +607,8 @@
                         <div class="dashboard-card">
                             <h4>Quick Actions</h4>
                             <div>
-                                <button onclick="showTab('setup')" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
-                                <button onclick="showTab('runningOrders')" style="width: 100%; margin-bottom: 10px;">Manage Running Orders</button>
+                                <button onclick="showTab('setup', event)" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
+                                <button onclick="showTab('runningOrders', event)" style="width: 100%; margin-bottom: 10px;">Manage Running Orders</button>
                                 <button onclick="exportAllData()" style="width: 100%;">Export All Data</button>
                             </div>
                         </div>
@@ -450,12 +618,12 @@
 
             <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
-                <div class="initial-question">
+                <div class="data-upload">
                     <h3>Data Management</h3>
                     <div class="form-group">
                         <label class="label">Upload Excel Data:</label>
                         <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
-                        <span style="color: #666; font-size: 12px;">Upload Data-for-site.xlsx to load dogs, classes, and judges</span>
+                        <span style="color: #666; font-size: 12px;">Upload your dog database Excel file</span>
                     </div>
                     <div id="dataStatus"></div>
                 </div>
@@ -466,9 +634,20 @@
                         <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number">
                         <button onclick="generateDays()">Generate Days</button>
                     </div>
+                    <div class="form-group">
+                        <button onclick="saveTrialData()">Save Trial</button>
+                    </div>
                 </div>
 
                 <div id="daysContainer"></div>
+                <div id="entryFormLink" style="display: none; margin-top: 20px; padding: 20px; background: #e8f4f8; border-radius: 8px; text-align: center;">
+                    <h3 style="color: #2c5aa0;">Trial Setup Complete!</h3>
+                    <p>Here is the link to your entry form for this trial only:</p>
+                    <div style="margin: 15px 0;">
+                        <a href="#" id="generatedEntryLink" style="display: inline-block; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);" onclick="showEntryForm()">Go to Entry Form</a>
+                    </div>
+                    <p style="font-size: 14px; color: #666;">Share this link with participants to register for the trial</p>
+                </div>
             </div>
 
             <!-- Entry Form Tab -->
@@ -499,8 +678,9 @@
                             <input type="email" id="contactEmail" placeholder="your.email@example.com" required>
                         </div>
 
-                        <div id="trialSelections" style="margin: 20px 0;">
-                            <!-- Trial checkboxes will be populated here -->
+                        <div id="trialOptionsContainer">
+                            <h4>Available Trial Options</h4>
+                            <div id="trialOptions"></div>
                         </div>
 
                         <div class="form-group">
@@ -634,6 +814,7 @@
                 document.getElementById('clubInfo').textContent = club.clubName;
                 document.getElementById('secretaryInfo').textContent = `Secretary: ${club.secretaryName}`;
                 updateDashboard();
+                updateTrialOptions();
             } else {
                 alert('Invalid credentials. Try Demo Dog Club / Demo Secretary / demo123');
             }
@@ -678,7 +859,7 @@
         }
 
         // Tab Management
-        function showTab(tabName) {
+        function showTab(tabName, event) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
             
@@ -686,85 +867,186 @@
             event.target.classList.add('active');
         }
 
-        // Trial Setup Functions
-        function loadJSONData() {
-            const file = document.getElementById('jsonFile').files[0];
+        function showEntryForm() {
+            showTab('entry', event);
+        }
+
+        // Data Management Functions
+        function loadExcelData() {
+            const file = document.getElementById('excelFile').files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data) && data.length > 0) {
-                        dogData = data;
-                        availableClasses = [...new Set(data.map(item => item.className || item.class).filter(Boolean))];
-                        availableJudges = [...new Set(data.map(item => item.judge).filter(Boolean))];
-                        showStatusMessage('JSON data loaded successfully!', 'success');
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonData.length > 0) {
+                        // Process the Excel data
+                        dogData = jsonData.map(row => ({
+                            regNumber: row['Registration Number'] || row.regNumber || row.RegNumber,
+                            callName: row['Call Name'] || row.callName || row.CallName,
+                            handler: row['Handler'] || row.handler
+                        })).filter(dog => dog.regNumber && dog.callName);
+
+                        // Extract unique classes and judges if available
+                        const classes = [...new Set(jsonData.map(row => 
+                            row['Class'] || row.className || row.class
+                        ).filter(Boolean))];
+                        
+                        const judges = [...new Set(jsonData.map(row => 
+                            row['Judge'] || row.judge
+                        ).filter(Boolean))];
+
+                        if (classes.length > 0) availableClasses = classes;
+                        if (judges.length > 0) availableJudges = judges;
+
+                        showStatusMessage(`Excel data loaded successfully! ${dogData.length} dogs imported.`, 'success');
                     } else {
-                        showStatusMessage('Invalid JSON format', 'danger');
+                        showStatusMessage('No valid data found in Excel file', 'warning');
                     }
                 } catch (error) {
-                    showStatusMessage('Error parsing JSON file', 'danger');
+                    showStatusMessage('Error reading Excel file: ' + error.message, 'danger');
                 }
             };
-            reader.readAsText(file);
+            reader.readAsArrayBuffer(file);
         }
 
+        function saveTrialData() {
+            if (!currentUser) {
+                alert("Please log in before saving the trial.");
+                return;
+            }
+            
+            showStatusMessage("Trial data saved!", "success");
+        }
+
+        // Trial Setup Functions - EXACT from working file
         function generateDays() {
-            const days = parseInt(document.getElementById('trialDays').value);
-            if (!days || days < 1) {
+            const numDays = parseInt(document.getElementById('trialDays').value);
+            if (!numDays || numDays < 1) {
                 alert('Please enter a valid number of days');
                 return;
             }
 
-            totalDays = days;
+            totalDays = numDays;
             savedDays = 0;
             const container = document.getElementById('daysContainer');
             container.innerHTML = '';
 
-            for (let i = 1; i <= days; i++) {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'initial-question';
-                dayDiv.innerHTML = `
-                    <h4>Day ${i} Configuration</h4>
-                    <div class="form-group">
-                        <span class="label">Date:</span>
-                        <input type="date" id="date${i}" required>
-                    </div>
-                    <div id="classContainer${i}">
-                        <div class="form-group">
-                            <span class="label">Class:</span>
-                            <select id="class${i}-1" required>
-                                <option value="">Select Class</option>
-                                ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                            </select>
-                            <span class="label">Judge:</span>
-                            <select id="judge${i}-1" required>
-                                <option value="">Select Judge</option>
-                                ${availableJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
-                            </select>
-                            <span class="label">Rounds:</span>
-                            <input type="number" id="rounds${i}-1" min="1" max="5" value="2" style="width: 60px;">
-                        </div>
-                    </div>
-                    <button onclick="addClassToDay(${i})">Add Another Class</button>
-                    <button onclick="saveDay(${i})">Save Day ${i}</button>
-                `;
-                container.appendChild(dayDiv);
+            for (let i = 1; i <= numDays; i++) {
+                createDaySection(i, container);
             }
         }
 
-        function addClassToDay(day) {
-            // This function is no longer needed with the new flow
-            // Classes are generated dynamically based on the count input
+        function createDaySection(dayNum, container) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day-container';
+            dayDiv.innerHTML = `
+                <div class="day-header">Day ${dayNum}</div>
+                <div class="form-group">
+                    <span class="label">Date for Day ${dayNum}:</span>
+                    <input type="date" id="date_${dayNum}">
+                </div>
+                <div class="classes-section">
+                    <div class="form-group">
+                        <span class="label">How many classes this day?</span>
+                        <input type="number" id="classes_${dayNum}" min="1" max="20" class="yellow-highlight" 
+                               placeholder="Number" onchange="generateClasses(${dayNum})">
+                    </div>
+                    <div id="classesContainer_${dayNum}"></div>
+                </div>
+                <div class="form-group">
+                    <button onclick="saveTrialDay(${dayNum})">Save Day ${dayNum}</button>
+                </div>
+            `;
+            container.appendChild(dayDiv);
         }
 
-        function updateRoundInputs(day, classIndex) {
-            // This function is no longer needed with the new flow
-            // Rounds are generated dynamically when class name is entered
+        function generateClasses(dayNum) {
+            const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
+            const container = document.getElementById(`classesContainer_${dayNum}`);
+            
+            if (!numClasses || numClasses < 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            for (let i = 1; i <= numClasses; i++) {
+                createClassSection(dayNum, i, container);
+            }
         }
 
-        // Typeahead functionality for classes
+        function createClassSection(dayNum, classNum, container) {
+            const classDiv = document.createElement('div');
+            classDiv.className = 'class-container';
+            
+            classDiv.innerHTML = `
+                <div class="class-header">Class ${classNum}</div>
+                <div class="form-group">
+                    <span class="label">Class Name:</span>
+                    <div class="typeahead-container">
+                        <input type="text" id="className_${dayNum}_${classNum}" class="typeahead-input" 
+                               placeholder="Type class name" 
+                               onkeyup="handleClassTypeahead(this, ${dayNum}, ${classNum})"
+                               onblur="hideClassDropdown(${dayNum}, ${classNum})"
+                               onfocus="showClassDropdown(${dayNum}, ${classNum})">
+                        <div id="classDropdown_${dayNum}_${classNum}" class="typeahead-dropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <span class="label">How many rounds?</span>
+                    <input type="number" id="rounds_${dayNum}_${classNum}" min="1" max="10" 
+                           placeholder="Number" onchange="generateRounds(${dayNum}, ${classNum})">
+                </div>
+                <div id="roundsContainer_${dayNum}_${classNum}"></div>
+            `;
+            container.appendChild(classDiv);
+        }
+
+        function generateRounds(dayNum, classNum) {
+            const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`).value);
+            const container = document.getElementById(`roundsContainer_${dayNum}_${classNum}`);
+            
+            if (!numRounds || numRounds < 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            for (let i = 1; i <= numRounds; i++) {
+                createRoundSection(dayNum, classNum, i, container);
+            }
+        }
+
+        function createRoundSection(dayNum, classNum, roundNum, container) {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'rounds-section';
+            
+            roundDiv.innerHTML = `
+                <div class="form-group">
+                    <span class="label">Round ${roundNum} - Judge:</span>
+                    <div class="typeahead-container">
+                        <input type="text" id="judge_${dayNum}_${classNum}_${roundNum}" class="typeahead-input" 
+                               placeholder="Type judge name" 
+                               onkeyup="handleJudgeTypeahead(this, ${dayNum}, ${classNum}, ${roundNum})"
+                               onblur="hideJudgeDropdown(${dayNum}, ${classNum}, ${roundNum})"
+                               onfocus="showJudgeDropdown(${dayNum}, ${classNum}, ${roundNum})">
+                        <div id="judgeDropdown_${dayNum}_${classNum}_${roundNum}" class="typeahead-dropdown"></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(roundDiv);
+        }
+
+        // Typeahead Functions
         function handleClassTypeahead(input, dayNum, classNum) {
             const query = input.value.toLowerCase();
             const dropdown = document.getElementById(`classDropdown_${dayNum}_${classNum}`);
@@ -793,7 +1075,6 @@
         function selectClass(className, dayNum, classNum) {
             document.getElementById(`className_${dayNum}_${classNum}`).value = className;
             document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
-            checkClassComplete(dayNum, classNum);
         }
 
         function hideClassDropdown(dayNum, classNum) {
@@ -804,10 +1085,11 @@
 
         function showClassDropdown(dayNum, classNum) {
             const input = document.getElementById(`className_${dayNum}_${classNum}`);
-            handleClassTypeahead(input, dayNum, classNum);
+            if (input.value.length > 0) {
+                handleClassTypeahead(input, dayNum, classNum);
+            }
         }
 
-        // Typeahead functionality for judges
         function handleJudgeTypeahead(input, dayNum, classNum, roundNum) {
             const query = input.value.toLowerCase();
             const dropdown = document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`);
@@ -846,114 +1128,63 @@
 
         function showJudgeDropdown(dayNum, classNum, roundNum) {
             const input = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`);
-            handleJudgeTypeahead(input, dayNum, classNum, roundNum);
+            if (input.value.length > 0) {
+                handleJudgeTypeahead(input, dayNum, classNum, roundNum);
+            }
         }
 
-        function generateClassesForDay(day) {
-            const classCount = parseInt(document.getElementById(`classCount${day}`).value);
-            const container = document.getElementById(`classesContainer${day}`);
-            const saveBtn = document.getElementById(`saveBtn${day}`);
-            
-            if (!classCount || classCount < 1) {
-                container.innerHTML = '';
-                saveBtn.style.display = 'none';
+        function saveTrialDay(dayNum) {
+            const date = document.getElementById(`date_${dayNum}`).value;
+            if (!date) {
+                alert('Please enter a date for this day');
                 return;
             }
 
-            let html = '';
-            for (let c = 1; c <= classCount; c++) {
-                html += `
-                    <div class="class-container" id="classContainer${day}-${c}">
-                        <div class="class-header">Class ${c}</div>
-                        <div class="class-content">
-                            <div class="form-group">
-                                <span class="label">Class Name:</span>
-                                <div class="typeahead-container">
-                                    <input type="text" class="typeahead-input" id="className_${day}_${c}" 
-                                           placeholder="Type class name" 
-                                           onkeyup="handleClassTypeahead(this, ${day}, ${c})"
-                                           onblur="hideClassDropdown(${day}, ${c})"
-                                           onfocus="showClassDropdown(${day}, ${c})"
-                                           onchange="checkClassComplete(${day}, ${c})" required>
-                                    <div id="classDropdown_${day}_${c}" class="typeahead-dropdown"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="rounds-question" id="roundsQuestion${day}-${c}" style="display: none;">
-                                <div class="form-group">
-                                    <strong>How many rounds?</strong>
-                                    <input type="number" id="roundCount${day}-${c}" min="1" max="5" placeholder="Number" 
-                                           onchange="generateRoundsForClass(${day}, ${c})" style="width: 80px; margin-left: 10px;">
-                                </div>
-                            </div>
-                            
-                            <div id="roundsContainer${day}-${c}"></div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
-            saveBtn.style.display = 'block';
-        }
-
-        function generateRoundsForClass(day, classIndex) {
-            const roundCount = parseInt(document.getElementById(`roundCount${day}-${classIndex}`).value);
-            const container = document.getElementById(`roundsContainer${day}-${classIndex}`);
-            
-            if (!roundCount || roundCount < 1) {
-                container.innerHTML = '';
+            const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
+            if (isNaN(numClasses) || numClasses < 1) {
+                alert('Please enter the number of classes');
                 return;
             }
 
-            let html = '';
-            for (let r = 1; r <= roundCount; r++) {
-                html += `
-                    <div class="round-config">
-                        <div class="form-group">
-                            <span class="label">Round ${r} - Judge:</span>
-                            <div class="typeahead-container">
-                                <input type="text" class="typeahead-input" id="judge_${day}_${classIndex}_${r}" 
-                                       placeholder="Type judge name" 
-                                       onkeyup="handleJudgeTypeahead(this, ${day}, ${classIndex}, ${r})"
-                                       onblur="hideJudgeDropdown(${day}, ${classIndex}, ${r})"
-                                       onfocus="showJudgeDropdown(${day}, ${classIndex}, ${r})" required>
-                                <div id="judgeDropdown_${day}_${classIndex}_${r}" class="typeahead-dropdown"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+            // Save all class/round/judge combinations for this day
+            for (let classNum = 1; classNum <= numClasses; classNum++) {
+                const className = document.getElementById(`className_${dayNum}_${classNum}`)?.value;
+                const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`)?.value || 0);
+
+                if (className && numRounds > 0) {
+                    for (let roundNum = 1; roundNum <= numRounds; roundNum++) {
+                        const judge = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`)?.value;
+                        
+                        if (judge) {
+                            // Remove existing entry if it exists
+                            trialConfig = trialConfig.filter(config => 
+                                !(config.day === dayNum && config.classNum === classNum && config.roundNum === roundNum)
+                            );
+
+                            trialConfig.push({
+                                day: dayNum,
+                                date: date,
+                                classNum: classNum,
+                                className: className,
+                                roundNum: roundNum,
+                                judge: judge
+                            });
+                        }
+                    }
+                }
             }
-            container.innerHTML = html;
+
+            savedDays++;
+            updateTrialOptions();
+            showStatusMessage(`Day ${dayNum} configuration saved!`, 'success');
+
+            // Check if all days are saved
+            if (savedDays === totalDays) {
+                document.getElementById('entryFormLink').style.display = 'block';
+            }
         }
 
-        // Existing typeahead functions from artifact above
-        function handleTypeahead(input, options) {
-            // This function is now handled by specific functions above
-        }
-
-        function showTypeahead(input, options) {
-            // This function is now handled by specific functions above
-        }
-
-        function hideTypeahead(input) {
-            // This function is now handled by specific functions above
-        }
-
-        function selectTypeaheadOption(inputId, value) {
-            // This function is now handled by specific functions above
-        }
-
-        // Enhanced Registration Number Typeahead  
-        function setupRegNumberTypeahead() {
-            const regNumberInput = document.getElementById('regNumber');
-            if (!regNumberInput) return;
-
-            regNumberInput.addEventListener('input', function() {
-                handleRegNumberTypeahead(this);
-            });
-        }
-
+        // Registration Number Typeahead  
         function handleRegNumberTypeahead(input) {
             const query = input.value.toLowerCase();
             const dropdown = document.getElementById('regNumberDropdown');
@@ -982,15 +1213,6 @@
                 if (exactMatch) {
                     callNameDiv.textContent = exactMatch.callName;
                     callNameDiv.style.color = '#28a745';
-                    
-                    // Auto-fill handler name if available
-                    const handlerInput = document.getElementById('handlerName');
-                    if (handlerInput && exactMatch.handler) {
-                        handlerInput.value = exactMatch.handler;
-                    }
-                } else {
-                    callNameDiv.textContent = `${matches.length} matches found`;
-                    callNameDiv.style.color = '#ffc107';
                 }
             } else {
                 dropdown.style.display = 'none';
@@ -1004,13 +1226,6 @@
             document.getElementById('callName').textContent = callName;
             document.getElementById('callName').style.color = '#28a745';
             document.getElementById('regNumberDropdown').style.display = 'none';
-            
-            // Auto-fill handler name if available
-            const dog = dogData.find(d => d.regNumber === regNumber);
-            const handlerInput = document.getElementById('handlerName');
-            if (handlerInput && dog && dog.handler) {
-                handlerInput.value = dog.handler;
-            }
         }
 
         function hideRegNumberDropdown() {
@@ -1026,160 +1241,141 @@
             }
         }
 
-        function saveDay(day) {
-            const date = document.getElementById(`date${day}`).value;
-            if (!date) {
-                alert('Please select a date for Day ' + day);
-                return;
-            }
-
-            const classCount = parseInt(document.getElementById(`classCount${day}`).value) || 0;
-            let dayConfig = [];
-
-            for (let c = 1; c <= classCount; c++) {
-                const className = document.getElementById(`className_${day}_${c}`).value.trim();
-                const roundCount = parseInt(document.getElementById(`roundCount_${day}_${c}`).value) || 0;
-                
-                if (!className) {
-                    alert(`Please enter a class name for Class ${c} on Day ${day}`);
-                    return;
+        function updateTrialOptions() {
+            const container = document.getElementById('trialOptions');
+            
+            // Group by day, then by class, then sort by round
+            const groupedByDay = {};
+            trialConfig.forEach(config => {
+                if (!groupedByDay[config.day]) {
+                    groupedByDay[config.day] = {};
                 }
-
-                if (roundCount === 0) {
-                    alert(`Please specify number of rounds for ${className} on Day ${day}`);
-                    return;
+                if (!groupedByDay[config.day][config.className]) {
+                    groupedByDay[config.day][config.className] = [];
                 }
-
-                // Check each round has a judge assigned
-                for (let r = 1; r <= roundCount; r++) {
-                    const judgeElement = document.getElementById(`judge_${day}_${c}_${r}`);
-                    if (!judgeElement || !judgeElement.value.trim()) {
-                        alert(`Please assign a judge for ${className} Round ${r} on Day ${day}`);
-                        return;
-                    }
-                }
-
-                // Add each round as a separate config
-                for (let r = 1; r <= roundCount; r++) {
-                    const judge = document.getElementById(`judge_${day}_${c}_${r}`).value.trim();
-                    dayConfig.push({
-                        day: day,
-                        date: date,
-                        className: className,
-                        judge: judge,
-                        round: `Round ${r}`,
-                        roundNum: r
-                    });
-                }
-            }
-
-            if (dayConfig.length === 0) {
-                alert('Please configure at least one class with rounds and judges for Day ' + day);
-                return;
-            }
-
-            // Remove existing config for this day
-            trialConfig = trialConfig.filter(config => config.day !== day);
-            // Add new config
-            trialConfig.push(...dayConfig);
-
-            savedDays++;
-            updateTrialSelections();
-            updateDashboard();
-            showStatusMessage(`Day ${day} saved successfully with ${dayConfig.length} round(s)!`, 'success');
-
-            if (savedDays === totalDays) {
-                showStatusMessage('All trial days configured! You can now accept entries.', 'success');
-            }
-        }
-
-        function updateTrialSelections() {
-            const container = document.getElementById('trialSelections');
-            if (trialConfig.length === 0) {
-                container.innerHTML = '<p style="color: #666; font-style: italic;">No trials configured yet. Please set up your trial first.</p>';
-                return;
-            }
-
-            let html = '<h4>Available Trial Entries:</h4>';
-            trialConfig.forEach((config, index) => {
-                html += `
-                    <label style="display: block; margin: 10px 0; cursor: pointer;">
-                        <input type="checkbox" name="trialEntry" value="${index}" style="margin-right: 10px;">
-                        <strong>${config.date}</strong> - ${config.className} ${config.round} (Judge: ${config.judge})
-                    </label>
-                `;
+                groupedByDay[config.day][config.className].push(config);
             });
+
+            // Sort rounds within each class
+            Object.keys(groupedByDay).forEach(day => {
+                Object.keys(groupedByDay[day]).forEach(className => {
+                    groupedByDay[day][className].sort((a, b) => a.roundNum - b.roundNum);
+                });
+            });
+
+            let html = '';
+            
+            // Sort days numerically
+            const sortedDays = Object.keys(groupedByDay).sort((a, b) => parseInt(a) - parseInt(b));
+            
+            sortedDays.forEach(day => {
+                html += `<div class="day-group">`;
+                html += `<div class="day-group-header">Day ${day} - ${groupedByDay[day][Object.keys(groupedByDay[day])[0]][0].date}</div>`;
+                
+                // Sort classes alphabetically
+                const sortedClasses = Object.keys(groupedByDay[day]).sort();
+                
+                sortedClasses.forEach(className => {
+                    html += `<div class="class-group">`;
+                    html += `<div class="class-group-header">${className}</div>`;
+                    
+                    groupedByDay[day][className].forEach((config, index) => {
+                        const configIndex = trialConfig.findIndex(c => 
+                            c.day === config.day && 
+                            c.classNum === config.classNum && 
+                            c.roundNum === config.roundNum
+                        );
+                        
+                        html += `
+                            <div class="trial-option">
+                                <div style="font-weight: bold; margin-bottom: 8px;">
+                                    Round ${config.roundNum} - ${config.judge}
+                                </div>
+                                <div class="entry-type-options">
+                                    <label>
+                                        <input type="checkbox" name="trialEntry" value="${configIndex}-regular">
+                                        Regular
+                                    </label>
+                                    <label>
+                                        <input type="checkbox" name="trialEntry" value="${configIndex}-feo">
+                                        FEO
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div>`;
+                });
+                
+                html += `</div>`;
+            });
+
             container.innerHTML = html;
         }
 
         // Entry Form Functions
-        document.getElementById('regNumber')?.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            if (query.length > 0) {
-                const match = dogData.find(dog => dog.regNumber.toLowerCase() === query);
-                const callNameDiv = document.getElementById('callName');
-                if (match) {
-                    callNameDiv.textContent = match.callName;
-                    callNameDiv.style.color = '#28a745';
-                } else {
-                    callNameDiv.textContent = 'Not found';
-                    callNameDiv.style.color = '#dc3545';
-                }
-            } else {
-                document.getElementById('callName').textContent = '';
-            }
-        });
-
         document.getElementById('entryForm')?.addEventListener('submit', function(e) {
             e.preventDefault();
             
             const regNumber = document.getElementById('regNumber').value;
-            const handlerName = document.getElementById('handlerName').value;
+            const callName = document.getElementById('callName').textContent;
+            const handler = document.getElementById('handlerName').value;
             const contactEmail = document.getElementById('contactEmail').value;
             const waiverAccepted = document.getElementById('waiverAccepted').checked;
             
+            if (!regNumber || !handler || callName === 'Not found' || callName === '') {
+                alert('Please complete all required fields and ensure registration number is valid');
+                return;
+            }
+
             if (!waiverAccepted) {
                 alert('You must accept the waiver to submit an entry.');
                 return;
             }
 
-            const selectedTrials = Array.from(document.querySelectorAll('input[name="trialEntry"]:checked'));
-            if (selectedTrials.length === 0) {
-                alert('Please select at least one trial entry.');
+            const selectedEntries = [];
+            document.querySelectorAll('input[name="trialEntry"]:checked').forEach(checkbox => {
+                const [configIndex, entryType] = checkbox.value.split('-');
+                const config = trialConfig[parseInt(configIndex)];
+                selectedEntries.push({
+                    ...config,
+                    entryType: entryType
+                });
+            });
+
+            if (selectedEntries.length === 0) {
+                alert('Please select at least one trial entry');
                 return;
             }
 
-            const dog = dogData.find(d => d.regNumber === regNumber);
-            const callName = dog ? dog.callName : 'Unknown';
-
-            selectedTrials.forEach(checkbox => {
-                const configIndex = parseInt(checkbox.value);
-                const config = trialConfig[configIndex];
-                
-                const newEntry = {
+            // Add each selected entry as a separate row
+            selectedEntries.forEach(entry => {
+                entryResults.push({
                     regNumber: regNumber,
                     callName: callName,
-                    handler: handlerName,
+                    handler: handler,
                     contactEmail: contactEmail,
-                    date: config.date,
-                    judge: config.judge,
-                    className: config.className,
-                    round: config.round,
+                    date: entry.date,
+                    className: entry.className,
+                    round: entry.roundNum,
+                    judge: entry.judge,
+                    entryType: entry.entryType,
                     waiverAccepted: waiverAccepted,
                     timestamp: new Date().toISOString()
-                };
-                entryResults.push(newEntry);
+                });
             });
 
             updateResultsDisplay();
             updateDashboard();
+            showStatusMessage(`${selectedEntries.length} entries submitted successfully!`, 'success');
             clearForm();
-            showStatusMessage(`Entry submitted successfully for ${selectedTrials.length} trial(s)!`, 'success');
         });
 
         function clearForm() {
             document.getElementById('entryForm')?.reset();
             document.getElementById('callName').textContent = '';
+            document.querySelectorAll('input[name="trialEntry"]').forEach(cb => cb.checked = false);
         }
 
         // Running Orders Functions
@@ -1236,7 +1432,7 @@
                         <div class="table-header">
                             ${group.date}<br>
                             <strong>${group.judge}</strong><br>
-                            ${group.className} - ${group.round}
+                            ${group.className} - Round ${group.round}
                         </div>
                         <div class="table-content">
                 `;
@@ -1355,7 +1551,7 @@
                     <div style="margin-bottom: 30px; page-break-inside: avoid;">
                         <h2 style="background: #667eea; color: white; padding: 10px; text-align: center; margin: 0;">
                             ${group.date} - ${group.judge}<br>
-                            ${group.className} - ${group.round}
+                            ${group.className} - Round ${group.round}
                         </h2>
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
                 `;
@@ -1435,7 +1631,7 @@
                 html += `
                     <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f9f9f9;">
                         <div style="font-weight: bold;">${entry.handler} - ${entry.callName}</div>
-                        <div style="color: #666; font-size: 14px;">${entry.regNumber} | ${entry.date} | ${entry.className} ${entry.round}</div>
+                        <div style="color: #666; font-size: 14px;">${entry.regNumber} | ${entry.date} | ${entry.className} Round ${entry.round}</div>
                         <div style="color: #666; font-size: 12px;">Judge: ${entry.judge} | Email: ${entry.contactEmail}</div>
                         <button onclick="deleteEntry(${entryResults.indexOf(entry)})" style="margin-top: 10px; background: #dc3545;">Delete Entry</button>
                     </div>
@@ -1485,7 +1681,7 @@
                     <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
                         <div style="background: #667eea; color: white; padding: 10px; text-align: center; font-weight: bold;">
                             ${group.date} - ${group.judge}<br>
-                            ${group.className} - ${group.round}
+                            ${group.className} - Round ${group.round}
                         </div>
                         <div style="padding: 10px;">
                 `;
@@ -1512,7 +1708,7 @@
                 return;
             }
 
-            const headers = ['Registration Number', 'Call Name', 'Handler', 'Email', 'Date', 'Judge', 'Class', 'Round', 'Timestamp'];
+            const headers = ['Registration Number', 'Call Name', 'Handler', 'Email', 'Date', 'Judge', 'Class', 'Round', 'Entry Type', 'Timestamp'];
             const csvContent = [
                 headers.join(','),
                 ...entryResults.map(entry => [
@@ -1524,6 +1720,7 @@
                     entry.judge,
                     entry.className,
                     entry.round,
+                    entry.entryType || 'regular',
                     entry.timestamp
                 ].join(','))
             ].join('\n');
@@ -1574,8 +1771,7 @@
         // Initialize application
         window.onload = function() {
             initializeData();
-            updateTrialSelections();
-            setupRegNumberTypeahead();
+            updateTrialOptions();
             
             // Load XLSX library for Excel processing
             if (typeof XLSX === 'undefined') {
