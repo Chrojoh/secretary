@@ -456,9 +456,95 @@
     <div class="header">
         <h1>C-WAGS Trial Management System</h1>
         <p class="header-subtitle">Canine-Work And Games | 17 Years of Excellence</p>
+        <div id="userInfo" style="display: none; text-align: right; margin-top: 0.5rem;">
+            <span id="welcomeUser" style="color: #4a5568; margin-right: 1rem;"></span>
+            <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem;">Logout</button>
+        </div>
     </div>
 
-    <div class="container">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: block;">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">C-WAGS Login</h2>
+            
+            <div class="form-group">
+                <label for="loginClub">Club/Organization</label>
+                <select id="loginClub" onchange="updateLoginForm()">
+                    <option value="">Select your club...</option>
+                    <option value="supervisor">🔧 Supervisor Access</option>
+                    <option value="metro_dogs">Metro Dog Training Club</option>
+                    <option value="westside_canine">Westside Canine Academy</option>
+                    <option value="northern_k9">Northern States K9</option>
+                    <option value="central_valley">Central Valley Dogs</option>
+                    <option value="desert_paws">Desert Paws Training</option>
+                    <option value="mountain_view">Mountain View Canines</option>
+                    <option value="coastal_dogs">Coastal Dog Sports</option>
+                    <option value="prairie_winds">Prairie Winds K9</option>
+                    <option value="forest_creek">Forest Creek Canines</option>
+                    <option value="lakeside_dogs">Lakeside Dog Training</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="performLogin()" style="width: 100%; margin-bottom: 1rem;">
+                    Login
+                </button>
+                <button class="btn btn-secondary" onclick="showPasswordReset()" style="width: 100%;">
+                    Forgot Password?
+                </button>
+            </div>
+
+            <div id="loginError" style="color: #e53e3e; text-align: center; margin-top: 1rem; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div id="passwordResetModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close" onclick="hideModal('passwordResetModal')">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">Reset Password</h2>
+            
+            <div class="form-group">
+                <label for="resetClub">Club/Organization</label>
+                <select id="resetClub">
+                    <option value="">Select your club...</option>
+                    <option value="metro_dogs">Metro Dog Training Club</option>
+                    <option value="westside_canine">Westside Canine Academy</option>
+                    <option value="northern_k9">Northern States K9</option>
+                    <option value="central_valley">Central Valley Dogs</option>
+                    <option value="desert_paws">Desert Paws Training</option>
+                    <option value="mountain_view">Mountain View Canines</option>
+                    <option value="coastal_dogs">Coastal Dog Sports</option>
+                    <option value="prairie_winds">Prairie Winds K9</option>
+                    <option value="forest_creek">Forest Creek Canines</option>
+                    <option value="lakeside_dogs">Lakeside Dog Training</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="resetEmail">Registered Email</label>
+                <input type="email" id="resetEmail" placeholder="Enter your registered email">
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="sendPasswordReset()" style="width: 100%; margin-bottom: 1rem;">
+                    Send Reset Link
+                </button>
+                <button class="btn btn-secondary" onclick="backToLogin()" style="width: 100%;">
+                    Back to Login
+                </button>
+            </div>
+
+            <div id="resetMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display: none;">
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
             <button class="nav-tab" onclick="showTab('trials')">Trial Management</button>
@@ -949,8 +1035,335 @@
     </div>
 
     <script>
-        // Global state management
-        let currentTab = 'dashboard';
+        // Authentication System
+        let currentUser = null;
+        let userPermissions = {};
+
+        // Club database with credentials and contact info
+        const clubDatabase = {
+            supervisor: {
+                name: "C-WAGS Supervisor",
+                password: "CWAGS2024Admin!",
+                email: "admin@c-wags.org",
+                permissions: ["all_access", "user_management", "system_admin"],
+                canSeeAllTrials: true
+            },
+            metro_dogs: {
+                name: "Metro Dog Training Club",
+                password: "MetroDogs2024",
+                email: "secretary@metrodogs.com",
+                contact: "John Smith",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            westside_canine: {
+                name: "Westside Canine Academy", 
+                password: "WestsideK9_2024",
+                email: "admin@westsidecanine.org",
+                contact: "Mary Johnson",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            northern_k9: {
+                name: "Northern States K9",
+                password: "NorthK9_Secure24",
+                email: "trials@northernk9.net",
+                contact: "Bob Wilson",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            central_valley: {
+                name: "Central Valley Dogs",
+                password: "CVDogs@2024",
+                email: "secretary@centralvalleydogs.com",
+                contact: "Lisa Davis",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            desert_paws: {
+                name: "Desert Paws Training",
+                password: "DesertPaws24!",
+                email: "info@desertpaws.org",
+                contact: "Carol Brown",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            mountain_view: {
+                name: "Mountain View Canines",
+                password: "MountainView2024",
+                email: "trials@mountainviewcanines.com",
+                contact: "David Lee",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            coastal_dogs: {
+                name: "Coastal Dog Sports",
+                password: "CoastalDogs_24",
+                email: "secretary@coastaldogs.net",
+                contact: "Susan Miller",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            prairie_winds: {
+                name: "Prairie Winds K9",
+                password: "PrairieWinds24!",
+                email: "admin@prairiewinds.org",
+                contact: "Mike Taylor",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            forest_creek: {
+                name: "Forest Creek Canines",
+                password: "ForestCreek2024",
+                email: "secretary@forestcreek.com",
+                contact: "Jennifer White",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            },
+            lakeside_dogs: {
+                name: "Lakeside Dog Training",
+                password: "Lakeside_K9_24",
+                email: "trials@lakesidedogs.org",
+                contact: "Robert Anderson",
+                permissions: ["club_trials", "applications", "scoring", "records"],
+                canSeeAllTrials: false
+            }
+        };
+
+        function updateLoginForm() {
+            const clubSelect = document.getElementById('loginClub');
+            const passwordField = document.getElementById('loginPassword');
+            
+            if (clubSelect.value === 'supervisor') {
+                passwordField.placeholder = "Enter supervisor password";
+            } else if (clubSelect.value) {
+                passwordField.placeholder = "Enter club password";
+            } else {
+                passwordField.placeholder = "Enter your password";
+            }
+        }
+
+        function performLogin() {
+            const clubId = document.getElementById('loginClub').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!clubId) {
+                showLoginError('Please select your club/organization.');
+                return;
+            }
+            
+            if (!password) {
+                showLoginError('Please enter your password.');
+                return;
+            }
+            
+            const club = clubDatabase[clubId];
+            if (!club) {
+                showLoginError('Invalid club selection.');
+                return;
+            }
+            
+            if (password !== club.password) {
+                showLoginError('Incorrect password. Please try again.');
+                return;
+            }
+            
+            // Successful login
+            currentUser = {
+                clubId: clubId,
+                clubName: club.name,
+                email: club.email,
+                contact: club.contact,
+                permissions: club.permissions,
+                canSeeAllTrials: club.canSeeAllTrials,
+                loginTime: new Date().toISOString()
+            };
+            
+            // Save login session
+            sessionStorage.setItem('cwags_session', JSON.stringify(currentUser));
+            
+            // Hide login modal and show main app
+            hideModal('loginModal');
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('welcomeUser').textContent = 
+                `Welcome, ${club.name}${club.contact ? ' (' + club.contact + ')' : ''}`;
+            
+            // Filter UI based on permissions
+            setupUserInterface();
+            
+            // Initialize data
+            initializeData();
+            
+            console.log(`✓ Logged in as: ${club.name}`);
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // Clear error after 5 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function setupUserInterface() {
+            if (!currentUser) return;
+            
+            // Show/hide tabs based on permissions
+            const allTabs = document.querySelectorAll('.nav-tab');
+            
+            if (currentUser.canSeeAllTrials) {
+                // Supervisor sees everything
+                allTabs.forEach(tab => tab.style.display = 'block');
+            } else {
+                // Club users see limited tabs
+                const allowedTabs = ['dashboard', 'trials', 'applications', 'scoring', 'records', 'calendar'];
+                allTabs.forEach(tab => {
+                    const tabName = tab.textContent.toLowerCase().replace(/\s+/g, '');
+                    if (allowedTabs.some(allowed => tabName.includes(allowed))) {
+                        tab.style.display = 'block';
+                    } else {
+                        tab.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Filter trials display
+            filterTrialsForUser();
+        }
+
+        function filterTrialsForUser() {
+            if (!currentUser) return;
+            
+            if (currentUser.canSeeAllTrials) {
+                // Supervisor sees all trials
+                return;
+            }
+            
+            // Filter trials to only show club's own trials
+            trials = trials.filter(trial => 
+                trial.clubId === currentUser.clubId || 
+                trial.host === currentUser.clubName ||
+                !trial.clubId // Legacy trials without club assignment
+            );
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear session
+                sessionStorage.removeItem('cwags_session');
+                currentUser = null;
+                
+                // Reset UI
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'none';
+                document.getElementById('loginModal').style.display = 'block';
+                
+                // Clear form
+                document.getElementById('loginClub').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginError').style.display = 'none';
+                
+                console.log('✓ Logged out successfully');
+            }
+        }
+
+        function showPasswordReset() {
+            hideModal('loginModal');
+            showModal('passwordResetModal');
+        }
+
+        function backToLogin() {
+            hideModal('passwordResetModal');
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function sendPasswordReset() {
+            const clubId = document.getElementById('resetClub').value;
+            const email = document.getElementById('resetEmail').value;
+            const messageDiv = document.getElementById('resetMessage');
+            
+            if (!clubId) {
+                showResetMessage('Please select your club.', 'error');
+                return;
+            }
+            
+            if (!email) {
+                showResetMessage('Please enter your email address.', 'error');
+                return;
+            }
+            
+            const club = clubDatabase[clubId];
+            if (!club) {
+                showResetMessage('Invalid club selection.', 'error');
+                return;
+            }
+            
+            if (email.toLowerCase() !== club.email.toLowerCase()) {
+                showResetMessage('Email address does not match our records.', 'error');
+                return;
+            }
+            
+            // Simulate sending password reset email
+            showResetMessage(
+                `Password reset instructions have been sent to ${email}. Please check your inbox and spam folder.`, 
+                'success'
+            );
+            
+            // In a real system, this would send an actual email
+            console.log(`Password reset requested for ${club.name} (${email})`);
+            console.log(`Current password for ${club.name}: ${club.password}`);
+        }
+
+        function showResetMessage(message, type) {
+            const messageDiv = document.getElementById('resetMessage');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.color = type === 'error' ? '#e53e3e' : '#38a169';
+        }
+
+        // Check for existing session on page load
+        function checkExistingSession() {
+            try {
+                const savedSession = sessionStorage.getItem('cwags_session');
+                if (savedSession) {
+                    currentUser = JSON.parse(savedSession);
+                    
+                    // Verify session is still valid (less than 8 hours old)
+                    const loginTime = new Date(currentUser.loginTime);
+                    const now = new Date();
+                    const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
+                    
+                    if (hoursDiff < 8) {
+                        // Valid session - auto login
+                        document.getElementById('loginModal').style.display = 'none';
+                        document.getElementById('mainApp').style.display = 'block';
+                        document.getElementById('userInfo').style.display = 'block';
+                        document.getElementById('welcomeUser').textContent = 
+                            `Welcome back, ${currentUser.clubName}`;
+                        
+                        setupUserInterface();
+                        initializeData();
+                        
+                        console.log(`✓ Restored session for: ${currentUser.clubName}`);
+                        return true;
+                    } else {
+                        // Session expired
+                        sessionStorage.removeItem('cwags_session');
+                        currentUser = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking session:', error);
+                sessionStorage.removeItem('cwags_session');
+            }
+            
+            return false;
+        }
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let trials = [];
@@ -1558,8 +1971,7 @@
             classes: []
         };
 
-        // Trial storage - in Phase 1, stored in browser localStorage
-        // In Phase 2, this would be saved to database
+        // Trial storage - now includes club association
         function saveTrialToStorage(trialData) {
             try {
                 // Get existing trials from localStorage
@@ -1568,13 +1980,17 @@
                 // Generate trial ID
                 const trialId = 'T' + String(savedTrials.length + 1).padStart(3, '0');
                 
-                // Add metadata
+                // Add metadata including club association
                 const fullTrialData = {
                     id: trialId,
                     ...trialData,
+                    clubId: currentUser?.clubId,
+                    clubName: currentUser?.clubName,
+                    host: currentUser?.clubName || trialData.host,
                     status: 'draft',
                     created: new Date().toISOString(),
-                    lastModified: new Date().toISOString()
+                    lastModified: new Date().toISOString(),
+                    createdBy: currentUser?.contact || 'Unknown'
                 };
                 
                 // Add to trials array
@@ -1588,7 +2004,7 @@
                 updateDashboardStats();
                 populateTrialsTable();
                 
-                console.log(`Trial ${trialId} saved to local storage`);
+                console.log(`Trial ${trialId} saved for ${currentUser?.clubName}`);
                 return trialId;
                 
             } catch (error) {
@@ -1597,13 +2013,24 @@
             }
         }
 
-        // Load trials from localStorage on startup
+        // Load trials with user filtering
         function loadStoredTrials() {
             try {
                 const savedTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                
+                // Filter trials based on user permissions
+                const userTrials = savedTrials.filter(trial => {
+                    if (currentUser?.canSeeAllTrials) {
+                        return true; // Supervisor sees all
+                    }
+                    return trial.clubId === currentUser?.clubId || 
+                           trial.clubName === currentUser?.clubName ||
+                           !trial.clubId; // Legacy trials without club assignment
+                });
+                
                 // Merge with any existing sample trials
-                trials = [...trials, ...savedTrials];
-                console.log(`Loaded ${savedTrials.length} trials from local storage`);
+                trials = [...trials, ...userTrials];
+                console.log(`Loaded ${userTrials.length} trials for ${currentUser?.clubName || 'user'}`);
             } catch (error) {
                 console.error('Error loading stored trials:', error);
             }
@@ -2266,7 +2693,11 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            initializeData();
+            // Check for existing session first
+            if (!checkExistingSession()) {
+                // No valid session, show login
+                document.getElementById('loginModal').style.display = 'block';
+            }
             
             // Show/hide scent reset option based on scent class selection
             document.getElementById('classScent').addEventListener('change', function() {
