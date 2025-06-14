@@ -833,6 +833,52 @@
         </div>
     </div>
 
+    <!-- Edit Trial Modal -->
+    <div id="editTrialModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="hideModal('editTrialModal')">&times;</span>
+            <h2 id="editTrialTitle">Edit Trial</h2>
+            
+            <div id="editTrialContent">
+                <!-- Trial basic info -->
+                <div class="form-grid" style="margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="editTrialDate">Trial Date</label>
+                        <input type="date" id="editTrialDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTrialStatus">Status</label>
+                        <select id="editTrialStatus">
+                            <option value="draft">Draft</option>
+                            <option value="pending">Pending Approval</option>
+                            <option value="approved">Approved</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Classes and judges configuration -->
+                <div id="editClassesContainer">
+                    <h3 style="color: #4a5568; margin-bottom: 1rem;">Classes & Judge Assignments</h3>
+                    <div id="editClassesList"></div>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="addClassToTrial()" style="margin-top: 1rem;">
+                        + Add Another Class
+                    </button>
+                </div>
+
+                <!-- Action buttons -->
+                <div style="text-align: center; margin-top: 2rem; border-top: 2px solid #e2e8f0; padding-top: 2rem;">
+                    <button class="btn btn-primary" onclick="saveTrialChanges()">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="hideModal('editTrialModal')" style="margin-left: 1rem;">Cancel</button>
+                    <button class="btn" onclick="deleteTrialConfirm()" style="margin-left: 1rem; background: #fc8181; color: white;">Delete Trial</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modals -->
     <div id="newTrialModal" class="modal">
         <div class="modal-content">
@@ -1253,7 +1299,8 @@
                     <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
                     <td>
                         <button class="btn btn-secondary" onclick="editTrial('${trial.id}')">Edit</button>
-                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')">View</button>
+                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="margin-left: 0.5rem;">View</button>
+                        <button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')" style="margin-left: 0.5rem;">Duplicate</button>
                     </td>
                 `;
             });
@@ -1869,12 +1916,344 @@
             window.currentTrialConfig = trialData;
         }
 
-        function viewTrial(trialId) {
-            alert(`Viewing trial ${trialId}`);
-        }
+        // Trial editing functionality
+        let currentEditingTrial = null;
 
         function editTrial(trialId) {
-            alert(`Editing trial ${trialId}`);
+            // Find the trial to edit
+            const trial = trials.find(t => t.id === trialId);
+            if (!trial) {
+                alert('Trial not found!');
+                return;
+            }
+
+            currentEditingTrial = trial;
+            
+            // Populate edit modal
+            document.getElementById('editTrialTitle').textContent = `Edit Trial ${trialId}`;
+            document.getElementById('editTrialDate').value = trial.date;
+            document.getElementById('editTrialStatus').value = trial.status || 'draft';
+            
+            // Populate classes
+            populateEditClasses(trial.classes || []);
+            
+            // Show modal
+            showModal('editTrialModal');
+        }
+
+        function populateEditClasses(classes) {
+            const container = document.getElementById('editClassesList');
+            container.innerHTML = '';
+            
+            classes.forEach((classData, index) => {
+                addEditClassRow(classData, index);
+            });
+            
+            // If no classes, add one empty class
+            if (classes.length === 0) {
+                addEditClassRow({ name: '', rounds: [] }, 0);
+            }
+        }
+
+        function addEditClassRow(classData, index) {
+            const container = document.getElementById('editClassesList');
+            
+            const classDiv = document.createElement('div');
+            classDiv.className = 'edit-class-row';
+            classDiv.style.cssText = `
+                border: 2px solid #e2e8f0; 
+                border-radius: 15px; 
+                padding: 1.5rem; 
+                margin-bottom: 1.5rem; 
+                background: #f7fafc;
+            `;
+            
+            let html = `
+                <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+                    <h5 style="color: #4a5568; margin: 0;">Class ${index + 1}</h5>
+                    <button type="button" onclick="removeEditClass(${index})" 
+                            style="background: #fc8181; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 5px; cursor: pointer;">
+                        Remove Class
+                    </button>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Class Type</label>
+                        <select id="editClass${index}" onchange="updateEditClassRounds(${index})">
+                            <option value="">Select Class...</option>
+                            ${availableClasses.map(cls => 
+                                `<option value="${cls}" ${cls === classData.name ? 'selected' : ''}>${cls}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Rounds</label>
+                        <select id="editRounds${index}" onchange="updateEditJudges(${index})">
+                            <option value="">Select...</option>
+                            ${[1,2,3,4].map(num => 
+                                `<option value="${num}" ${num === classData.rounds.length ? 'selected' : ''}>${num} Round${num > 1 ? 's' : ''}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="editJudges${index}" style="margin-top: 1rem;">
+                    <!-- Judge assignments will be populated here -->
+                </div>
+            `;
+            
+            classDiv.innerHTML = html;
+            container.appendChild(classDiv);
+            
+            // Populate judge assignments
+            if (classData.rounds && classData.rounds.length > 0) {
+                updateEditJudges(index);
+            }
+        }
+
+        function updateEditClassRounds(classIndex) {
+            // Reset rounds when class changes
+            document.getElementById(`editRounds${classIndex}`).value = '';
+            document.getElementById(`editJudges${classIndex}`).innerHTML = '';
+        }
+
+        function updateEditJudges(classIndex) {
+            const numRounds = parseInt(document.getElementById(`editRounds${classIndex}`).value);
+            const container = document.getElementById(`editJudges${classIndex}`);
+            
+            if (!numRounds) {
+                container.innerHTML = '';
+                return;
+            }
+
+            // Get existing judge assignments if any
+            const existingJudges = currentEditingTrial?.classes?.[classIndex]?.rounds || [];
+            
+            let html = '<h6 style="margin-bottom: 0.5rem; color: #4a5568;">Judge Assignments</h6>';
+            html += '<div class="form-grid">';
+            
+            for (let round = 1; round <= numRounds; round++) {
+                const existingJudge = existingJudges.find(r => r.round === round)?.judge || '';
+                
+                html += `
+                    <div class="form-group">
+                        <label>Round ${round} Judge</label>
+                        <input type="text" 
+                               id="editJudge${classIndex}_${round}" 
+                               value="${existingJudge}"
+                               placeholder="Type to search judges..."
+                               oninput="filterEditJudges(${classIndex}, ${round})"
+                               onfocus="showEditJudgeDropdown(${classIndex}, ${round})"
+                               style="position: relative;">
+                        <div id="editJudgeDropdown${classIndex}_${round}" class="judge-dropdown" style="display: none;"></div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function filterEditJudges(classIndex, round) {
+            const input = document.getElementById(`editJudge${classIndex}_${round}`);
+            const dropdown = document.getElementById(`editJudgeDropdown${classIndex}_${round}`);
+            const value = input.value.toLowerCase();
+            
+            const filteredJudges = availableJudges.filter(judge => 
+                judge.toLowerCase().includes(value)
+            );
+            
+            let html = '';
+            filteredJudges.slice(0, 10).forEach(judge => { // Limit to 10 results
+                html += `<div onclick="selectEditJudge('${judge}', ${classIndex}, ${round})" 
+                              style="padding: 0.5rem; cursor: pointer; border-bottom: 1px solid #e2e8f0;">
+                              ${judge}
+                         </div>`;
+            });
+            
+            dropdown.innerHTML = html;
+            dropdown.style.display = filteredJudges.length > 0 ? 'block' : 'none';
+        }
+
+        function showEditJudgeDropdown(classIndex, round) {
+            filterEditJudges(classIndex, round);
+        }
+
+        function selectEditJudge(judge, classIndex, round) {
+            document.getElementById(`editJudge${classIndex}_${round}`).value = judge;
+            document.getElementById(`editJudgeDropdown${classIndex}_${round}`).style.display = 'none';
+        }
+
+        function addClassToTrial() {
+            const container = document.getElementById('editClassesList');
+            const newIndex = container.children.length;
+            addEditClassRow({ name: '', rounds: [] }, newIndex);
+        }
+
+        function removeEditClass(classIndex) {
+            const container = document.getElementById('editClassesList');
+            const classRows = container.children;
+            
+            if (classRows.length <= 1) {
+                alert('Trial must have at least one class.');
+                return;
+            }
+            
+            if (confirm('Remove this class from the trial?')) {
+                container.children[classIndex].remove();
+                
+                // Re-index remaining classes
+                Array.from(container.children).forEach((row, newIndex) => {
+                    // Update the class number display
+                    const header = row.querySelector('h5');
+                    if (header) header.textContent = `Class ${newIndex + 1}`;
+                });
+            }
+        }
+
+        function saveTrialChanges() {
+            if (!currentEditingTrial) return;
+            
+            // Collect updated trial data
+            const updatedDate = document.getElementById('editTrialDate').value;
+            const updatedStatus = document.getElementById('editTrialStatus').value;
+            
+            if (!updatedDate) {
+                alert('Please select a trial date.');
+                return;
+            }
+            
+            // Collect classes
+            const container = document.getElementById('editClassesList');
+            const updatedClasses = [];
+            
+            Array.from(container.children).forEach((classRow, classIndex) => {
+                const className = document.getElementById(`editClass${classIndex}`)?.value;
+                const numRounds = parseInt(document.getElementById(`editRounds${classIndex}`)?.value || 0);
+                
+                if (className) {
+                    const classData = {
+                        name: className,
+                        rounds: []
+                    };
+                    
+                    for (let round = 1; round <= numRounds; round++) {
+                        const judge = document.getElementById(`editJudge${classIndex}_${round}`)?.value || '';
+                        classData.rounds.push({
+                            round: round,
+                            judge: judge
+                        });
+                    }
+                    
+                    updatedClasses.push(classData);
+                }
+            });
+            
+            if (updatedClasses.length === 0) {
+                alert('Trial must have at least one class.');
+                return;
+            }
+            
+            // Update the trial
+            currentEditingTrial.date = updatedDate;
+            currentEditingTrial.status = updatedStatus;
+            currentEditingTrial.classes = updatedClasses;
+            currentEditingTrial.lastModified = new Date().toISOString();
+            
+            // Update classes list for display
+            currentEditingTrial.classes = updatedClasses.map(c => c.name);
+            
+            // Save to localStorage
+            updateTrialInStorage(currentEditingTrial);
+            
+            // Refresh UI
+            updateDashboardStats();
+            populateTrialsTable();
+            
+            // Close modal
+            hideModal('editTrialModal');
+            
+            alert(`Trial ${currentEditingTrial.id} updated successfully!`);
+            currentEditingTrial = null;
+        }
+
+        function updateTrialInStorage(updatedTrial) {
+            try {
+                let savedTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                const index = savedTrials.findIndex(t => t.id === updatedTrial.id);
+                
+                if (index >= 0) {
+                    savedTrials[index] = updatedTrial;
+                } else {
+                    savedTrials.push(updatedTrial);
+                }
+                
+                localStorage.setItem('cwags_trials', JSON.stringify(savedTrials));
+                
+                // Update in-memory trials array
+                const trialIndex = trials.findIndex(t => t.id === updatedTrial.id);
+                if (trialIndex >= 0) {
+                    trials[trialIndex] = updatedTrial;
+                }
+                
+            } catch (error) {
+                console.error('Error updating trial in storage:', error);
+            }
+        }
+
+        function duplicateTrial(trialId) {
+            const trial = trials.find(t => t.id === trialId);
+            if (!trial) {
+                alert('Trial not found!');
+                return;
+            }
+            
+            if (confirm(`Create a copy of trial ${trialId}?`)) {
+                const duplicatedTrial = {
+                    ...trial,
+                    date: '', // Clear date so they have to set new one
+                    status: 'draft',
+                    created: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                
+                // Remove ID so it gets a new one
+                delete duplicatedTrial.id;
+                
+                const newTrialId = saveTrialToStorage(duplicatedTrial);
+                
+                if (newTrialId) {
+                    alert(`Trial duplicated as ${newTrialId}! Please set the new trial date.`);
+                    editTrial(newTrialId);
+                }
+            }
+        }
+
+        function deleteTrialConfirm() {
+            if (!currentEditingTrial) return;
+            
+            const trialId = currentEditingTrial.id;
+            
+            if (confirm(`Are you sure you want to delete trial ${trialId}? This cannot be undone.`)) {
+                // Remove from localStorage
+                let savedTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                savedTrials = savedTrials.filter(t => t.id !== trialId);
+                localStorage.setItem('cwags_trials', JSON.stringify(savedTrials));
+                
+                // Remove from in-memory array
+                trials = trials.filter(t => t.id !== trialId);
+                
+                // Refresh UI
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                // Close modal
+                hideModal('editTrialModal');
+                
+                alert(`Trial ${trialId} deleted successfully.`);
+                currentEditingTrial = null;
+            }
         }
 
         function viewRecord(recordId) {
