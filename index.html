@@ -3,27 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dog Trial Secretary Management System</title>
+    <title>Dog Trial Secretary System</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
+            padding: 20px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
-            min-height: 100vh;
-            box-shadow: 0 0 50px rgba(0,0,0,0.2);
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
         .header {
@@ -31,476 +28,241 @@
             color: white;
             padding: 2rem;
             text-align: center;
-            position: relative;
         }
         
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
+        .nav {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
         }
         
-        .user-info {
-            position: absolute;
-            top: 1rem;
-            right: 2rem;
-            text-align: right;
-            font-size: 0.9rem;
-        }
-        
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
+        .nav-btn {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
             cursor: pointer;
-            margin-top: 0.5rem;
+            font-weight: bold;
             transition: all 0.3s ease;
         }
         
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.3);
+        .nav-btn:hover {
+            background: #e9ecef;
         }
         
-        /* Login Screen */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 2rem;
-        }
-        
-        .login-box {
+        .nav-btn.active {
             background: white;
-            padding: 3rem;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
         }
         
-        .login-box h2 {
+        .content {
+            padding: 2rem;
+            min-height: 500px;
+        }
+        
+        .tab {
+            display: none;
+        }
+        
+        .tab.active {
+            display: block;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #667eea;
+        }
+        
+        .card h3 {
             color: #667eea;
-            margin-bottom: 2rem;
-            font-size: 2rem;
+            margin-bottom: 1rem;
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
+            margin-bottom: 1rem;
         }
         
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #555;
+            font-weight: bold;
         }
         
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 1rem;
+            padding: 0.75rem;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 5px;
             font-size: 1rem;
-            transition: all 0.3s ease;
         }
         
-        .form-group input:focus {
-            border-color: #667eea;
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
         }
         
         .btn {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            width: 100%;
+            font-weight: bold;
+            margin-right: 0.5rem;
             margin-bottom: 0.5rem;
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        .btn-demo {
+        .btn-success {
             background: linear-gradient(45deg, #28a745, #20c997);
-            font-size: 1.1rem;
-            margin-top: 1rem;
-        }
-        
-        /* Tab Navigation */
-        .nav-tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 3px solid #e0e0e0;
-            overflow-x: auto;
-        }
-        
-        .nav-tab {
-            padding: 1rem 1.5rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #666;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-        
-        .nav-tab:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
-        }
-        
-        .nav-tab.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-            background: white;
-        }
-        
-        /* Tab Content */
-        .tab-content {
-            display: none;
-            padding: 2rem;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Sections */
-        .section {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .section h3 {
-            color: #667eea;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
         }
         
         .alert {
             padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border: 1px solid transparent;
+            border-radius: 5px;
+            margin-bottom: 1rem;
         }
         
         .alert-success {
             background: #d4edda;
             color: #155724;
-            border-color: #c3e6cb;
+            border: 1px solid #c3e6cb;
         }
         
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-color: #ffeaa7;
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
         }
         
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-color: #f5c6cb;
-        }
-        
-        /* Dashboard Cards */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .dashboard-card {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
-        }
-        
-        .dashboard-card h4 {
-            color: #667eea;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-        
-        .quick-actions {
-            display: grid;
-            gap: 1rem;
-        }
-        
-        /* Form Elements */
-        .form-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            align-items: end;
-            flex-wrap: wrap;
-        }
-        
-        .form-field {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .form-field label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .form-field input,
-        .form-field select {
+        table {
             width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
             padding: 0.75rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
         
-        .form-field input:focus,
-        .form-field select:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
         }
         
-        /* Status displays */
-        .status-banner {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
+        .hidden {
+            display: none;
+        }
+        
+        .demo-data {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
             padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .status-banner h4 {
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Simple demo message */
-        .demo-info {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .demo-info h4 {
-            color: #1976d2;
+            border-radius: 5px;
             margin-bottom: 1rem;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                margin: 0;
-                border-radius: 0;
-            }
-            
-            .header {
-                padding: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .user-info {
-                position: static;
-                text-align: center;
-                margin-top: 1rem;
-            }
-            
-            .nav-tabs {
-                flex-wrap: wrap;
-            }
-            
-            .tab-content {
-                padding: 1rem;
-            }
-            
-            .form-row {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-box">
-            <h2>🐕 Trial Secretary Portal</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="clubEmail">Club Email Address</label>
-                    <input type="email" id="clubEmail" required placeholder="your-club@example.com">
-                </div>
-                <div class="form-group">
-                    <label for="secretaryName">Secretary Name</label>
-                    <input type="text" id="secretaryName" required placeholder="Your full name">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="Enter your password">
-                </div>
-                <button type="submit" class="btn">Sign In</button>
-            </form>
-            
-            <button type="button" class="btn btn-demo" onclick="quickDemo()">🎯 Try Demo Instantly</button>
-            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
-                Click above to test with demo data immediately!
-            </p>
+    <div class="container">
+        <div class="header">
+            <h1>🐾 Dog Trial Secretary</h1>
+            <p>Simple Trial Management System</p>
         </div>
-    </div>
-
-    <!-- Main Application -->
-    <div id="mainApp" style="display: none;">
-        <div class="container">
-            <div class="header">
-                <h1>🐾 Trial Secretary System</h1>
-                <p>Professional Dog Trial Management Platform</p>
-                <div class="user-info">
-                    <div id="clubInfo"></div>
-                    <div id="secretaryInfo"></div>
-                    <button onclick="logout()" class="logout-btn">Sign Out</button>
-                </div>
-            </div>
-
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
-                <button class="nav-tab" onclick="showTab('setup')">Trial Setup</button>
-                <button class="nav-tab" onclick="showTab('entry')">Entry Form</button>
-                <button class="nav-tab" onclick="showTab('results')">Results</button>
-            </div>
-
+        
+        <div class="nav">
+            <button class="nav-btn active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="nav-btn" onclick="showTab('setup')">Trial Setup</button>
+            <button class="nav-btn" onclick="showTab('entry')">Entry Form</button>
+            <button class="nav-btn" onclick="showTab('results')">Results</button>
+        </div>
+        
+        <div class="content">
             <!-- Dashboard Tab -->
-            <div id="dashboard" class="tab-content active">
-                <div class="demo-info">
-                    <h4>🎉 Welcome to the Demo!</h4>
-                    <p>You're now logged in as <strong>Demo Dog Club</strong>. This is a fully functional trial management system with:</p>
-                    <ul style="text-align: left; margin: 1rem 0; display: inline-block;">
-                        <li>🐕 <strong>12 demo dogs</strong> for testing registration lookup</li>
-                        <li>🏆 <strong>20+ classes</strong> (Patrol, Detective, Super Sleuth, etc.)</li>
-                        <li>👨‍⚖️ <strong>9 judges</strong> ready for assignment</li>
-                        <li>💾 <strong>Save/Load trial progress</strong> for real use</li>
-                    </ul>
+            <div id="dashboard" class="tab active">
+                <div class="demo-data">
+                    <h4>🎯 Demo Mode Active</h4>
+                    <p>This system includes 12 demo dogs for testing. Try registration numbers like: <strong>07-0001-01</strong>, <strong>07-0002-01</strong>, <strong>07-0003-01</strong></p>
                 </div>
                 
-                <div class="dashboard-grid">
-                    <div class="dashboard-card">
-                        <h4>📊 Trial Status</h4>
-                        <div id="trialStatus">Ready to create your first trial</div>
-                    </div>
-                    <div class="dashboard-card">
-                        <h4>📝 Recent Entries</h4>
-                        <div id="recentEntries">No entries yet - set up a trial first</div>
-                    </div>
-                    <div class="dashboard-card">
-                        <h4>🎯 Quick Actions</h4>
-                        <div class="quick-actions">
-                            <button class="btn" onclick="showTab('setup')">🚀 Create New Trial</button>
-                            <button class="btn" onclick="showTab('entry')">📝 Go to Entry Form</button>
-                            <button class="btn" style="background: #28a745;" onclick="saveDemo()">💾 Save Trial Progress</button>
-                        </div>
-                    </div>
+                <div class="card">
+                    <h3>📊 Current Status</h3>
+                    <p id="statusText">Ready to create your first trial</p>
+                </div>
+                
+                <div class="card">
+                    <h3>🚀 Quick Actions</h3>
+                    <button class="btn" onclick="showTab('setup')">Create New Trial</button>
+                    <button class="btn btn-success" onclick="saveData()">💾 Save Progress</button>
+                    <button class="btn" onclick="loadSampleData()">📦 Load Sample Data</button>
                 </div>
             </div>
-
+            
             <!-- Trial Setup Tab -->
-            <div id="setup" class="tab-content">
-                <div class="section">
+            <div id="setup" class="tab">
+                <div class="card">
                     <h3>📅 Create New Trial</h3>
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="trialName">Trial Name</label>
-                            <input type="text" id="trialName" placeholder="e.g., Spring Championship 2024">
-                        </div>
-                        <div class="form-field">
-                            <label for="trialDays">Number of Days</label>
-                            <input type="number" id="trialDays" min="1" max="10" placeholder="1-3" value="1">
-                        </div>
-                        <div class="form-field">
-                            <button class="btn" onclick="setupTrial()">Create Trial</button>
-                        </div>
+                    <div class="form-group">
+                        <label for="trialName">Trial Name</label>
+                        <input type="text" id="trialName" placeholder="e.g., Spring Championship 2024">
                     </div>
-                    <div id="setupStatus"></div>
+                    <div class="form-group">
+                        <label for="trialDate">Trial Date</label>
+                        <input type="date" id="trialDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="numClasses">Number of Classes</label>
+                        <input type="number" id="numClasses" min="1" max="10" value="3">
+                    </div>
+                    <button class="btn" onclick="createTrial()">Create Trial</button>
                 </div>
                 
-                <div id="trialSetupForm" style="display: none;" class="section">
-                    <h3>🏆 Configure Day 1</h3>
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="trialDate">Trial Date</label>
-                            <input type="date" id="trialDate">
-                        </div>
-                        <div class="form-field">
-                            <label for="numClasses">Number of Classes</label>
-                            <input type="number" id="numClasses" min="1" max="10" placeholder="2-5" value="2">
-                        </div>
-                        <div class="form-field">
-                            <button class="btn" onclick="finalizeTrial()">✅ Finalize Trial Setup</button>
-                        </div>
+                <div id="setupComplete" class="hidden">
+                    <div class="alert alert-success">
+                        <h4>✅ Trial Setup Complete!</h4>
+                        <p>Your trial is ready. Go to the Entry Form to start accepting registrations.</p>
                     </div>
                 </div>
             </div>
-
+            
             <!-- Entry Form Tab -->
-            <div id="entry" class="tab-content">
-                <div class="section">
-                    <h3>🐕 Trial Entry Form</h3>
+            <div id="entry" class="tab">
+                <div class="card">
+                    <h3>🐕 Dog Registration Form</h3>
                     <div id="entryFormContent">
-                        <div class="alert alert-warning">
-                            Please set up a trial first in the Trial Setup tab.
+                        <div class="alert alert-info">
+                            Please create a trial first in the Trial Setup tab.
                         </div>
                     </div>
                 </div>
             </div>
-
+            
             <!-- Results Tab -->
-            <div id="results" class="tab-content">
-                <div class="section">
-                    <h3>📊 Trial Results</h3>
-                    <div id="resultsContent">
-                        <div class="alert alert-warning">
-                            No trial entries yet. Set up a trial and add entries to see results here.
-                        </div>
+            <div id="results" class="tab">
+                <div class="card">
+                    <h3>📋 Trial Entries</h3>
+                    <button class="btn" onclick="exportResults()">📄 Export CSV</button>
+                    <div id="resultsTable">
+                        <p>No entries yet. Set up a trial and add some entries to see results here.</p>
                     </div>
                 </div>
             </div>
@@ -508,188 +270,115 @@
     </div>
 
     <script>
-        // Simple, direct approach - all functions defined immediately
-        console.log('✅ Trial Management System loaded successfully!');
-    </script>
-</body>
-</html>('🚀 Loading Trial Management System...');
+        // Simple global variables
+        let currentTrial = null;
+        let entries = [];
         
-        // Global variables
-        let currentUser = null;
-        let trialData = {
-            name: '',
-            date: '',
-            classes: [],
-            entries: []
-        };
-        
-        // Demo data
-        const demoDogs = [
-            { regNumber: "07-0001-01", callName: "BJ", handler: "Shirley Ottmer" },
-            { regNumber: "07-0001-02", callName: "Jaidon", handler: "Shirley Ottmer" },
-            { regNumber: "07-0001-03", callName: "Jake", handler: "Shirley Ottmer" },
-            { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer" },
-            { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher" },
-            { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher" },
-            { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher" },
-            { regNumber: "07-0003-02", callName: "Becky", handler: "Bonnie Hornfisher" },
-            { regNumber: "07-0003-03", callName: "Ben", handler: "Bonnie Hornfisher" },
-            { regNumber: "07-0004-01", callName: "Max", handler: "Demo Handler" },
-            { regNumber: "07-0004-02", callName: "Bella", handler: "Demo Handler" },
-            { regNumber: "07-0004-03", callName: "Charlie", handler: "Demo Handler" }
+        // Demo dog data
+        const dogs = [
+            { reg: "07-0001-01", name: "BJ", handler: "Shirley Ottmer" },
+            { reg: "07-0001-02", name: "Jaidon", handler: "Shirley Ottmer" },
+            { reg: "07-0001-03", name: "Jake", handler: "Shirley Ottmer" },
+            { reg: "07-0002-01", name: "Liz", handler: "Russ Hornfisher" },
+            { reg: "07-0002-02", name: "Morgan", handler: "Russ Hornfisher" },
+            { reg: "07-0003-01", name: "Julie", handler: "Bonnie Hornfisher" },
+            { reg: "07-0003-02", name: "Becky", handler: "Bonnie Hornfisher" },
+            { reg: "07-0003-03", name: "Ben", handler: "Bonnie Hornfisher" },
+            { reg: "07-0004-01", name: "Max", handler: "Demo Handler" },
+            { reg: "07-0004-02", name: "Bella", handler: "Demo Handler" },
+            { reg: "07-0004-03", name: "Charlie", handler: "Demo Handler" },
+            { reg: "07-0005-01", name: "Luna", handler: "Demo Handler" }
         ];
         
-        const demoClasses = [
-            "Patrol 1", "Patrol 2", "Detective 1", "Detective 2", 
-            "Super Sleuth 1", "Super Sleuth 2", "Ranger 1", "Ranger 2",
-            "Investigator 1", "Investigator 2"
-        ];
+        const classes = ["Patrol 1", "Detective 1", "Super Sleuth 1", "Ranger 1", "Investigator 1"];
         
-        const demoJudges = [
-            "Sarah Knight", "Lane Michie", "Gary Truitt", 
-            "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
-        ];
-
-        // Demo login function - simple and direct
-        function quickDemo() {
-            console.log('🎯 Quick demo login...');
-            
-            currentUser = {
-                clubName: "Demo Dog Club",
-                clubEmail: "demo@dogclub.com",
-                secretaryName: "Demo Secretary"
-            };
-            
-            showMainApp();
-            console.log('✅ Demo login successful!');
-        }
-
-        // Show main application
-        function showMainApp() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('clubInfo').textContent = currentUser.clubName;
-            document.getElementById('secretaryInfo').textContent = `Secretary: ${currentUser.secretaryName}`;
-            
-            showAlert('🎉 Welcome to the Trial Management System!', 'success');
-        }
-
-        // Logout
-        function logout() {
-            currentUser = null;
-            trialData = { name: '', date: '', classes: [], entries: [] };
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            showAlert('👋 Logged out successfully', 'success');
-        }
-
-        // Tab management
+        // Tab switching
         function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            // Hide all tabs and remove active class
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             
-            // Show selected tab
+            // Show selected tab and mark button as active
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
-
-        // Trial setup
-        function setupTrial() {
-            const name = document.getElementById('trialName').value.trim();
-            const days = document.getElementById('trialDays').value;
-            
-            if (!name) {
-                showAlert('Please enter a trial name', 'warning');
-                return;
-            }
-            
-            trialData.name = name;
-            document.getElementById('trialSetupForm').style.display = 'block';
-            showAlert(`Trial "${name}" created! Now configure the details below.`, 'success');
-        }
-
-        function finalizeTrial() {
+        
+        // Create trial
+        function createTrial() {
+            const name = document.getElementById('trialName').value;
             const date = document.getElementById('trialDate').value;
             const numClasses = document.getElementById('numClasses').value;
             
-            if (!date) {
-                showAlert('Please select a trial date', 'warning');
+            if (!name || !date) {
+                alert('Please fill in trial name and date');
                 return;
             }
             
-            trialData.date = date;
-            trialData.classes = demoClasses.slice(0, numClasses);
+            currentTrial = {
+                name: name,
+                date: date,
+                classes: classes.slice(0, numClasses)
+            };
             
-            // Create entry form
+            document.getElementById('setupComplete').classList.remove('hidden');
             createEntryForm();
+            updateStatus();
             
-            // Update dashboard
-            updateDashboard();
-            
-            showAlert(`✅ Trial setup complete! ${numClasses} classes configured for ${date}`, 'success');
+            alert('✅ Trial created successfully!');
         }
-
+        
+        // Create entry form
         function createEntryForm() {
-            const entryContent = document.getElementById('entryFormContent');
-            entryContent.innerHTML = `
-                <form id="entryForm" onsubmit="submitEntry(event)">
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="regNumber">Registration Number</label>
-                            <input type="text" id="regNumber" placeholder="e.g., 07-0001-01" onkeyup="lookupDog()">
-                        </div>
-                        <div class="form-field">
-                            <span id="dogInfo" style="font-weight: bold; color: #667eea;"></span>
-                        </div>
+            const content = document.getElementById('entryFormContent');
+            content.innerHTML = `
+                <form onsubmit="submitEntry(event)">
+                    <div class="form-group">
+                        <label for="regNumber">Registration Number</label>
+                        <input type="text" id="regNumber" placeholder="e.g., 07-0001-01" onkeyup="lookupDog()" required>
+                        <div id="dogInfo" style="margin-top: 0.5rem; font-weight: bold;"></div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="handlerName">Handler Name</label>
-                            <input type="text" id="handlerName" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="entryClass">Class</label>
-                            <select id="entryClass" required>
-                                <option value="">Select a class</option>
-                                ${trialData.classes.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label for="handlerName">Handler Name</label>
+                        <input type="text" id="handlerName" required>
                     </div>
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="contactEmail">Contact Email</label>
-                            <input type="email" id="contactEmail" required>
-                        </div>
-                        <div class="form-field">
-                            <label>
-                                <input type="checkbox" required style="margin-right: 0.5rem;">
-                                I agree to the liability waiver
-                            </label>
-                        </div>
+                    <div class="form-group">
+                        <label for="entryClass">Class</label>
+                        <select id="entryClass" required>
+                            <option value="">Select a class</option>
+                            ${currentTrial.classes.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactEmail">Contact Email</label>
+                        <input type="email" id="contactEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" required> I agree to the liability waiver
+                        </label>
                     </div>
                     <button type="submit" class="btn">Submit Entry</button>
                 </form>
             `;
         }
-
+        
+        // Dog lookup
         function lookupDog() {
             const regNumber = document.getElementById('regNumber').value;
             const dogInfo = document.getElementById('dogInfo');
             
-            const dog = demoDogs.find(d => d.regNumber === regNumber);
+            const dog = dogs.find(d => d.reg === regNumber);
             if (dog) {
-                dogInfo.textContent = `${dog.callName} - ${dog.handler}`;
-                dogInfo.style.color = '#28a745';
+                dogInfo.innerHTML = `<span style="color: green;">✅ ${dog.name} - ${dog.handler}</span>`;
                 document.getElementById('handlerName').value = dog.handler;
             } else if (regNumber.length > 3) {
-                dogInfo.textContent = 'Not found';
-                dogInfo.style.color = '#dc3545';
+                dogInfo.innerHTML = `<span style="color: red;">❌ Dog not found</span>`;
             } else {
-                dogInfo.textContent = '';
+                dogInfo.innerHTML = '';
             }
         }
-
+        
+        // Submit entry
         function submitEntry(event) {
             event.preventDefault();
             
@@ -698,107 +387,127 @@
             const entryClass = document.getElementById('entryClass').value;
             const contactEmail = document.getElementById('contactEmail').value;
             
-            const dog = demoDogs.find(d => d.regNumber === regNumber);
-            const callName = dog ? dog.callName : 'Unknown';
+            const dog = dogs.find(d => d.reg === regNumber);
+            const callName = dog ? dog.name : 'Unknown';
             
             const entry = {
-                regNumber,
-                callName,
-                handlerName,
-                entryClass,
-                contactEmail,
-                timestamp: new Date().toISOString()
+                regNumber: regNumber,
+                callName: callName,
+                handler: handlerName,
+                class: entryClass,
+                email: contactEmail,
+                timestamp: new Date().toLocaleString()
             };
             
-            trialData.entries.push(entry);
+            entries.push(entry);
             
             // Reset form
-            document.getElementById('entryForm').reset();
-            document.getElementById('dogInfo').textContent = '';
+            event.target.reset();
+            document.getElementById('dogInfo').innerHTML = '';
             
-            updateDashboard();
             updateResults();
-            showAlert(`✅ Entry submitted for ${callName}!`, 'success');
+            updateStatus();
+            alert(`✅ Entry submitted for ${callName}!`);
         }
-
-        function updateDashboard() {
-            document.getElementById('trialStatus').innerHTML = trialData.name ? 
-                `<strong>${trialData.name}</strong><br>📅 ${trialData.date}<br>🏆 ${trialData.classes.length} classes<br>📝 ${trialData.entries.length} entries` :
-                'Ready to create your first trial';
-                
-            const recentEntries = trialData.entries.slice(-3);
-            document.getElementById('recentEntries').innerHTML = recentEntries.length ? 
-                recentEntries.map(entry => `<div style="margin-bottom: 0.5rem; font-size: 0.9rem;">${entry.callName} - ${entry.entryClass}</div>`).join('') :
-                'No entries yet - set up a trial first';
-        }
-
+        
+        // Update results table
         function updateResults() {
-            const resultsContent = document.getElementById('resultsContent');
-            if (trialData.entries.length === 0) {
-                resultsContent.innerHTML = '<div class="alert alert-warning">No trial entries yet.</div>';
+            const table = document.getElementById('resultsTable');
+            if (entries.length === 0) {
+                table.innerHTML = '<p>No entries yet.</p>';
                 return;
             }
             
-            let html = '<h4>Trial Entries</h4><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">';
-            html += '<thead><tr style="background: #f8f9fa;"><th style="padding: 0.75rem; border: 1px solid #ddd;">Reg #</th><th style="padding: 0.75rem; border: 1px solid #ddd;">Dog</th><th style="padding: 0.75rem; border: 1px solid #ddd;">Handler</th><th style="padding: 0.75rem; border: 1px solid #ddd;">Class</th></tr></thead><tbody>';
-            
-            trialData.entries.forEach(entry => {
-                html += `<tr><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.regNumber}</td><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.callName}</td><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.handlerName}</td><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.entryClass}</td></tr>`;
+            let html = '<table><tr><th>Reg #</th><th>Dog</th><th>Handler</th><th>Class</th><th>Email</th></tr>';
+            entries.forEach(entry => {
+                html += `<tr>
+                    <td>${entry.regNumber}</td>
+                    <td>${entry.callName}</td>
+                    <td>${entry.handler}</td>
+                    <td>${entry.class}</td>
+                    <td>${entry.email}</td>
+                </tr>`;
             });
-            
-            html += '</tbody></table></div>';
-            resultsContent.innerHTML = html;
+            html += '</table>';
+            table.innerHTML = html;
         }
-
-        function saveDemo() {
-            const data = JSON.stringify(trialData, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
+        
+        // Update status
+        function updateStatus() {
+            const status = document.getElementById('statusText');
+            if (currentTrial) {
+                status.innerHTML = `
+                    <strong>${currentTrial.name}</strong><br>
+                    📅 ${currentTrial.date}<br>
+                    🏆 ${currentTrial.classes.length} classes<br>
+                    📝 ${entries.length} entries
+                `;
+            }
+        }
+        
+        // Save data
+        function saveData() {
+            const data = {
+                trial: currentTrial,
+                entries: entries
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `trial_${trialData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `trial_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            showAlert('💾 Trial data saved to downloads!', 'success');
+            alert('💾 Data saved to downloads!');
         }
-
-        function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.innerHTML = message;
-            alertDiv.style.position = 'fixed';
-            alertDiv.style.top = '20px';
-            alertDiv.style.right = '20px';
-            alertDiv.style.zIndex = '10000';
-            alertDiv.style.maxWidth = '400px';
-            alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+        
+        // Export CSV
+        function exportResults() {
+            if (entries.length === 0) {
+                alert('No entries to export');
+                return;
+            }
             
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 4000);
-        }
-
-        // Form submission handler
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const email = document.getElementById('clubEmail').value;
-                const secretary = document.getElementById('secretaryName').value;
-                const password = document.getElementById('password').value;
-                
-                if (email && secretary && password) {
-                    currentUser = {
-                        clubName: "Custom Club",
-                        clubEmail: email,
-                        secretaryName: secretary
-                    };
-                    showMainApp();
-                } else {
-                    showAlert('Please fill in all fields', 'warning');
-                }
+            let csv = 'Registration,Dog,Handler,Class,Email,Timestamp\n';
+            entries.forEach(entry => {
+                csv += `${entry.regNumber},${entry.callName},${entry.handler},${entry.class},${entry.email},${entry.timestamp}\n`;
             });
-        });
-
-        console.log
+            
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'trial_entries.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('📄 CSV exported to downloads!');
+        }
+        
+        // Load sample data
+        function loadSampleData() {
+            if (!currentTrial) {
+                alert('Please create a trial first');
+                return;
+            }
+            
+            // Add some sample entries
+            const sampleEntries = [
+                { regNumber: "07-0001-01", callName: "BJ", handler: "Shirley Ottmer", class: currentTrial.classes[0], email: "shirley@example.com" },
+                { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher", class: currentTrial.classes[1], email: "russ@example.com" },
+                { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher", class: currentTrial.classes[0], email: "bonnie@example.com" }
+            ];
+            
+            sampleEntries.forEach(entry => {
+                entry.timestamp = new Date().toLocaleString();
+                entries.push(entry);
+            });
+            
+            updateResults();
+            updateStatus();
+            alert('📦 Sample data loaded!');
+        }
+        
+        console.log('✅ Simple Trial System loaded successfully!');
+    </script>
+</body>
+</html>
