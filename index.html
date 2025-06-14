@@ -404,6 +404,29 @@
             font-weight: 600;
         }
 
+        .judge-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .judge-dropdown div:hover {
+            background: #f7fafc !important;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -815,32 +838,66 @@
         <div class="modal-content">
             <span class="close" onclick="hideModal('newTrialModal')">&times;</span>
             <h2>Create New Trial</h2>
-            <div class="form-grid">
+            
+            <!-- Step 1: Trial Type -->
+            <div id="trialTypeStep">
+                <h3 style="margin-bottom: 1rem; color: #4a5568;">Trial Type</h3>
                 <div class="form-group">
-                    <label for="modalTrialDate">Trial Date</label>
-                    <input type="date" id="modalTrialDate" required>
+                    <label style="display: flex; align-items: center; margin-bottom: 1rem; cursor: pointer;">
+                        <input type="radio" name="trialType" value="standalone" style="margin-right: 0.5rem;" checked>
+                        <span style="font-size: 1.1rem;">Standalone Event</span>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="radio" name="trialType" value="league" style="margin-right: 0.5rem;">
+                        <span style="font-size: 1.1rem;">League Event</span>
+                    </label>
                 </div>
-                <div class="form-group">
-                    <label for="modalTrialHost">Host Organization</label>
-                    <input type="text" id="modalTrialHost" required>
-                </div>
-                <div class="form-group">
-                    <label for="modalTrialLocation">Location</label>
-                    <input type="text" id="modalTrialLocation" required>
-                </div>
-                <div class="form-group">
-                    <label for="modalTrialClasses">Classes Offered</label>
-                    <select id="modalTrialClasses" multiple>
-                        <option value="patrol1">Patrol Level 1</option>
-                        <option value="detective2">Detective Level 2</option>
-                        <option value="investigator3">Investigator Level 3</option>
-                        <option value="supersleuth4">Super Sleuth Level 4</option>
-                    </select>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="nextStep()">Next</button>
+                    <button class="btn btn-secondary" onclick="hideModal('newTrialModal')">Cancel</button>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="createTrial()">Create Trial</button>
-                <button class="btn btn-secondary" onclick="hideModal('newTrialModal')">Cancel</button>
+
+            <!-- Step 2: Standalone Configuration -->
+            <div id="standaloneStep" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #4a5568;">Standalone Trial Setup</h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="standaloneDate">Trial Date</label>
+                        <input type="date" id="standaloneDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="numClasses">Number of Classes</label>
+                        <select id="numClasses" onchange="generateClassBoxes()">
+                            <option value="">Select...</option>
+                            <option value="1">1 Class</option>
+                            <option value="2">2 Classes</option>
+                            <option value="3">3 Classes</option>
+                            <option value="4">4 Classes</option>
+                            <option value="5">5 Classes</option>
+                            <option value="6">6 Classes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="classConfiguration" style="margin-top: 2rem;"></div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+                    <button class="btn btn-primary" onclick="createStandaloneTrial()" id="createStandaloneBtn" style="display: none;">Create Trial</button>
+                </div>
+            </div>
+
+            <!-- Step 3: League Configuration (placeholder) -->
+            <div id="leagueStep" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #4a5568;">League Trial Setup</h3>
+                <p style="color: #718096; text-align: center; padding: 2rem;">
+                    League configuration will be implemented after standalone trials are complete.
+                </p>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1437,10 +1494,281 @@
             });
         }
 
-        function createTrial() {
-            // Implementation for creating trial from modal
+        // Modal step management
+        let currentModalStep = 1;
+        let trialConfiguration = {
+            type: 'standalone',
+            date: '',
+            classes: []
+        };
+
+        // C-WAGS class options
+        const cwagsClasses = [
+            'Patrol Level 1',
+            'Detective Level 2', 
+            'Investigator Level 3',
+            'Super Sleuth Level 4',
+            'ARF (Any Ready For)',
+            'Zoom Level 1',
+            'Zoom Level 2',
+            'Starter Scent',
+            'Advanced Scent',
+            'Pro Scent'
+        ];
+
+        // Sample judges list (this would come from your database)
+        const availableJudges = [
+            'Linda Alberda',
+            'Ginger Alpine',
+            'Paige Alpine-Malone',
+            'Anita Ambani',
+            'Shirley Ottmer',
+            'Mary Johnson',
+            'Bob Smith',
+            'Carol Williams',
+            'David Brown',
+            'Lisa Davis'
+        ];
+
+        function nextStep() {
+            const selectedType = document.querySelector('input[name="trialType"]:checked').value;
+            trialConfiguration.type = selectedType;
+            
+            if (selectedType === 'standalone') {
+                document.getElementById('trialTypeStep').style.display = 'none';
+                document.getElementById('standaloneStep').style.display = 'block';
+                currentModalStep = 2;
+            } else {
+                document.getElementById('trialTypeStep').style.display = 'none';
+                document.getElementById('leagueStep').style.display = 'block';
+                currentModalStep = 3;
+            }
+        }
+
+        function previousStep() {
+            if (currentModalStep === 2 || currentModalStep === 3) {
+                document.getElementById('standaloneStep').style.display = 'none';
+                document.getElementById('leagueStep').style.display = 'none';
+                document.getElementById('trialTypeStep').style.display = 'block';
+                currentModalStep = 1;
+            }
+        }
+
+        function generateClassBoxes() {
+            const numClasses = parseInt(document.getElementById('numClasses').value);
+            const container = document.getElementById('classConfiguration');
+            const createBtn = document.getElementById('createStandaloneBtn');
+            
+            if (!numClasses) {
+                container.innerHTML = '';
+                createBtn.style.display = 'none';
+                return;
+            }
+
+            let html = '<h4 style="margin-bottom: 1rem; color: #4a5568;">Class Configuration</h4>';
+            
+            for (let i = 0; i < numClasses; i++) {
+                html += `
+                    <div style="border: 2px solid #e2e8f0; border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem; background: #f7fafc;">
+                        <h5 style="margin-bottom: 1rem; color: #4a5568;">Class ${i + 1}</h5>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="class${i}">Class Type</label>
+                                <select id="class${i}" onchange="updateClassConfig(${i})" required>
+                                    <option value="">Select Class...</option>
+                                    ${cwagsClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rounds${i}">Number of Rounds</label>
+                                <select id="rounds${i}" onchange="generateJudgeDropdowns(${i})">
+                                    <option value="">Select...</option>
+                                    <option value="1">1 Round</option>
+                                    <option value="2">2 Rounds</option>
+                                    <option value="3">3 Rounds</option>
+                                    <option value="4">4 Rounds</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="judgeConfig${i}" style="margin-top: 1rem;"></div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+            createBtn.style.display = 'inline-block';
+            
+            // Initialize filterable dropdowns
+            setTimeout(() => {
+                for (let i = 0; i < numClasses; i++) {
+                    makeFilterableDropdown(`class${i}`, cwagsClasses);
+                }
+            }, 100);
+        }
+
+        function updateClassConfig(classIndex) {
+            const selectedClass = document.getElementById(`class${classIndex}`).value;
+            // Reset rounds when class changes
+            document.getElementById(`rounds${classIndex}`).value = '';
+            document.getElementById(`judgeConfig${classIndex}`).innerHTML = '';
+        }
+
+        function generateJudgeDropdowns(classIndex) {
+            const numRounds = parseInt(document.getElementById(`rounds${classIndex}`).value);
+            const container = document.getElementById(`judgeConfig${classIndex}`);
+            
+            if (!numRounds) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<h6 style="margin-bottom: 0.5rem; color: #4a5568;">Judge Assignments</h6>';
+            html += '<div class="form-grid">';
+            
+            for (let round = 1; round <= numRounds; round++) {
+                html += `
+                    <div class="form-group">
+                        <label for="judge${classIndex}_${round}">Round ${round} Judge</label>
+                        <input type="text" 
+                               id="judge${classIndex}_${round}" 
+                               placeholder="Type to search judges..."
+                               oninput="filterJudges(${classIndex}, ${round})"
+                               onfocus="showJudgeDropdown(${classIndex}, ${round})"
+                               style="position: relative;">
+                        <div id="judgeDropdown${classIndex}_${round}" class="judge-dropdown" style="display: none;"></div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function makeFilterableDropdown(elementId, options) {
+            // Convert select to searchable input - implementation would go here
+            // For now, keeping as regular select
+        }
+
+        function filterJudges(classIndex, round) {
+            const input = document.getElementById(`judge${classIndex}_${round}`);
+            const dropdown = document.getElementById(`judgeDropdown${classIndex}_${round}`);
+            const value = input.value.toLowerCase();
+            
+            const filteredJudges = availableJudges.filter(judge => 
+                judge.toLowerCase().includes(value)
+            );
+            
+            let html = '';
+            filteredJudges.forEach(judge => {
+                html += `<div onclick="selectJudge('${judge}', ${classIndex}, ${round})" 
+                              style="padding: 0.5rem; cursor: pointer; border-bottom: 1px solid #e2e8f0; hover: background: #f7fafc;">
+                              ${judge}
+                         </div>`;
+            });
+            
+            dropdown.innerHTML = html;
+            dropdown.style.display = filteredJudges.length > 0 ? 'block' : 'none';
+        }
+
+        function showJudgeDropdown(classIndex, round) {
+            filterJudges(classIndex, round);
+        }
+
+        function selectJudge(judge, classIndex, round) {
+            document.getElementById(`judge${classIndex}_${round}`).value = judge;
+            document.getElementById(`judgeDropdown${classIndex}_${round}`).style.display = 'none';
+        }
+
+        function createStandaloneTrial() {
+            // Collect all the trial configuration data
+            const date = document.getElementById('standaloneDate').value;
+            const numClasses = parseInt(document.getElementById('numClasses').value);
+            
+            if (!date) {
+                alert('Please select a trial date.');
+                return;
+            }
+            
+            let trialData = {
+                type: 'standalone',
+                date: date,
+                classes: []
+            };
+            
+            // Collect class and judge data
+            for (let i = 0; i < numClasses; i++) {
+                const className = document.getElementById(`class${i}`).value;
+                const numRounds = parseInt(document.getElementById(`rounds${i}`).value || 0);
+                
+                if (!className) {
+                    alert(`Please select a class type for Class ${i + 1}.`);
+                    return;
+                }
+                
+                let classData = {
+                    name: className,
+                    rounds: []
+                };
+                
+                for (let round = 1; round <= numRounds; round++) {
+                    const judge = document.getElementById(`judge${i}_${round}`)?.value || '';
+                    classData.rounds.push({
+                        round: round,
+                        judge: judge
+                    });
+                }
+                
+                trialData.classes.push(classData);
+            }
+            
+            // Pre-populate the trial application form
+            populateTrialApplication(trialData);
+            
+            // Close modal and switch to Applications tab
             hideModal('newTrialModal');
             showTab('applications');
+            
+            alert('Trial configuration created! Please complete the remaining application details.');
+        }
+
+        function populateTrialApplication(trialData) {
+            // Pre-fill the trial application form with the configured data
+            document.getElementById('trialDates').value = trialData.date;
+            
+            // Set class checkboxes
+            const classNames = trialData.classes.map(c => c.name);
+            if (classNames.some(name => name.includes('Patrol') || name.includes('Detective') || name.includes('Investigator') || name.includes('Super Sleuth'))) {
+                document.getElementById('classScent').checked = true;
+                // Show scent reset option
+                document.getElementById('scentResetGroup').style.display = 'block';
+            }
+            
+            // Build judges list
+            const allJudges = [];
+            trialData.classes.forEach(classData => {
+                classData.rounds.forEach(round => {
+                    if (round.judge && !allJudges.includes(round.judge)) {
+                        allJudges.push(round.judge);
+                    }
+                });
+            });
+            
+            document.getElementById('judges').value = allJudges.join('\n');
+            
+            // Build class schedule text
+            let scheduleText = '';
+            trialData.classes.forEach((classData, index) => {
+                scheduleText += `Class ${index + 1}: ${classData.name}\n`;
+                classData.rounds.forEach(round => {
+                    if (round.judge) {
+                        scheduleText += `  Round ${round.round}: ${round.judge}\n`;
+                    }
+                });
+                scheduleText += '\n';
+            });
+            
+            // Store the detailed configuration for later use
+            window.currentTrialConfig = trialData;
         }
 
         function viewTrial(trialId) {
