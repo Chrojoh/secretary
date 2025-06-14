@@ -494,8 +494,11 @@
                 <button class="btn btn-primary" onclick="performLogin()" style="width: 100%; margin-bottom: 1rem;">
                     Login
                 </button>
-                <button class="btn btn-secondary" onclick="showPasswordReset()" style="width: 100%;">
+                <button class="btn btn-secondary" onclick="showPasswordReset()" style="width: 100%; margin-bottom: 1rem;">
                     Forgot Password?
+                </button>
+                <button class="btn" onclick="showRegistration()" style="width: 100%; background: #48bb78; color: white;">
+                    New Club? Register Here
                 </button>
             </div>
 
@@ -541,6 +544,136 @@
             </div>
 
             <div id="resetMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Club Registration Modal -->
+    <div id="registrationModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="hideModal('registrationModal')">&times;</span>
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">New Club Registration</h2>
+            
+            <div style="background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; padding: 1rem; margin-bottom: 2rem;">
+                <h4 style="color: #2c7a7b; margin-bottom: 0.5rem;">📋 Registration Process:</h4>
+                <ol style="color: #2c7a7b; margin: 0; padding-left: 1.5rem;">
+                    <li>Complete this registration form</li>
+                    <li>Submit for C-WAGS review</li>
+                    <li>C-WAGS Administrator approves your club</li>
+                    <li>You receive login credentials via email</li>
+                    <li>Begin hosting C-WAGS trials!</li>
+                </ol>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="regClubName">Club/Organization Name *</label>
+                    <input type="text" id="regClubName" placeholder="e.g., Sunshine Dog Training Club" required>
+                </div>
+                <div class="form-group">
+                    <label for="regClubType">Organization Type *</label>
+                    <select id="regClubType" required>
+                        <option value="">Select type...</option>
+                        <option value="training_club">Dog Training Club</option>
+                        <option value="kennel_club">Kennel Club</option>
+                        <option value="dog_sports">Dog Sports Club</option>
+                        <option value="rescue_org">Rescue Organization</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="regContactName">Primary Contact Name *</label>
+                    <input type="text" id="regContactName" placeholder="Full name of trial secretary" required>
+                </div>
+                <div class="form-group">
+                    <label for="regContactTitle">Contact Title</label>
+                    <input type="text" id="regContactTitle" placeholder="e.g., Trial Secretary, President">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="regEmail">Email Address *</label>
+                    <input type="email" id="regEmail" placeholder="primary.contact@yourclub.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">Phone Number *</label>
+                    <input type="tel" id="regPhone" placeholder="(555) 123-4567" required>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="regAddress">Club Address *</label>
+                    <textarea id="regAddress" rows="3" placeholder="Street address, City, State/Province, ZIP/Postal Code" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="regWebsite">Website (Optional)</label>
+                    <input type="url" id="regWebsite" placeholder="https://www.yourclub.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="regExperience">Trial Hosting Experience</label>
+                <select id="regExperience">
+                    <option value="">Select your experience level...</option>
+                    <option value="none">New to hosting dog sports trials</option>
+                    <option value="other_orgs">Experience with other organizations (AKC, CKC, etc.)</option>
+                    <option value="cwags_assisted">Assisted with C-WAGS trials before</option>
+                    <option value="cwags_experienced">Experienced C-WAGS host</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="regTrainingFacility">Training Facility Details</label>
+                <textarea id="regTrainingFacility" rows="3" placeholder="Describe your training facility: indoor/outdoor, size, surface type, available equipment, etc."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="regTrialTypes">Interested Trial Types (Select all that apply)</label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="regScent" style="margin-right: 0.5rem;"> Scent Detection
+                    </label>
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="regObedience" style="margin-right: 0.5rem;"> Obedience
+                    </label>
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="regRally" style="margin-right: 0.5rem;"> Rally
+                    </label>
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="regGames" style="margin-right: 0.5rem;"> Games
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="regComments">Additional Comments</label>
+                <textarea id="regComments" rows="3" placeholder="Tell us more about your club, goals, or any questions you have..."></textarea>
+            </div>
+
+            <div style="background: #fef5e7; border: 2px solid #ed8936; border-radius: 10px; padding: 1rem; margin: 2rem 0;">
+                <h4 style="color: #c05621; margin-bottom: 0.5rem;">⚠️ Important Notes:</h4>
+                <ul style="color: #c05621; margin: 0; padding-left: 1.5rem;">
+                    <li>All new clubs must be approved by C-WAGS administration</li>
+                    <li>Insurance requirements will be discussed during approval process</li>
+                    <li>Initial training/orientation may be required</li>
+                    <li>Registration is free for eligible organizations</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="submitRegistration()" style="width: 100%; margin-bottom: 1rem;">
+                    Submit Registration Application
+                </button>
+                <button class="btn btn-secondary" onclick="backToLoginFromReg()" style="width: 100%;">
+                    Back to Login
+                </button>
+            </div>
+
+            <div id="registrationMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
         </div>
     </div>
 
@@ -1217,8 +1350,11 @@
             const allTabs = document.querySelectorAll('.nav-tab');
             
             if (currentUser.canSeeAllTrials) {
-                // Supervisor sees everything
+                // Supervisor sees everything, plus admin functions
                 allTabs.forEach(tab => tab.style.display = 'block');
+                
+                // Add admin functions for supervisor
+                addSupervisorFunctions();
             } else {
                 // Club users see limited tabs
                 const allowedTabs = ['dashboard', 'trials', 'applications', 'scoring', 'records', 'calendar'];
@@ -1319,14 +1455,292 @@
             console.log(`Current password for ${club.name}: ${club.password}`);
         }
 
-        function showResetMessage(message, type) {
-            const messageDiv = document.getElementById('resetMessage');
+        function showRegistration() {
+            hideModal('loginModal');
+            showModal('registrationModal');
+        }
+
+        function backToLoginFromReg() {
+            hideModal('registrationModal');
+            document.getElementById('loginModal').style.display = 'block';
+            clearRegistrationForm();
+        }
+
+        function clearRegistrationForm() {
+            document.getElementById('regClubName').value = '';
+            document.getElementById('regClubType').value = '';
+            document.getElementById('regContactName').value = '';
+            document.getElementById('regContactTitle').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPhone').value = '';
+            document.getElementById('regAddress').value = '';
+            document.getElementById('regWebsite').value = '';
+            document.getElementById('regExperience').value = '';
+            document.getElementById('regTrainingFacility').value = '';
+            document.getElementById('regComments').value = '';
+            
+            // Clear checkboxes
+            document.getElementById('regScent').checked = false;
+            document.getElementById('regObedience').checked = false;
+            document.getElementById('regRally').checked = false;
+            document.getElementById('regGames').checked = false;
+            
+            document.getElementById('registrationMessage').style.display = 'none';
+        }
+
+        function submitRegistration() {
+            // Collect form data
+            const registrationData = {
+                clubName: document.getElementById('regClubName').value.trim(),
+                clubType: document.getElementById('regClubType').value,
+                contactName: document.getElementById('regContactName').value.trim(),
+                contactTitle: document.getElementById('regContactTitle').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                phone: document.getElementById('regPhone').value.trim(),
+                address: document.getElementById('regAddress').value.trim(),
+                website: document.getElementById('regWebsite').value.trim(),
+                experience: document.getElementById('regExperience').value,
+                trainingFacility: document.getElementById('regTrainingFacility').value.trim(),
+                comments: document.getElementById('regComments').value.trim(),
+                trialTypes: {
+                    scent: document.getElementById('regScent').checked,
+                    obedience: document.getElementById('regObedience').checked,
+                    rally: document.getElementById('regRally').checked,
+                    games: document.getElementById('regGames').checked
+                },
+                submittedDate: new Date().toISOString(),
+                status: 'pending_review'
+            };
+
+            // Validate required fields
+            const validationErrors = validateRegistration(registrationData);
+            if (validationErrors.length > 0) {
+                showRegistrationMessage(
+                    'Please fix the following errors:\n• ' + validationErrors.join('\n• '), 
+                    'error'
+                );
+                return;
+            }
+
+            // Check if club name already exists
+            if (isClubNameTaken(registrationData.clubName)) {
+                showRegistrationMessage(
+                    'A club with this name is already registered. Please choose a different name or contact C-WAGS if this is your organization.',
+                    'error'
+                );
+                return;
+            }
+
+            // Save registration to pending list
+            saveRegistrationApplication(registrationData);
+
+            // Show success message
+            showRegistrationMessage(
+                `✅ Registration submitted successfully!\n\nYour application for "${registrationData.clubName}" has been submitted for review.\n\nNext steps:\n1. C-WAGS administrators will review your application\n2. You will receive an email within 3-5 business days\n3. Upon approval, login credentials will be provided\n\nThank you for your interest in C-WAGS!`,
+                'success'
+            );
+
+            // Simulate sending notification to C-WAGS admin
+            console.log('📧 Registration notification sent to C-WAGS Admin:');
+            console.log('New club registration pending review:');
+            console.log(`Club: ${registrationData.clubName}`);
+            console.log(`Contact: ${registrationData.contactName} (${registrationData.email})`);
+            console.log(`Type: ${registrationData.clubType}`);
+            console.log(`Experience: ${registrationData.experience}`);
+            
+            // Clear form after successful submission
+            setTimeout(() => {
+                clearRegistrationForm();
+                backToLoginFromReg();
+            }, 8000);
+        }
+
+        function validateRegistration(data) {
+            const errors = [];
+            
+            if (!data.clubName) errors.push('Club/Organization Name is required');
+            if (!data.clubType) errors.push('Organization Type is required');
+            if (!data.contactName) errors.push('Primary Contact Name is required');
+            if (!data.email) errors.push('Email Address is required');
+            if (!data.phone) errors.push('Phone Number is required');
+            if (!data.address) errors.push('Club Address is required');
+            
+            // Email format validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (data.email && !emailRegex.test(data.email)) {
+                errors.push('Please enter a valid email address');
+            }
+            
+            // Check if at least one trial type is selected
+            const hasTrialType = Object.values(data.trialTypes).some(type => type);
+            if (!hasTrialType) {
+                errors.push('Please select at least one trial type you are interested in');
+            }
+            
+            return errors;
+        }
+
+        function isClubNameTaken(clubName) {
+            const normalizedName = clubName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            // Check against existing clubs
+            const existingClubs = Object.values(clubDatabase).map(club => 
+                club.name.toLowerCase().replace(/[^a-z0-9]/g, '')
+            );
+            
+            return existingClubs.includes(normalizedName);
+        }
+
+        function saveRegistrationApplication(registrationData) {
+            try {
+                // Get existing pending registrations
+                let pendingRegistrations = JSON.parse(localStorage.getItem('cwags_pending_registrations') || '[]');
+                
+                // Add new registration
+                registrationData.id = 'REG' + String(pendingRegistrations.length + 1).padStart(3, '0');
+                pendingRegistrations.push(registrationData);
+                
+                // Save to localStorage
+                localStorage.setItem('cwags_pending_registrations', JSON.stringify(pendingRegistrations));
+                
+                console.log(`Registration ${registrationData.id} saved for admin review`);
+                
+            } catch (error) {
+                console.error('Error saving registration:', error);
+            }
+        }
+
+        function showRegistrationMessage(message, type) {
+            const messageDiv = document.getElementById('registrationMessage');
+            messageDiv.style.whiteSpace = 'pre-line'; // Preserve line breaks
             messageDiv.textContent = message;
             messageDiv.style.display = 'block';
             messageDiv.style.color = type === 'error' ? '#e53e3e' : '#38a169';
+            messageDiv.style.backgroundColor = type === 'error' ? '#fed7d7' : '#c6f6d5';
+            messageDiv.style.padding = '1rem';
+            messageDiv.style.borderRadius = '10px';
+            messageDiv.style.border = type === 'error' ? '2px solid #e53e3e' : '2px solid #38a169';
         }
 
-        // Check for existing session on page load
+        // Function for supervisors to view pending registrations
+        function viewPendingRegistrations() {
+            if (!currentUser?.canSeeAllTrials) {
+                alert('Access denied. Supervisor privileges required.');
+                return;
+            }
+            
+            try {
+                const pendingRegistrations = JSON.parse(localStorage.getItem('cwags_pending_registrations') || '[]');
+                
+                if (pendingRegistrations.length === 0) {
+                    alert('No pending registrations.');
+                    return;
+                }
+                
+                console.log('📋 Pending Club Registrations:');
+                pendingRegistrations.forEach(reg => {
+                    console.log(`\n${reg.id}: ${reg.clubName}`);
+                    console.log(`Contact: ${reg.contactName} (${reg.email})`);
+                    console.log(`Type: ${reg.clubType}`);
+                    console.log(`Submitted: ${new Date(reg.submittedDate).toLocaleDateString()}`);
+                    console.log(`Status: ${reg.status}`);
+                });
+                
+                alert(`Found ${pendingRegistrations.length} pending registration(s). Check browser console for details.`);
+                
+            } catch (error) {
+                console.error('Error loading pending registrations:', error);
+                alert('Error loading pending registrations.');
+            }
+        }
+
+        function addSupervisorFunctions() {
+            // Add a special admin button to the header for supervisors
+            const userInfo = document.getElementById('userInfo');
+            const adminBtn = document.createElement('button');
+            adminBtn.className = 'btn btn-secondary';
+            adminBtn.style.cssText = 'padding: 0.5rem 1rem; margin-right: 1rem; background: #805ad5; color: white;';
+            adminBtn.textContent = '👑 Admin Functions';
+            adminBtn.onclick = showAdminFunctions;
+            
+            userInfo.insertBefore(adminBtn, userInfo.firstChild);
+        }
+
+        function showAdminFunctions() {
+            const functions = [
+                '1. View Pending Registrations',
+                '2. Approve New Clubs', 
+                '3. Reset Club Passwords',
+                '4. View All Club Activity',
+                '5. System Statistics'
+            ];
+            
+            const choice = prompt(`👑 C-WAGS Administrator Functions:\n\n${functions.join('\n')}\n\nEnter number (1-5):`);
+            
+            switch(choice) {
+                case '1':
+                    viewPendingRegistrations();
+                    break;
+                case '2':
+                    alert('Approve New Clubs:\nThis would show pending registrations with approve/deny buttons.\n(Feature ready for Phase 2 implementation)');
+                    break;
+                case '3':
+                    alert('Reset Club Passwords:\nThis would allow password resets for any club.\n(Feature ready for Phase 2 implementation)');
+                    break;
+                case '4':
+                    alert(`All Club Activity:\nTotal Clubs: ${Object.keys(clubDatabase).length - 1}\nTotal Trials: ${trials.length}\nActive Sessions: ${sessionStorage.getItem('cwags_session') ? '1' : '0'}`);
+                    break;
+                case '5':
+                    showSystemStatistics();
+                    break;
+                default:
+                    if (choice !== null) alert('Invalid selection. Please choose 1-5.');
+            }
+        }
+
+        function showSystemStatistics() {
+            try {
+                const pendingRegs = JSON.parse(localStorage.getItem('cwags_pending_registrations') || '[]');
+                const allTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                
+                const stats = `📊 C-WAGS System Statistics:
+
+🏢 Clubs:
+• Registered Clubs: ${Object.keys(clubDatabase).length - 1}
+• Pending Registrations: ${pendingRegs.length}
+• Total Organizations: ${Object.keys(clubDatabase).length - 1 + pendingRegs.length}
+
+🎯 Trials:
+• Total Trials Created: ${allTrials.length}
+• Draft Trials: ${allTrials.filter(t => t.status === 'draft').length}
+• Approved Trials: ${allTrials.filter(t => t.status === 'approved').length}
+• Completed Trials: ${allTrials.filter(t => t.status === 'completed').length}
+
+👥 Activity:
+• Current Session: ${currentUser?.clubName}
+• Session Time: ${currentUser?.loginTime ? new Date(currentUser.loginTime).toLocaleString() : 'Unknown'}
+• System Version: Phase 1 (GitHub Pages)
+
+📋 Records:
+• Dog Records: ${records.length}
+• Available Classes: ${availableClasses.length}
+• Available Judges: ${availableJudges.length}`;
+
+                alert(stats);
+                console.log('📊 System Statistics:', {
+                    clubs: Object.keys(clubDatabase).length - 1,
+                    pendingRegistrations: pendingRegs.length,
+                    trials: allTrials.length,
+                    records: records.length,
+                    classes: availableClasses.length,
+                    judges: availableJudges.length
+                });
+                
+            } catch (error) {
+                console.error('Error generating statistics:', error);
+                alert('Error generating system statistics.');
+            }
+        }
         function checkExistingSession() {
             try {
                 const savedSession = sessionStorage.getItem('cwags_session');
