@@ -3,1032 +3,1332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trial Management System</title>
+    <title>C-WAGS Trial Management System</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -webkit-system-font, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
             color: #333;
         }
-        
-        .header h1 {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            color: transparent;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        
+
+        .header h1 {
+            color: #4a5568;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
         .nav-tabs {
             display: flex;
-            border-bottom: 2px solid #e0e0e0;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
         }
-        
+
         .nav-tab {
-            padding: 15px 25px;
-            background: #f0f0f0;
-            border: 2px solid #d0d0d0;
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
             cursor: pointer;
-            border-radius: 10px 10px 0 0;
-            margin-right: 5px;
-            font-weight: bold;
             transition: all 0.3s ease;
-            color: #666;
-            font-family: inherit;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 120px;
         }
-        
+
         .nav-tab:hover {
-            background: #e8e8e8;
-            color: #333;
-        }
-        
-        .nav-tab.active {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+            background: rgba(102, 126, 234, 0.1);
             transform: translateY(-2px);
         }
-        
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
         .tab-content {
             display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-in;
         }
-        
+
         .tab-content.active {
             display: block;
-            animation: fadeIn 0.5s ease-in;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .form-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 10px 0;
-            flex-wrap: wrap;
-        }
-        
-        .label {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        
-        input, select, textarea {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        button {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
+
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
         }
-        
+
         .dashboard-card {
-            background: white;
-            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card p {
+            opacity: 0.9;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
-        }
-        
-        .initial-question {
-            background: #e8f4f8;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .day-container {
-            border: 2px solid #2c5aa0;
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
-        
-        .day-header {
-            background: #2c5aa0;
-            color: white;
-            padding: 10px 15px;
-            margin: -20px -20px 20px -20px;
-            border-radius: 6px 6px 0 0;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .classes-section {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            border-left: 4px solid #ffc107;
-        }
-        
-        .class-container {
-            border: 1px solid #28a745;
-            margin: 15px 0;
-            padding: 15px;
-            border-radius: 6px;
-            background: #f8fff8;
-        }
-        
-        .class-header {
-            background: #28a745;
-            color: white;
-            padding: 8px 12px;
-            margin: -15px -15px 15px -15px;
-            border-radius: 4px 4px 0 0;
-            font-weight: bold;
-        }
-        
-        .dog-search-result {
+            font-size: 1rem;
+            transition: all 0.3s ease;
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 5px 0;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
-        
-        .dog-search-result:hover {
-            background: #f0f7ff;
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+        }
+
+        .table tr:hover {
+            background: #f7fafc;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .status-approved {
+            background: #c6f6d5;
+            color: #2d7d32;
+        }
+
+        .status-completed {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .calendar-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            background: white;
+            padding: 1rem;
+            min-height: 100px;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: #f7fafc;
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #a0aec0;
+        }
+
+        .trial-event {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close {
+            color: #a0aec0;
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #4a5568;
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
-        .dog-search-result.selected {
-            background: #e3f2fd;
-            border-color: #667eea;
-            border-width: 2px;
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
         }
-        
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-weight: 600;
+        }
+
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
             .nav-tabs {
                 flex-direction: column;
             }
-            .form-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .dashboard-grid {
+            
+            .dashboard-grid,
+            .form-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Login Section -->
-    <div id="loginSection" class="header" style="display: block;">
-        <h1>Trial Management System</h1>
-        <p>Multi-Club Trial Management Platform</p>
-        
-        <div class="nav-tabs" style="margin-bottom: 20px;">
-            <button class="nav-tab active" onclick="switchLoginTab('loginForm', this)">Sign In</button>
-            <button class="nav-tab" onclick="switchLoginTab('registerForm', this)">Register Club</button>
+    <div class="header">
+        <h1>C-WAGS Trial Management System</h1>
+        <p class="header-subtitle">Canine-Work And Games | 17 Years of Excellence</p>
+    </div>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="nav-tab" onclick="showTab('trials')">Trial Management</button>
+            <button class="nav-tab" onclick="showTab('applications')">Applications</button>
+            <button class="nav-tab" onclick="showTab('scoring')">Scoring</button>
+            <button class="nav-tab" onclick="showTab('records')">Records</button>
+            <button class="nav-tab" onclick="showTab('calendar')">Calendar</button>
+            <button class="nav-tab" onclick="showTab('reports')">Reports</button>
         </div>
-        
-        <!-- Sign In Form -->
-        <div id="loginForm" class="tab-content active">
-            <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
-            <div style="max-width: 400px; margin: 0 auto;">
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="loginClubName" class="label">Club Name:</label>
-                    <input type="text" id="loginClubName" placeholder="Enter your club name" style="width: 100%; margin-bottom: 15px;">
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Dashboard Overview</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTrials">0</div>
+                    <div class="stat-label">Total Trials</div>
                 </div>
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="loginSecretaryName" class="label">Secretary Name:</label>
-                    <input type="text" id="loginSecretaryName" placeholder="Enter your name" style="width: 100%; margin-bottom: 15px;">
+                <div class="stat-card">
+                    <div class="stat-number" id="activeTrials">0</div>
+                    <div class="stat-label">Active Trials</div>
                 </div>
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="loginPassword" class="label">Password:</label>
-                    <input type="password" id="loginPassword" placeholder="Enter password" style="width: 100%; margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDogs">0</div>
+                    <div class="stat-label">Registered Dogs</div>
                 </div>
-                <div class="form-group" style="justify-content: center;">
-                    <button type="button" onclick="handleLogin()">Sign In</button>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalHandlers">0</div>
+                    <div class="stat-label">Active Handlers</div>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 20px; color: #666;">
-                <p><strong>Demo:</strong> Club: "Demo Dog Club" | Secretary: "Demo Secretary" | Password: "demo123"</p>
-                <button onclick="fillDemoCredentials()" style="margin-top: 10px; padding: 8px 15px; background: #28a745;">🚀 Auto-Fill Demo</button>
-                <button onclick="testSystem()" style="margin-left: 10px; padding: 8px 15px; background: #17a2b8;">🔍 Test System</button>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="showTab('applications')">
+                    <h3>New Trial Application</h3>
+                    <p>Create and submit trial applications with complete scheduling and logistics information.</p>
+                </div>
+                <div class="dashboard-card" onclick="showTab('scoring')">
+                    <h3>Score Entry</h3>
+                    <p>Enter scores and manage trial results with digital signature capture.</p>
+                </div>
+                <div class="dashboard-card" onclick="showTab('records')">
+                    <h3>Title Tracking</h3>
+                    <p>Track points accumulation and title progression for all registered teams.</p>
+                </div>
+                <div class="dashboard-card" onclick="showTab('reports')">
+                    <h3>Generate Reports</h3>
+                    <p>Create comprehensive trial reports, judge evaluations, and administrative summaries.</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3 style="padding: 1rem; margin: 0; background: #f7fafc; color: #4a5568;">Upcoming Trials</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Trial Date</th>
+                            <th>Host</th>
+                            <th>Location</th>
+                            <th>Classes</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upcomingTrialsTable">
+                        <!-- Trial data will be populated here -->
+                    </tbody>
+                </table>
             </div>
         </div>
-        
-        <!-- Register Form -->
-        <div id="registerForm" class="tab-content">
-            <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
-            <div style="max-width: 400px; margin: 0 auto;">
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="registerClubName" class="label">Club Name:</label>
-                    <input type="text" id="registerClubName" placeholder="Enter club name" style="width: 100%; margin-bottom: 15px;">
+
+        <!-- Trial Management Tab -->
+        <div id="trials" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Trial Management</h2>
+            
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search trials by host, location, or date..." id="trialSearch">
+            </div>
+
+            <button class="btn btn-primary" onclick="showModal('newTrialModal')" style="margin-bottom: 2rem;">
+                + Create New Trial
+            </button>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Trial ID</th>
+                            <th>Date</th>
+                            <th>Host</th>
+                            <th>Location</th>
+                            <th>Classes</th>
+                            <th>Judge</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trialsTable">
+                        <!-- Trial data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Applications Tab -->
+        <div id="applications" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Trial Applications</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="trialDates">Trial Dates</label>
+                    <input type="date" id="trialDates" required>
                 </div>
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="registerSecretaryName" class="label">Secretary Name:</label>
-                    <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" style="width: 100%; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label for="hostName">Host Name</label>
+                    <input type="text" id="hostName" placeholder="Enter host organization" required>
                 </div>
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="registerEmail" class="label">Email:</label>
-                    <input type="email" id="registerEmail" placeholder="Enter email address" style="width: 100%; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label for="trialLocation">Trial Location</label>
+                    <input type="text" id="trialLocation" placeholder="Venue name" required>
                 </div>
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="registerPassword" class="label">Password:</label>
-                    <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" minlength="6" style="width: 100%; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label for="cityState">City, State/Province</label>
+                    <input type="text" id="cityState" placeholder="City, State" required>
                 </div>
-                <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label for="registerConfirmPassword" class="label">Confirm Password:</label>
-                    <input type="password" id="registerConfirmPassword" placeholder="Confirm password" style="width: 100%; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label for="contactName">Contact Name</label>
+                    <input type="text" id="contactName" placeholder="Trial contact person" required>
                 </div>
-                <div class="form-group" style="justify-content: center;">
-                    <button type="button" onclick="handleRegistration()">Register Club</button>
+                <div class="form-group">
+                    <label for="contactEmail">Contact Email</label>
+                    <input type="email" id="contactEmail" placeholder="email@example.com" required>
                 </div>
+                <div class="form-group">
+                    <label for="contactPhone">Contact Phone</label>
+                    <input type="tel" id="contactPhone" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label for="premiumWebsite">Premium Website</label>
+                    <input type="url" id="premiumWebsite" placeholder="https://...">
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Class Configuration</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="classObedience"> Obedience
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="classRally"> Rally
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="classScent"> Scent
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="classGames"> Games
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="judges">Judges</label>
+                    <textarea id="judges" rows="3" placeholder="List judges for each class"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="advocates">C-WAGS Advocates</label>
+                    <textarea id="advocates" rows="3" placeholder="List assigned advocates"></textarea>
+                </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Trial Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="trialType">Trial Type</label>
+                    <select id="trialType">
+                        <option value="inside">Inside</option>
+                        <option value="outside">Outside</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ringSurface">Ring Surface</label>
+                    <input type="text" id="ringSurface" placeholder="e.g., Matting, Grass, Dirt">
+                </div>
+                <div class="form-group">
+                    <label for="numRings">Number of Rings/Search Areas</label>
+                    <input type="number" id="numRings" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isLeague"> League Trial
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="insuranceExpiration">Insurance Expiration Date</label>
+                    <input type="date" id="insuranceExpiration" required>
+                </div>
+                <div class="form-group" id="scentResetGroup" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="scentResets"> Scent Resets Offered
+                    </label>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="submitTrialApplication()">Submit Application</button>
+                <button class="btn btn-secondary" onclick="clearForm()" style="margin-left: 1rem;">Clear Form</button>
+            </div>
+        </div>
+
+        <!-- Scoring Tab -->
+        <div id="scoring" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Score Entry & Management</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="scoringTrial">Select Trial</label>
+                    <select id="scoringTrial">
+                        <option value="">Choose a trial...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scoringClass">Select Class</label>
+                    <select id="scoringClass">
+                        <option value="">Choose a class...</option>
+                        <option value="patrol1">Patrol Level 1</option>
+                        <option value="detective2">Detective Level 2</option>
+                        <option value="investigator3">Investigator Level 3</option>
+                        <option value="supersleuth4">Super Sleuth Level 4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="judge">Judge</label>
+                    <input type="text" id="judge" placeholder="Judge name">
+                </div>
+            </div>
+
+            <div id="scoreEntrySection" style="display: none;">
+                <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Score Entry</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Team #</th>
+                                <th>Dog</th>
+                                <th>Handler</th>
+                                <th>Scent 1</th>
+                                <th>Scent 2</th>
+                                <th>Scent 3</th>
+                                <th>Scent 4</th>
+                                <th>Time</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreEntryTable">
+                            <!-- Score entry rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="saveScores()">Save Scores</button>
+                    <button class="btn btn-secondary" onclick="generateScoreSheet()" style="margin-left: 1rem;">Generate Score Sheet PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records Tab -->
+        <div id="records" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Title Tracking & Records</h2>
+            
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search by dog name, handler, or registration number..." id="recordSearch">
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Registration #</th>
+                            <th>Dog Name</th>
+                            <th>Handler</th>
+                            <th>Current Level</th>
+                            <th>Total Points</th>
+                            <th>Next Title</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTable">
+                        <!-- Records will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Calendar Tab -->
+        <div id="calendar" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Trial Calendar</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <button class="btn btn-secondary" onclick="previousMonth()">← Previous</button>
+                <h3 id="calendarMonth" style="color: #4a5568;">December 2024</h3>
+                <button class="btn btn-secondary" onclick="nextMonth()">Next →</button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be populated here -->
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h3 style="color: #4a5568; margin-bottom: 1rem;">Legend</h3>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 5px;"></div>
+                        <span>Scheduled Trial</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">Reports & Analytics</h2>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-card" onclick="generateTrialRecap()">
+                    <h3>Trial Recap</h3>
+                    <p>Generate comprehensive trial summary reports with all results and statistics.</p>
+                </div>
+                <div class="dashboard-card" onclick="generateJudgeEvaluation()">
+                    <h3>Judge Evaluation</h3>
+                    <p>Create judge evaluation forms and compile feedback from trial hosts.</p>
+                </div>
+                <div class="dashboard-card" onclick="generateClassResults()">
+                    <h3>Class Results</h3>
+                    <p>Generate official class results reports with judge signatures.</p>
+                </div>
+                <div class="dashboard-card" onclick="generateAnalytics()">
+                    <h3>Trial Analytics</h3>
+                    <p>View participation trends, success rates, and organizational metrics.</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3 style="padding: 1rem; margin: 0; background: #f7fafc; color: #4a5568;">Recent Reports</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Report Type</th>
+                            <th>Trial/Period</th>
+                            <th>Generated</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTable">
+                        <!-- Reports will be populated here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Main Application -->
-    <div id="mainApp" style="display: none;">
-        <div class="container">
-            <div class="header">
-                <h1>Trial Management System</h1>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <p>Track judges across multiple days, classes, and rounds</p>
-                    <div style="text-align: right;">
-                        <div style="color: #667eea; font-weight: bold;" id="clubInfo"></div>
-                        <div style="font-size: 14px; color: #666;" id="secretaryInfo"></div>
-                        <button onclick="signOut()" style="margin-top: 10px; padding: 8px 15px; font-size: 12px;">Sign Out</button>
-                    </div>
+    <!-- Modals -->
+    <div id="newTrialModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="hideModal('newTrialModal')">&times;</span>
+            <h2>Create New Trial</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="modalTrialDate">Trial Date</label>
+                    <input type="date" id="modalTrialDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalTrialHost">Host Organization</label>
+                    <input type="text" id="modalTrialHost" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalTrialLocation">Location</label>
+                    <input type="text" id="modalTrialLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="modalTrialClasses">Classes Offered</label>
+                    <select id="modalTrialClasses" multiple>
+                        <option value="patrol1">Patrol Level 1</option>
+                        <option value="detective2">Detective Level 2</option>
+                        <option value="investigator3">Investigator Level 3</option>
+                        <option value="supersleuth4">Super Sleuth Level 4</option>
+                    </select>
                 </div>
             </div>
-
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="switchTab('dashboard', this)">Dashboard</button>
-                <button class="nav-tab" onclick="switchTab('setup', this)">Trial Setup</button>
-                <button class="nav-tab" onclick="switchTab('entry', this)">Entry Form</button>
-                <button class="nav-tab" onclick="switchTab('results', this)">Results</button>
-            </div>
-
-            <!-- Dashboard Tab -->
-            <div id="dashboard" class="tab-content active">
-                <div class="initial-question">
-                    <h3>Club Dashboard</h3>
-                    <div class="dashboard-grid">
-                        <div class="dashboard-card">
-                            <h4>System Status</h4>
-                            <div>✅ System Online</div>
-                            <div>🐕 <span id="dogCount">0</span> dogs loaded</div>
-                            <div>🏆 <span id="classCount">0</span> classes available</div>
-                            <div>👨‍⚖️ <span id="judgeCount">0</span> judges available</div>
-                            <div style="margin-top: 10px;">
-                                <div id="dataLoadStatus" style="color: #856404;">Loading data...</div>
-                            </div>
-                        </div>
-                        <div class="dashboard-card">
-                            <h4>Quick Actions</h4>
-                            <div>
-                                <button onclick="switchTab('setup', document.querySelectorAll('.nav-tab')[1])" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
-                                <button onclick="switchTab('entry', document.querySelectorAll('.nav-tab')[2])" style="width: 100%; margin-bottom: 10px;">Entry Form</button>
-                                <button onclick="exportData()" style="width: 100%;">Export Data</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Trial Setup Tab -->
-            <div id="setup" class="tab-content">
-                <div class="initial-question">
-                    <h3>📁 Database Information</h3>
-                    
-                    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
-                        <h4 style="color: #2e7d32; margin-top: 0;">🐕 Loaded Database</h4>
-                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                            <strong>📊 Current Database:</strong>
-                            <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 14px;">
-                                <div>🐕 <span id="setupDogCount">0</span> dogs</div>
-                                <div>🏆 <span id="setupClassCount">0</span> classes</div>
-                                <div>👨‍⚖️ <span id="setupJudgeCount">0</span> judges</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3>🏆 Trial Setup</h3>
-                    <div class="form-group">
-                        <label for="trialDays" class="label">How many days in trial?</label>
-                        <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number" style="width: 150px;">
-                        <button onclick="generateDays()">Generate Days</button>
-                    </div>
-                </div>
-
-                <div id="daysContainer"></div>
-                
-                <div id="saveTrialSection" style="display: none; margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; text-align: center;">
-                    <h4 style="color: #2e7d32; margin-bottom: 15px;">🎯 Complete Trial Setup</h4>
-                    <p style="margin-bottom: 20px; color: #1b5e20;">All days configured! Ready to save your complete trial setup.</p>
-                    <button onclick="saveTrial()" style="background: #2e7d32; color: white; border: none; font-size: 16px; padding: 15px 30px; border-radius: 5px; cursor: pointer;">
-                        💾 Save Complete Trial
-                    </button>
-                </div>
-            </div>
-
-            <!-- Entry Form Tab -->
-            <div id="entry" class="tab-content">
-                <div class="initial-question">
-                    <h3>Trial Entry Form</h3>
-                    
-                    <!-- Liability Waiver -->
-                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
-                        <h4 style="color: #856404; margin-bottom: 15px;">📋 Liability Waiver and Agreement</h4>
-                        <div style="max-height: 200px; overflow-y: auto; padding: 15px; background: white; border-radius: 5px; margin-bottom: 15px; font-size: 14px; line-height: 1.5;">
-                            <p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
-                            <p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers.</p>
-                            <p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials.</p>
-                            <p><strong>RELEASE AND HOLD HARMLESS:</strong> I hereby release, waive, discharge and covenant not to sue the trial-giving club, judges, and all their agents from liability from any and all claims.</p>
-                        </div>
-                        
-                        <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
-                            <input type="checkbox" id="waiverAccepted" onchange="toggleEntryForm()">
-                            <span>I have read, understood, and agree to all terms of this Liability Waiver and Agreement.</span>
-                        </label>
-                    </div>
-
-                    <!-- Entry Form -->
-                    <div id="entryFormSection" style="display: none;">
-                        <div class="form-group">
-                            <label for="regNumber" class="label">Registration Number:</label>
-                            <input type="text" id="regNumber" placeholder="Type registration number" style="width: 250px;" oninput="searchDog(this.value)">
-                            <div id="dogSearchResults" style="max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
-                        </div>
-
-                        <div id="dogInfo" style="display: none; background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                            <h4 style="color: #2e7d32; margin-bottom: 10px;">Selected Dog</h4>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div><strong>Call Name:</strong> <span id="selectedCallName"></span></div>
-                                <div><strong>Full Name:</strong> <span id="selectedFullName"></span></div>
-                                <div><strong>Handler:</strong> <span id="selectedHandler"></span></div>
-                                <div><strong>Registration:</strong> <span id="selectedRegNumber"></span></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="handlerName" class="label">Handler Name:</label>
-                            <input type="text" id="handlerName" placeholder="Handler name" style="width: 250px;">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="contactEmail" class="label">Contact Email:</label>
-                            <input type="email" id="contactEmail" placeholder="your.email@example.com" style="width: 250px;">
-                        </div>
-
-                        <div style="margin: 20px 0;">
-                            <h4>Available Trial Options</h4>
-                            <div id="trialOptions" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #e0e0e0;">
-                                <p style="color: #666; font-style: italic;">Trial options will appear here after trial setup is completed.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <button onclick="submitEntry()" type="button">Submit Entry</button>
-                            <button onclick="clearEntryForm()" type="button" style="background: #6c757d; margin-left: 10px;">Clear Form</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Results Tab -->
-            <div id="results" class="tab-content">
-                <div class="initial-question">
-                    <h3>Entry Results & Running Orders</h3>
-                    
-                    <div class="form-group">
-                        <button onclick="generateRunningOrders()" style="background: #17a2b8;">Generate Running Orders</button>
-                        <button onclick="generateScoreSheets()" style="background: #FF6B6B;">Generate Score Sheets</button>
-                        <button onclick="exportToCSV()" style="background: #28a745;">Export to CSV</button>
-                    </div>
-                    
-                    <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
-                        <h4>📊 Trial Statistics</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #dc3545;">Ready</div>
-                                <div style="color: #666;">System Status</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 20px;">
-                        <h4>📋 Recent Entries</h4>
-                        <div id="entriesList" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
-                            <p style="color: #666; font-style: italic; text-align: center;">No entries yet. Entries will appear here after submission.</p>
-                        </div>
-                    </div>
-                </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="createTrial()">Create Trial</button>
+                <button class="btn btn-secondary" onclick="hideModal('newTrialModal')">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables for cross-browser compatibility
-        var globalData = {
-            dogs: [],
-            judges: [],
-            classes: [],
-            handlers: [],
-            trialDays: [],
-            entries: [],
-            savedDays: 0,
-            totalDays: 0
-        };
+        // Global state management
+        let currentTab = 'dashboard';
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let trials = [];
+        let records = [];
+        let reports = [];
 
-        // Cross-browser compatibility for console.log
-        var log = function(message) {
-            if (typeof console !== 'undefined' && console.log) {
-                console.log(message);
-            }
-        };
-
-        // Load embedded data on startup
-        function loadEmbeddedData() {
-            log('Loading embedded trial data...');
+        // Sample data initialization
+        function initializeData() {
+            // Load trial data from the uploaded file
+            loadTrialData();
             
-            // Embedded data from Excel file
-            var embeddedData = {
-                dogs: [
-                    {"id":"07-0001-01","callName":"BJ","fullName":"Jed's Black Jack","handlerFullName":"Shirley   Ottmer","handlerFirstName":"Shirley ","handlerLastName":"Ottmer","className":"Patrol 1","judgeName":"Linda Alberda"},
-                    {"id":"07-0001-02","callName":"Jaidon","fullName":"Romyldale's Jaidon","handlerFullName":"Shirley  Ottmer","handlerFirstName":"Shirley","handlerLastName":"Ottmer","className":"Detective 2","judgeName":"Ginger Alpine"},
-                    {"id":"07-0001-03","callName":"Jake","fullName":"Jacob ","handlerFullName":"Shirley  Ottmer","handlerFirstName":"Shirley","handlerLastName":"Ottmer","className":"Investigator 3","judgeName":"Paige Alpine-Malone"},
-                    {"id":"07-0001-04","callName":"Ozone","fullName":"3BF O3 In The Stratosphere","handlerFullName":"Shirley  Ottmer","handlerFirstName":"Shirley","handlerLastName":"Ottmer","className":"Super Sleuth 4","judgeName":"Anita Ambani"},
-                    {"id":"07-0002-01","callName":"Demo","fullName":"Demo Dog for Testing","handlerFullName":"Demo Handler","handlerFirstName":"Demo","handlerLastName":"Handler","className":"Patrol 1","judgeName":"Sarah Knight"},
-                    {"id":"07-0003-01","callName":"Test","fullName":"Test Dog Entry","handlerFullName":"Test Handler","handlerFirstName":"Test","handlerLastName":"Handler","className":"Detective 2","judgeName":"Sharon Mounsey"}
-                ],
-                judges: ["Linda Alberda","Ginger Alpine","Paige Alpine-Malone","Anita Ambani","Sarah Knight","Sharon Mounsey"],
-                classes: ["Patrol 1","Detective 2","Investigator 3","Super Sleuth 4","Private Inv","Det Diversions","Ranger 1","Ranger 2","Ranger 3","Ranger 4","Ranger 5","Dasher 3","Dasher 4","Dasher 5","Dasher 6","Obedience 1","Obedience 2","Obedience 3","Obedience 4","Obedience 5","Starter","Advanced","Pro","ARF","Zoom 1","Zoom 1.5","Zoom 2","Games 1","Games 2","Games 3","Games 4"],
-                handlers: ["Shirley   Ottmer","Shirley  Ottmer","Demo Handler","Test Handler"]
-            };
-            
-            // Load the data into global variables
-            globalData.dogs = embeddedData.dogs;
-            globalData.judges = embeddedData.judges;
-            globalData.classes = embeddedData.classes;
-            globalData.handlers = embeddedData.handlers;
-            
-            // Update dashboard counters
-            updateDashboardCounters();
-            
-            log('Data loaded successfully!');
-            log('Dogs: ' + globalData.dogs.length);
-            log('Judges: ' + globalData.judges.length);
-            log('Classes: ' + globalData.classes.length);
-        }
-
-        // Update dashboard counters
-        function updateDashboardCounters() {
-            var dogCountElements = document.querySelectorAll('#dogCount, #setupDogCount');
-            var classCountElements = document.querySelectorAll('#classCount, #setupClassCount');
-            var judgeCountElements = document.querySelectorAll('#judgeCount, #setupJudgeCount');
-            var statusElement = document.getElementById('dataLoadStatus');
-            
-            for (var i = 0; i < dogCountElements.length; i++) {
-                dogCountElements[i].textContent = globalData.dogs.length;
-            }
-            for (var i = 0; i < classCountElements.length; i++) {
-                classCountElements[i].textContent = globalData.classes.length;
-            }
-            for (var i = 0; i < judgeCountElements.length; i++) {
-                judgeCountElements[i].textContent = globalData.judges.length;
-            }
-            
-            if (statusElement) {
-                statusElement.textContent = '✅ Data loaded successfully';
-                statusElement.style.color = '#28a745';
-            }
-        }
-
-        // Login tab switching
-        function switchLoginTab(tabId, element) {
-            var tabs = document.querySelectorAll('#loginSection .tab-content');
-            var navTabs = document.querySelectorAll('#loginSection .nav-tab');
-            
-            for (var i = 0; i < tabs.length; i++) {
-                tabs[i].classList.remove('active');
-            }
-            for (var i = 0; i < navTabs.length; i++) {
-                navTabs[i].classList.remove('active');
-            }
-            
-            document.getElementById(tabId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        // Main app tab switching
-        function switchTab(tabId, element) {
-            var tabs = document.querySelectorAll('#mainApp .tab-content');
-            var navTabs = document.querySelectorAll('#mainApp .nav-tab');
-            
-            for (var i = 0; i < tabs.length; i++) {
-                tabs[i].classList.remove('active');
-            }
-            for (var i = 0; i < navTabs.length; i++) {
-                navTabs[i].classList.remove('active');
-            }
-            
-            document.getElementById(tabId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        // Login functions
-        function fillDemoCredentials() {
-            document.getElementById('loginClubName').value = 'Demo Dog Club';
-            document.getElementById('loginSecretaryName').value = 'Demo Secretary';
-            document.getElementById('loginPassword').value = 'demo123';
-            log('Demo credentials filled');
-        }
-
-        function testSystem() {
-            alert('System Status: Ready\\nDemo credentials available\\nLogin system functional\\nData loaded: ' + globalData.dogs.length + ' dogs');
-        }
-
-        function handleLogin() {
-            log('Login attempt...');
-            var clubName = document.getElementById('loginClubName').value.trim();
-            var secretaryName = document.getElementById('loginSecretaryName').value.trim();
-            var password = document.getElementById('loginPassword').value.trim();
-            
-            if (clubName === 'Demo Dog Club' && secretaryName === 'Demo Secretary' && password === 'demo123') {
-                log('Login successful!');
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('clubInfo').textContent = 'Demo Dog Club';
-                document.getElementById('secretaryInfo').textContent = 'Secretary: Demo Secretary';
-            } else {
-                alert('Invalid credentials! Use: Demo Dog Club / Demo Secretary / demo123');
-            }
-        }
-
-        function handleRegistration() {
-            var clubName = document.getElementById('registerClubName').value.trim();
-            var secretaryName = document.getElementById('registerSecretaryName').value.trim();
-            var email = document.getElementById('registerEmail').value.trim();
-            var password = document.getElementById('registerPassword').value.trim();
-            var confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
-            
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
-                return;
-            }
-            
-            if (clubName && secretaryName && email && password) {
-                alert('Club registered successfully! You can now sign in with your credentials.');
-                switchLoginTab('loginForm', document.querySelector('#loginSection .nav-tab'));
-            } else {
-                alert('Please fill in all fields!');
-            }
-        }
-
-        function signOut() {
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'block';
-        }
-
-        // Trial setup functions
-        function generateDays() {
-            var numDays = parseInt(document.getElementById('trialDays').value);
-            if (!numDays || numDays < 1) {
-                alert('Please enter a valid number of days');
-                return;
-            }
-            
-            globalData.totalDays = numDays;
-            globalData.savedDays = 0;
-            
-            var container = document.getElementById('daysContainer');
-            container.innerHTML = '';
-            
-            for (var i = 1; i <= numDays; i++) {
-                var dayDiv = document.createElement('div');
-                dayDiv.className = 'day-container';
-                dayDiv.innerHTML = 
-                    '<div class="day-header">Day ' + i + '</div>' +
-                    '<div class="form-group">' +
-                        '<label class="label">Date:</label>' +
-                        '<input type="date" id="date_' + i + '" style="margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
-                    '</div>' +
-                    '<div class="classes-section">' +
-                        '<div class="form-group">' +
-                            '<label class="label">How many classes?</label>' +
-                            '<input type="number" id="classes_' + i + '" min="1" max="20" placeholder="Number of classes" style="width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" onchange="generateClasses(' + i + ')">' +
-                        '</div>' +
-                        '<div id="classesContainer_' + i + '"></div>' +
-                    '</div>' +
-                    '<div class="form-group">' +
-                        '<button onclick="saveDay(' + i + ')" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Day ' + i + '</button>' +
-                        '<span id="dayStatus_' + i + '" style="margin-left: 15px; font-weight: bold;"></span>' +
-                    '</div>';
-                container.appendChild(dayDiv);
-            }
-            
-            alert('Generated ' + numDays + ' day(s) for your trial setup!');
-        }
-
-        function generateClasses(dayNum) {
-            var numClasses = parseInt(document.getElementById('classes_' + dayNum).value);
-            var container = document.getElementById('classesContainer_' + dayNum);
-            
-            if (!numClasses || numClasses < 1) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            container.innerHTML = '';
-            for (var i = 1; i <= numClasses; i++) {
-                var classDiv = document.createElement('div');
-                classDiv.className = 'class-container';
-                classDiv.innerHTML = 
-                    '<div class="class-header">Class ' + i + '</div>' +
-                    '<div class="form-group">' +
-                        '<label class="label">Class Name:</label>' +
-                        '<select id="className_' + dayNum + '_' + i + '" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">' +
-                            '<option value="">Select class...</option>' +
-                            generateClassOptions() +
-                        '</select>' +
-                        '<label class="label">Judge:</label>' +
-                        '<select id="judge_' + dayNum + '_' + i + '" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
-                            '<option value="">Select judge...</option>' +
-                            generateJudgeOptions() +
-                        '</select>' +
-                    '</div>';
-                container.appendChild(classDiv);
-            }
-        }
-
-        function generateClassOptions() {
-            var options = '';
-            for (var i = 0; i < globalData.classes.length; i++) {
-                options += '<option value="' + globalData.classes[i] + '">' + globalData.classes[i] + '</option>';
-            }
-            return options;
-        }
-
-        function generateJudgeOptions() {
-            var options = '';
-            for (var i = 0; i < globalData.judges.length; i++) {
-                options += '<option value="' + globalData.judges[i] + '">' + globalData.judges[i] + '</option>';
-            }
-            return options;
-        }
-
-        function saveDay(dayNum) {
-            var date = document.getElementById('date_' + dayNum).value;
-            if (!date) {
-                alert('Please enter a date for Day ' + dayNum);
-                return;
-            }
-            
-            var numClasses = parseInt(document.getElementById('classes_' + dayNum).value);
-            if (!numClasses) {
-                alert('Please enter number of classes for Day ' + dayNum);
-                return;
-            }
-            
-            // Validate all classes have names and judges
-            var allValid = true;
-            for (var i = 1; i <= numClasses; i++) {
-                var className = document.getElementById('className_' + dayNum + '_' + i);
-                var judgeName = document.getElementById('judge_' + dayNum + '_' + i);
-                
-                if (!className || !className.value.trim() || !judgeName || !judgeName.value.trim()) {
-                    allValid = false;
-                    break;
+            // Initialize with some sample data
+            trials = [
+                {
+                    id: 'T001',
+                    date: '2024-12-15',
+                    host: 'Metro Dog Training Club',
+                    location: 'Downtown Training Center',
+                    city: 'Chicago, IL',
+                    classes: ['Patrol Level 1', 'Detective Level 2'],
+                    judge: 'Linda Alberda',
+                    status: 'approved',
+                    contact: 'john.smith@metro.com',
+                    phone: '(555) 123-4567'
+                },
+                {
+                    id: 'T002',
+                    date: '2024-12-22',
+                    host: 'Westside Canine Academy',
+                    location: 'Outdoor Training Facility',
+                    city: 'Denver, CO',
+                    classes: ['Investigator Level 3', 'Super Sleuth Level 4'],
+                    judge: 'Ginger Alpine',
+                    status: 'pending',
+                    contact: 'mary.jones@westside.com',
+                    phone: '(555) 987-6543'
                 }
-            }
-            
-            if (!allValid) {
-                alert('Please select all class names and judges for Day ' + dayNum);
-                return;
-            }
-            
-            // Save day data
-            globalData.trialDays[dayNum] = {
-                date: date,
-                numClasses: numClasses,
-                classes: []
-            };
-            
-            for (var i = 1; i <= numClasses; i++) {
-                globalData.trialDays[dayNum].classes.push({
-                    name: document.getElementById('className_' + dayNum + '_' + i).value,
-                    judge: document.getElementById('judge_' + dayNum + '_' + i).value
-                });
-            }
-            
-            // Update UI
-            document.getElementById('dayStatus_' + dayNum).innerHTML = '✅ Saved';
-            document.getElementById('dayStatus_' + dayNum).style.color = '#28a745';
-            
-            globalData.savedDays++;
-            alert('Day ' + dayNum + ' saved successfully!');
-            
-            // Show complete trial section if all days saved
-            if (globalData.savedDays >= globalData.totalDays) {
-                document.getElementById('saveTrialSection').style.display = 'block';
-            }
+            ];
+
+            reports = [
+                {
+                    type: 'Trial Recap',
+                    trial: 'Metro Dog Training Club - Dec 15',
+                    generated: '2024-12-16',
+                    status: 'completed'
+                },
+                {
+                    type: 'Judge Evaluation',
+                    trial: 'Linda Alberda - Multiple Trials',
+                    generated: '2024-12-10',
+                    status: 'pending'
+                }
+            ];
+
+            updateDashboardStats();
+            populateTrialsTable();
+            populateReportsTable();
+            generateCalendar();
         }
 
-        function saveTrial() {
-            var trialName = prompt('Enter a name for this trial:', 'Trial_' + new Date().getFullYear());
-            if (trialName) {
-                alert('Trial setup saved successfully!\\n\\nTrial Name: ' + trialName + '\\nDays: ' + globalData.totalDays + '\\nClasses configured: ' + globalData.savedDays + '\\n\\nYou can now use the Entry Form to accept entries.');
-                
-                // Update trial options in entry form
-                updateTrialOptions();
-            }
-        }
-
-        function updateTrialOptions() {
-            var container = document.getElementById('trialOptions');
-            var html = '<h5>Available Classes:</h5>';
-            
-            for (var dayNum in globalData.trialDays) {
-                if (globalData.trialDays[dayNum]) {
-                    var day = globalData.trialDays[dayNum];
-                    html += '<div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">';
-                    html += '<div style="font-weight: bold; margin-bottom: 8px;">Day ' + dayNum + ' - ' + day.date + '</div>';
-                    
-                    for (var i = 0; i < day.classes.length; i++) {
-                        var cls = day.classes[i];
-                        html += '<label style="margin-right: 15px; display: block; margin-bottom: 5px;">';
-                        html += '<input type="checkbox" name="trialEntry" value="day' + dayNum + '_class' + i + '"> ';
-                        html += cls.name + ' - Judge: ' + cls.judge;
-                        html += '</label>';
+        // Load trial data from uploaded file
+        async function loadTrialData() {
+            try {
+                // This would integrate with the Excel file data
+                // For now, we'll populate with sample data based on the file structure
+                records = [
+                    {
+                        id: '07-0001-01',
+                        dogName: 'BJ (Jed\'s Black Jack)',
+                        handler: 'Shirley Ottmer',
+                        currentLevel: 'Patrol 1',
+                        totalPoints: 45,
+                        nextTitle: 'Detective 2',
+                        progress: 75
+                    },
+                    {
+                        id: '07-0001-02',
+                        dogName: 'Jaidon (Romyldale\'s Jaidon)',
+                        handler: 'Shirley Ottmer',
+                        currentLevel: 'Detective 2',
+                        totalPoints: 67,
+                        nextTitle: 'Investigator 3',
+                        progress: 60
                     }
-                    html += '</div>';
-                }
-            }
-            
-            container.innerHTML = html;
-        }
-
-        // Entry form functions
-        function toggleEntryForm() {
-            var checkbox = document.getElementById('waiverAccepted');
-            var entryFormSection = document.getElementById('entryFormSection');
-            
-            if (checkbox.checked) {
-                entryFormSection.style.display = 'block';
-            } else {
-                entryFormSection.style.display = 'none';
+                ];
+                populateRecordsTable();
+            } catch (error) {
+                console.error('Error loading trial data:', error);
             }
         }
 
-        function searchDog(regNumber) {
-            var resultsContainer = document.getElementById('dogSearchResults');
-            var dogInfo = document.getElementById('dogInfo');
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            if (!regNumber || regNumber.length < 2) {
-                resultsContainer.innerHTML = '';
-                dogInfo.style.display = 'none';
-                return;
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            // Load tab-specific data
+            if (tabName === 'calendar') {
+                generateCalendar();
+            } else if (tabName === 'scoring') {
+                populateScoringTrials();
             }
-            
-            var matches = [];
-            for (var i = 0; i < globalData.dogs.length; i++) {
-                var dog = globalData.dogs[i];
-                if (dog.id.toLowerCase().indexOf(regNumber.toLowerCase()) !== -1 ||
-                    dog.callName.toLowerCase().indexOf(regNumber.toLowerCase()) !== -1) {
-                    matches.push(dog);
-                }
-            }
-            
-            var html = '';
-            for (var i = 0; i < Math.min(5, matches.length); i++) {
-                var dog = matches[i];
-                html += '<div class="dog-search-result" onclick="selectDog(\'' + dog.id + '\')">';
-                html += '<strong>' + dog.callName + '</strong> (' + dog.id + ') - ' + dog.handlerFullName;
-                html += '</div>';
-            }
-            
-            resultsContainer.innerHTML = html;
         }
 
-        function selectDog(dogId) {
-            var dog = null;
-            for (var i = 0; i < globalData.dogs.length; i++) {
-                if (globalData.dogs[i].id === dogId) {
-                    dog = globalData.dogs[i];
-                    break;
-                }
-            }
+        // Modal management
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Dashboard functions
+        function updateDashboardStats() {
+            document.getElementById('totalTrials').textContent = trials.length;
+            document.getElementById('activeTrials').textContent = trials.filter(t => t.status !== 'completed').length;
+            document.getElementById('totalDogs').textContent = records.length;
             
-            if (dog) {
-                document.getElementById('regNumber').value = dog.id;
-                document.getElementById('handlerName').value = dog.handlerFullName;
-                document.getElementById('dogSearchResults').innerHTML = '';
+            // Calculate unique handlers
+            const uniqueHandlers = new Set(records.map(r => r.handler));
+            document.getElementById('totalHandlers').textContent = uniqueHandlers.size;
+            
+            populateUpcomingTrials();
+        }
+
+        function populateUpcomingTrials() {
+            const tbody = document.getElementById('upcomingTrialsTable');
+            tbody.innerHTML = '';
+            
+            const upcomingTrials = trials.filter(trial => {
+                const trialDate = new Date(trial.date);
+                const today = new Date();
+                return trialDate >= today;
+            }).slice(0, 5);
+            
+            upcomingTrials.forEach(trial => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${formatDate(trial.date)}</td>
+                    <td>${trial.host}</td>
+                    <td>${trial.city}</td>
+                    <td>${trial.classes.join(', ')}</td>
+                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')">View</button>
+                    </td>
+                `;
+            });
+        }
+
+        function populateTrialsTable() {
+            const tbody = document.getElementById('trialsTable');
+            tbody.innerHTML = '';
+            
+            trials.forEach(trial => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${trial.id}</td>
+                    <td>${formatDate(trial.date)}</td>
+                    <td>${trial.host}</td>
+                    <td>${trial.city}</td>
+                    <td>${trial.classes.join(', ')}</td>
+                    <td>${trial.judge}</td>
+                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editTrial('${trial.id}')">Edit</button>
+                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')">View</button>
+                    </td>
+                `;
+            });
+        }
+
+        function populateRecordsTable() {
+            const tbody = document.getElementById('recordsTable');
+            tbody.innerHTML = '';
+            
+            records.forEach(record => {
+                const row = tbody.insertRow();
+                const progressBar = `<div style="background: #e2e8f0; border-radius: 10px; height: 20px; width: 100px;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); height: 100%; width: ${record.progress}%; border-radius: 10px;"></div>
+                </div>`;
                 
-                document.getElementById('selectedCallName').textContent = dog.callName;
-                document.getElementById('selectedFullName').textContent = dog.fullName;
-                document.getElementById('selectedHandler').textContent = dog.handlerFullName;
-                document.getElementById('selectedRegNumber').textContent = dog.id;
-                document.getElementById('dogInfo').style.display = 'block';
-            }
+                row.innerHTML = `
+                    <td>${record.id}</td>
+                    <td>${record.dogName}</td>
+                    <td>${record.handler}</td>
+                    <td>${record.currentLevel}</td>
+                    <td>${record.totalPoints}</td>
+                    <td>${record.nextTitle}</td>
+                    <td>${progressBar}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewRecord('${record.id}')">View</button>
+                    </td>
+                `;
+            });
         }
 
-        function submitEntry() {
-            var regNumber = document.getElementById('regNumber').value.trim();
-            var handlerName = document.getElementById('handlerName').value.trim();
-            var contactEmail = document.getElementById('contactEmail').value.trim();
+        function populateReportsTable() {
+            const tbody = document.getElementById('reportsTable');
+            tbody.innerHTML = '';
             
-            if (!regNumber || !handlerName || !contactEmail) {
-                alert('Please fill in all required fields');
-                return;
-            }
-            
-            var selectedEntries = document.querySelectorAll('input[name="trialEntry"]:checked');
-            if (selectedEntries.length === 0) {
-                alert('Please select at least one trial entry');
-                return;
-            }
-            
-            // Save entry
-            var entry = {
-                regNumber: regNumber,
-                handlerName: handlerName,
-                contactEmail: contactEmail,
-                entries: [],
-                timestamp: new Date()
+            reports.forEach(report => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${report.type}</td>
+                    <td>${report.trial}</td>
+                    <td>${formatDate(report.generated)}</td>
+                    <td><span class="status-badge status-${report.status}">${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="downloadReport('${report.type}')">Download</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Trial application functions
+        function submitTrialApplication() {
+            const formData = {
+                date: document.getElementById('trialDates').value,
+                host: document.getElementById('hostName').value,
+                location: document.getElementById('trialLocation').value,
+                city: document.getElementById('cityState').value,
+                contact: document.getElementById('contactName').value,
+                email: document.getElementById('contactEmail').value,
+                phone: document.getElementById('contactPhone').value,
+                website: document.getElementById('premiumWebsite').value,
+                classes: getSelectedClasses(),
+                judges: document.getElementById('judges').value,
+                advocates: document.getElementById('advocates').value,
+                type: document.getElementById('trialType').value,
+                surface: document.getElementById('ringSurface').value,
+                rings: document.getElementById('numRings').value,
+                league: document.getElementById('isLeague').checked,
+                insurance: document.getElementById('insuranceExpiration').value,
+                scentResets: document.getElementById('scentResets').checked
             };
-            
-            for (var i = 0; i < selectedEntries.length; i++) {
-                entry.entries.push(selectedEntries[i].value);
+
+            if (validateTrialApplication(formData)) {
+                // Add to trials array
+                const newTrial = {
+                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
+                    date: formData.date,
+                    host: formData.host,
+                    location: formData.location,
+                    city: formData.city,
+                    classes: formData.classes,
+                    judge: formData.judges.split('\n')[0] || 'TBD',
+                    status: 'pending',
+                    contact: formData.email,
+                    phone: formData.phone
+                };
+
+                trials.push(newTrial);
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                alert('Trial application submitted successfully!');
+                clearForm();
             }
-            
-            globalData.entries.push(entry);
-            
-            alert('Entry submitted successfully!\\nRegistration: ' + regNumber + '\\nHandler: ' + handlerName + '\\nEntries: ' + selectedEntries.length);
-            
-            // Update results display
-            updateResults();
-            
-            // Clear form
-            clearEntryForm();
         }
 
-        function clearEntryForm() {
-            document.getElementById('regNumber').value = '';
-            document.getElementById('handlerName').value = '';
-            document.getElementById('contactEmail').value = '';
-            document.getElementById('dogSearchResults').innerHTML = '';
-            document.getElementById('dogInfo').style.display = 'none';
-            
-            var checkboxes = document.querySelectorAll('input[name="trialEntry"]');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = false;
-            }
-            
-            document.getElementById('waiverAccepted').checked = false;
-            document.getElementById('entryFormSection').style.display = 'none';
+        function getSelectedClasses() {
+            const classes = [];
+            if (document.getElementById('classObedience').checked) classes.push('Obedience');
+            if (document.getElementById('classRally').checked) classes.push('Rally');
+            if (document.getElementById('classScent').checked) classes.push('Scent');
+            if (document.getElementById('classGames').checked) classes.push('Games');
+            return classes;
         }
 
-        // Results functions
-        function updateResults() {
-            document.getElementById('totalEntries').textContent = globalData.entries.length;
-            
-            var entriesList = document.getElementById('entriesList');
-            if (globalData.entries.length === 0) {
-                entriesList.innerHTML = '<p style="color: #666; font-style: italic; text-align: center;">No entries yet. Entries will appear here after submission.</p>';
-            } else {
-                var html = '';
-                for (var i = globalData.entries.length - 1; i >= Math.max(0, globalData.entries.length - 10); i--) {
-                    var entry = globalData.entries[i];
-                    html += '<div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">';
-                    html += '<strong>' + entry.regNumber + '</strong> - ' + entry.handlerName;
-                    html += '<div style="font-size: 14px; color: #666;">' + entry.entries.length + ' entries submitted</div>';
-                    html += '</div>';
+        function validateTrialApplication(data) {
+            if (!data.date || !data.host || !data.location || !data.contact || !data.email) {
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            if (data.classes.length === 0) {
+                alert('Please select at least one class type.');
+                return false;
+            }
+            return true;
+        }
+
+        function clearForm() {
+            document.querySelector('#applications form, #applications .form-grid').querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.type === 'checkbox') {
+                    field.checked = false;
+                } else {
+                    field.value = '';
                 }
-                entriesList.innerHTML = html;
+            });
+        }
+
+        // Calendar functions
+        function generateCalendar() {
+            const calendar = document.getElementById('calendarGrid');
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            
+            document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            calendar.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-header';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            // Generate calendar days
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                if (date.getMonth() !== currentMonth) {
+                    dayElement.classList.add('other-month');
+                }
+                
+                dayElement.innerHTML = `<div>${date.getDate()}</div>`;
+                
+                // Add trial events
+                const dateString = date.toISOString().split('T')[0];
+                const dayTrials = trials.filter(trial => trial.date === dateString);
+                dayTrials.forEach(trial => {
+                    const event = document.createElement('div');
+                    event.className = 'trial-event';
+                    event.textContent = trial.host;
+                    event.onclick = () => viewTrial(trial.id);
+                    dayElement.appendChild(event);
+                });
+                
+                calendar.appendChild(dayElement);
             }
         }
 
-        function generateRunningOrders() {
-            alert('Running orders will be generated from submitted entries.\\nCurrent entries: ' + globalData.entries.length);
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            generateCalendar();
         }
 
-        function generateScoreSheets() {
-            alert('Score sheets will be generated from confirmed running orders.\\nCurrent entries: ' + globalData.entries.length);
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar();
         }
 
-        function exportData() {
-            alert('Export functionality ready!\\nAvailable data:\\n- Dogs: ' + globalData.dogs.length + '\\n- Entries: ' + globalData.entries.length);
+        // Scoring functions
+        function populateScoringTrials() {
+            const select = document.getElementById('scoringTrial');
+            select.innerHTML = '<option value="">Choose a trial...</option>';
+            
+            trials.forEach(trial => {
+                const option = document.createElement('option');
+                option.value = trial.id;
+                option.textContent = `${trial.host} - ${formatDate(trial.date)}`;
+                select.appendChild(option);
+            });
         }
 
-        function exportToCSV() {
-            alert('CSV export functionality ready!\\nWill export trial entries and running orders.');
+        function saveScores() {
+            // Implementation for saving scores
+            alert('Scores saved successfully!');
         }
 
-        // Initialize the application
-        function initializeApp() {
-            log('Trial Management System loading...');
-            loadEmbeddedData();
-            log('System loaded successfully!');
-            log('Ready for login - use Auto-Fill Demo button or enter manually:');
-            log('Club: Demo Dog Club, Secretary: Demo Secretary, Password: demo123');
+        function generateScoreSheet() {
+            // Implementation for PDF generation
+            alert('Score sheet PDF generated!');
         }
 
-        // Cross-browser window load event
-        if (window.addEventListener) {
-            window.addEventListener('load', initializeApp, false);
-        } else if (window.attachEvent) {
-            window.attachEvent('onload', initializeApp);
-        } else {
-            window.onload = initializeApp;
+        // Report functions
+        function generateTrialRecap() {
+            alert('Trial Recap report generated!');
         }
+
+        function generateJudgeEvaluation() {
+            alert('Judge Evaluation form generated!');
+        }
+
+        function generateClassResults() {
+            alert('Class Results report generated!');
+        }
+
+        function generateAnalytics() {
+            alert('Analytics report generated!');
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function createTrial() {
+            // Implementation for creating trial from modal
+            hideModal('newTrialModal');
+            showTab('applications');
+        }
+
+        function viewTrial(trialId) {
+            alert(`Viewing trial ${trialId}`);
+        }
+
+        function editTrial(trialId) {
+            alert(`Editing trial ${trialId}`);
+        }
+
+        function viewRecord(recordId) {
+            alert(`Viewing record ${recordId}`);
+        }
+
+        function downloadReport(reportType) {
+            alert(`Downloading ${reportType} report`);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            
+            // Show/hide scent reset option based on scent class selection
+            document.getElementById('classScent').addEventListener('change', function() {
+                const resetGroup = document.getElementById('scentResetGroup');
+                resetGroup.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Search functionality
+            document.getElementById('trialSearch').addEventListener('input', function() {
+                // Implementation for trial search
+            });
+            
+            document.getElementById('recordSearch').addEventListener('input', function() {
+                // Implementation for record search
+            });
+            
+            // Scoring class selection
+            document.getElementById('scoringClass').addEventListener('change', function() {
+                const section = document.getElementById('scoreEntrySection');
+                section.style.display = this.value ? 'block' : 'none';
+            });
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
     </script>
 </body>
-</html> #667eea;" id="totalEntries">0</div>
-                                <div style="color: #666;">Total Entries</div>
-                            </div>
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #28a745;" id="classesConfigured">0</div>
-                                <div style="color: #666;">Classes Configured</div>
-                            </div>
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #ffc107;" id="runningOrders">0</div>
-                                <div style="color: #666;">Running Orders</div>
-                            </div>
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color:
+</html>
