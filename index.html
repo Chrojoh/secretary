@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: Arial, sans-serif;
+            font-family: -webkit-system-font, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -33,6 +33,8 @@
             background: linear-gradient(45deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
             font-size: 2.5em;
             margin-bottom: 10px;
         }
@@ -54,6 +56,7 @@
             font-weight: bold;
             transition: all 0.3s ease;
             color: #666;
+            font-family: inherit;
         }
         
         .nav-tab:hover {
@@ -100,6 +103,7 @@
             border-radius: 8px;
             font-size: 14px;
             transition: all 0.3s ease;
+            font-family: inherit;
         }
         
         input:focus, select:focus, textarea:focus {
@@ -118,6 +122,7 @@
             font-size: 14px;
             font-weight: bold;
             transition: all 0.3s ease;
+            font-family: inherit;
         }
         
         button:hover {
@@ -213,6 +218,27 @@
             font-weight: bold;
         }
         
+        .dog-search-result {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dog-search-result:hover {
+            background: #f0f7ff;
+            border-color: #667eea;
+        }
+        
+        .dog-search-result.selected {
+            background: #e3f2fd;
+            border-color: #667eea;
+            border-width: 2px;
+        }
+        
         @media (max-width: 768px) {
             .nav-tabs {
                 flex-direction: column;
@@ -234,18 +260,8 @@
         <p>Multi-Club Trial Management Platform</p>
         
         <div class="nav-tabs" style="margin-bottom: 20px;">
-            <button class="nav-tab active" onclick="
-                document.querySelectorAll('#loginSection .tab-content').forEach(function(t) { t.classList.remove('active'); });
-                document.querySelectorAll('#loginSection .nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                document.getElementById('loginForm').classList.add('active');
-                this.classList.add('active');
-            ">Sign In</button>
-            <button class="nav-tab" onclick="
-                document.querySelectorAll('#loginSection .tab-content').forEach(function(t) { t.classList.remove('active'); });
-                document.querySelectorAll('#loginSection .nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                document.getElementById('registerForm').classList.add('active');
-                this.classList.add('active');
-            ">Register Club</button>
+            <button class="nav-tab active" onclick="switchLoginTab('loginForm', this)">Sign In</button>
+            <button class="nav-tab" onclick="switchLoginTab('registerForm', this)">Register Club</button>
         </div>
         
         <!-- Sign In Form -->
@@ -265,36 +281,13 @@
                     <input type="password" id="loginPassword" placeholder="Enter password" style="width: 100%; margin-bottom: 20px;">
                 </div>
                 <div class="form-group" style="justify-content: center;">
-                    <button type="button" onclick="
-                        console.log('Login attempt...');
-                        var clubName = document.getElementById('loginClubName').value.trim();
-                        var secretaryName = document.getElementById('loginSecretaryName').value.trim();
-                        var password = document.getElementById('loginPassword').value.trim();
-                        console.log('Entered:', clubName, secretaryName, password);
-                        
-                        if (clubName === 'Demo Dog Club' && secretaryName === 'Demo Secretary' && password === 'demo123') {
-                            console.log('Login successful!');
-                            document.getElementById('loginSection').style.display = 'none';
-                            document.getElementById('mainApp').style.display = 'block';
-                            document.getElementById('clubInfo').textContent = 'Demo Dog Club';
-                            document.getElementById('secretaryInfo').textContent = 'Secretary: Demo Secretary';
-                        } else {
-                            alert('Invalid credentials! Use: Demo Dog Club / Demo Secretary / demo123');
-                        }
-                    ">Sign In</button>
+                    <button type="button" onclick="handleLogin()">Sign In</button>
                 </div>
             </div>
             <div style="text-align: center; margin-top: 20px; color: #666;">
                 <p><strong>Demo:</strong> Club: "Demo Dog Club" | Secretary: "Demo Secretary" | Password: "demo123"</p>
-                <button onclick="
-                    document.getElementById('loginClubName').value = 'Demo Dog Club';
-                    document.getElementById('loginSecretaryName').value = 'Demo Secretary';
-                    document.getElementById('loginPassword').value = 'demo123';
-                    console.log('Demo credentials filled');
-                " style="margin-top: 10px; padding: 8px 15px; background: #28a745;">🚀 Auto-Fill Demo</button>
-                <button onclick="
-                    alert('System Status: Ready\\nDemo credentials available\\nLogin system functional');
-                " style="margin-left: 10px; padding: 8px 15px; background: #17a2b8;">🔍 Test System</button>
+                <button onclick="fillDemoCredentials()" style="margin-top: 10px; padding: 8px 15px; background: #28a745;">🚀 Auto-Fill Demo</button>
+                <button onclick="testSystem()" style="margin-left: 10px; padding: 8px 15px; background: #17a2b8;">🔍 Test System</button>
             </div>
         </div>
         
@@ -323,28 +316,7 @@
                     <input type="password" id="registerConfirmPassword" placeholder="Confirm password" style="width: 100%; margin-bottom: 20px;">
                 </div>
                 <div class="form-group" style="justify-content: center;">
-                    <button type="button" onclick="
-                        var clubName = document.getElementById('registerClubName').value.trim();
-                        var secretaryName = document.getElementById('registerSecretaryName').value.trim();
-                        var email = document.getElementById('registerEmail').value.trim();
-                        var password = document.getElementById('registerPassword').value.trim();
-                        var confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
-                        
-                        if (password !== confirmPassword) {
-                            alert('Passwords do not match!');
-                            return;
-                        }
-                        
-                        if (clubName && secretaryName && email && password) {
-                            alert('Club registered successfully! You can now sign in with your credentials.');
-                            document.querySelectorAll('#loginSection .tab-content').forEach(function(t) { t.classList.remove('active'); });
-                            document.querySelectorAll('#loginSection .nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                            document.getElementById('loginForm').classList.add('active');
-                            document.querySelector('#loginSection .nav-tab').classList.add('active');
-                        } else {
-                            alert('Please fill in all fields!');
-                        }
-                    ">Register Club</button>
+                    <button type="button" onclick="handleRegistration()">Register Club</button>
                 </div>
             </div>
         </div>
@@ -360,39 +332,16 @@
                     <div style="text-align: right;">
                         <div style="color: #667eea; font-weight: bold;" id="clubInfo"></div>
                         <div style="font-size: 14px; color: #666;" id="secretaryInfo"></div>
-                        <button onclick="
-                            document.getElementById('mainApp').style.display = 'none';
-                            document.getElementById('loginSection').style.display = 'block';
-                        " style="margin-top: 10px; padding: 8px 15px; font-size: 12px;">Sign Out</button>
+                        <button onclick="signOut()" style="margin-top: 10px; padding: 8px 15px; font-size: 12px;">Sign Out</button>
                     </div>
                 </div>
             </div>
 
             <div class="nav-tabs">
-                <button class="nav-tab active" onclick="
-                    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-                    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                    document.getElementById('dashboard').classList.add('active');
-                    this.classList.add('active');
-                ">Dashboard</button>
-                <button class="nav-tab" onclick="
-                    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-                    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                    document.getElementById('setup').classList.add('active');
-                    this.classList.add('active');
-                ">Trial Setup</button>
-                <button class="nav-tab" onclick="
-                    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-                    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                    document.getElementById('entry').classList.add('active');
-                    this.classList.add('active');
-                ">Entry Form</button>
-                <button class="nav-tab" onclick="
-                    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-                    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                    document.getElementById('results').classList.add('active');
-                    this.classList.add('active');
-                ">Results</button>
+                <button class="nav-tab active" onclick="switchTab('dashboard', this)">Dashboard</button>
+                <button class="nav-tab" onclick="switchTab('setup', this)">Trial Setup</button>
+                <button class="nav-tab" onclick="switchTab('entry', this)">Entry Form</button>
+                <button class="nav-tab" onclick="switchTab('results', this)">Results</button>
             </div>
 
             <!-- Dashboard Tab -->
@@ -403,26 +352,19 @@
                         <div class="dashboard-card">
                             <h4>System Status</h4>
                             <div>✅ System Online</div>
-                            <div>🐕 <span id="dogCount">8</span> dogs loaded</div>
-                            <div>🏆 <span id="classCount">21</span> classes available</div>
-                            <div>👨‍⚖️ <span id="judgeCount">6</span> judges available</div>
+                            <div>🐕 <span id="dogCount">0</span> dogs loaded</div>
+                            <div>🏆 <span id="classCount">0</span> classes available</div>
+                            <div>👨‍⚖️ <span id="judgeCount">0</span> judges available</div>
+                            <div style="margin-top: 10px;">
+                                <div id="dataLoadStatus" style="color: #856404;">Loading data...</div>
+                            </div>
                         </div>
                         <div class="dashboard-card">
                             <h4>Quick Actions</h4>
                             <div>
-                                <button onclick="
-                                    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-                                    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                                    document.getElementById('setup').classList.add('active');
-                                    document.querySelectorAll('.nav-tab')[1].classList.add('active');
-                                " style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
-                                <button onclick="
-                                    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-                                    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-                                    document.getElementById('entry').classList.add('active');
-                                    document.querySelectorAll('.nav-tab')[2].classList.add('active');
-                                " style="width: 100%; margin-bottom: 10px;">Entry Form</button>
-                                <button onclick="alert('Export functionality ready!')" style="width: 100%;">Export Data</button>
+                                <button onclick="switchTab('setup', document.querySelectorAll('.nav-tab')[1])" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
+                                <button onclick="switchTab('entry', document.querySelectorAll('.nav-tab')[2])" style="width: 100%; margin-bottom: 10px;">Entry Form</button>
+                                <button onclick="exportData()" style="width: 100%;">Export Data</button>
                             </div>
                         </div>
                     </div>
@@ -432,27 +374,16 @@
             <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
                 <div class="initial-question">
-                    <h3>📁 File Management</h3>
+                    <h3>📁 Database Information</h3>
                     
-                    <!-- Dog Database Upload -->
-                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
-                        <h4 style="color: #856404; margin-top: 0;">🐕 Dog Database</h4>
-                        <div class="form-group">
-                            <label for="excelFile" class="label">Upload Excel Data:</label>
-                            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="
-                                var file = this.files[0];
-                                if (file) {
-                                    alert('Excel file selected: ' + file.name + '\\nFile upload functionality ready for implementation.');
-                                }
-                            ">
-                        </div>
-                        
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                        <h4 style="color: #2e7d32; margin-top: 0;">🐕 Loaded Database</h4>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
                             <strong>📊 Current Database:</strong>
                             <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 14px;">
-                                <div>🐕 8 dogs</div>
-                                <div>🏆 21 classes</div>
-                                <div>👨‍⚖️ 6 judges</div>
+                                <div>🐕 <span id="setupDogCount">0</span> dogs</div>
+                                <div>🏆 <span id="setupClassCount">0</span> classes</div>
+                                <div>👨‍⚖️ <span id="setupJudgeCount">0</span> judges</div>
                             </div>
                         </div>
                     </div>
@@ -461,43 +392,7 @@
                     <div class="form-group">
                         <label for="trialDays" class="label">How many days in trial?</label>
                         <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number" style="width: 150px;">
-                        <button onclick="
-                            var numDays = parseInt(document.getElementById('trialDays').value);
-                            if (!numDays || numDays < 1) {
-                                alert('Please enter a valid number of days');
-                                return;
-                            }
-                            
-                            var container = document.getElementById('daysContainer');
-                            container.innerHTML = '';
-                            
-                            for (var i = 1; i <= numDays; i++) {
-                                var dayDiv = document.createElement('div');
-                                dayDiv.className = 'day-container';
-                                dayDiv.style.cssText = 'border: 2px solid #2c5aa0; margin: 20px 0; padding: 20px; border-radius: 8px; background: #f8f9fa;';
-                                dayDiv.innerHTML = `
-                                    <div style="background: #2c5aa0; color: white; padding: 10px 15px; margin: -20px -20px 20px -20px; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 18px;">Day ` + i + `</div>
-                                    <div class="form-group">
-                                        <label class="label">Date:</label>
-                                        <input type="date" id="date_` + i + `" style="margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                    </div>
-                                    <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;">
-                                        <div class="form-group">
-                                            <label class="label">How many classes?</label>
-                                            <input type="number" id="classes_` + i + `" min="1" max="20" placeholder="Number of classes" style="width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" onchange="generateClasses(` + i + `)">
-                                        </div>
-                                        <div id="classesContainer_` + i + `"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <button onclick="saveDay(` + i + `)" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Day ` + i + `</button>
-                                        <span id="dayStatus_` + i + `" style="margin-left: 15px; font-weight: bold;"></span>
-                                    </div>
-                                `;
-                                container.appendChild(dayDiv);
-                            }
-                            
-                            alert('Generated ' + numDays + ' day(s) for your trial setup!');
-                        ">Generate Days</button>
+                        <button onclick="generateDays()">Generate Days</button>
                     </div>
                 </div>
 
@@ -506,29 +401,7 @@
                 <div id="saveTrialSection" style="display: none; margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; text-align: center;">
                     <h4 style="color: #2e7d32; margin-bottom: 15px;">🎯 Complete Trial Setup</h4>
                     <p style="margin-bottom: 20px; color: #1b5e20;">All days configured! Ready to save your complete trial setup.</p>
-                    <button onclick="
-                        var trialName = prompt('Enter a name for this trial:', 'Trial_' + new Date().getFullYear());
-                        if (trialName) {
-                            alert('Trial setup saved successfully!\\n\\nTrial Name: ' + trialName + '\\nDays: ' + totalDays + '\\nClasses configured: ' + savedDays + '\\n\\nYou can now use the Entry Form to accept entries.');
-                            
-                            // Generate entry form link
-                            var currentUrl = window.location.href;
-                            var entryLink = currentUrl + '?direct=entry&trial=' + encodeURIComponent(trialName);
-                            
-                            var shareLink = confirm('Trial saved! Would you like to copy the entry form link to share with participants?');
-                            if (shareLink) {
-                                if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(entryLink).then(function() {
-                                        alert('Entry form link copied to clipboard!');
-                                    }).catch(function() {
-                                        prompt('Copy this entry form link:', entryLink);
-                                    });
-                                } else {
-                                    prompt('Copy this entry form link:', entryLink);
-                                }
-                            }
-                        }
-                    " style="background: #2e7d32; color: white; border: none; font-size: 16px; padding: 15px 30px; border-radius: 5px; cursor: pointer;">
+                    <button onclick="saveTrial()" style="background: #2e7d32; color: white; border: none; font-size: 16px; padding: 15px 30px; border-radius: 5px; cursor: pointer;">
                         💾 Save Complete Trial
                     </button>
                 </div>
@@ -550,24 +423,27 @@
                         </div>
                         
                         <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
-                            <input type="checkbox" id="waiverAccepted" onchange="
-                                var entryFormSection = document.getElementById('entryFormSection');
-                                if (this.checked) {
-                                    entryFormSection.style.display = 'block';
-                                } else {
-                                    entryFormSection.style.display = 'none';
-                                }
-                            ">
+                            <input type="checkbox" id="waiverAccepted" onchange="toggleEntryForm()">
                             <span>I have read, understood, and agree to all terms of this Liability Waiver and Agreement.</span>
                         </label>
                     </div>
 
-                    <!-- Entry Form - Initially Hidden -->
+                    <!-- Entry Form -->
                     <div id="entryFormSection" style="display: none;">
                         <div class="form-group">
                             <label for="regNumber" class="label">Registration Number:</label>
-                            <input type="text" id="regNumber" placeholder="Type registration number" style="width: 250px;">
-                            <span id="callName" style="font-weight: bold; color: #667eea; margin-left: 10px;"></span>
+                            <input type="text" id="regNumber" placeholder="Type registration number" style="width: 250px;" oninput="searchDog(this.value)">
+                            <div id="dogSearchResults" style="max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
+                        </div>
+
+                        <div id="dogInfo" style="display: none; background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <h4 style="color: #2e7d32; margin-bottom: 10px;">Selected Dog</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div><strong>Call Name:</strong> <span id="selectedCallName"></span></div>
+                                <div><strong>Full Name:</strong> <span id="selectedFullName"></span></div>
+                                <div><strong>Handler:</strong> <span id="selectedHandler"></span></div>
+                                <div><strong>Registration:</strong> <span id="selectedRegNumber"></span></div>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -582,52 +458,14 @@
 
                         <div style="margin: 20px 0;">
                             <h4>Available Trial Options</h4>
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                            <div id="trialOptions" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #e0e0e0;">
                                 <p style="color: #666; font-style: italic;">Trial options will appear here after trial setup is completed.</p>
-                                <p>Demo trial options:</p>
-                                <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
-                                    <div style="font-weight: bold; margin-bottom: 8px;">Day 1 - Patrol 1 - Round 1 - Judge: Sarah Knight</div>
-                                    <label style="margin-right: 15px;"><input type="checkbox" name="demoEntry" value="patrol1-regular"> Regular</label>
-                                    <label><input type="checkbox" name="demoEntry" value="patrol1-feo"> FEO</label>
-                                </div>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <button onclick="
-                                var regNumber = document.getElementById('regNumber').value.trim();
-                                var handlerName = document.getElementById('handlerName').value.trim();
-                                var contactEmail = document.getElementById('contactEmail').value.trim();
-                                
-                                if (!regNumber || !handlerName || !contactEmail) {
-                                    alert('Please fill in all required fields');
-                                    return;
-                                }
-                                
-                                var selectedEntries = document.querySelectorAll('input[name=\"demoEntry\"]:checked');
-                                if (selectedEntries.length === 0) {
-                                    alert('Please select at least one trial entry');
-                                    return;
-                                }
-                                
-                                alert('Entry submitted successfully!\\nRegistration: ' + regNumber + '\\nHandler: ' + handlerName + '\\nEntries: ' + selectedEntries.length);
-                                
-                                // Clear form
-                                document.getElementById('regNumber').value = '';
-                                document.getElementById('handlerName').value = '';
-                                document.getElementById('contactEmail').value = '';
-                                document.getElementById('callName').textContent = '';
-                                selectedEntries.forEach(function(cb) { cb.checked = false; });
-                                document.getElementById('waiverAccepted').checked = false;
-                                document.getElementById('entryFormSection').style.display = 'none';
-                            " type="button">Submit Entry</button>
-                            <button onclick="
-                                document.getElementById('regNumber').value = '';
-                                document.getElementById('handlerName').value = '';
-                                document.getElementById('contactEmail').value = '';
-                                document.getElementById('callName').textContent = '';
-                                document.querySelectorAll('input[name=\"demoEntry\"]').forEach(function(cb) { cb.checked = false; });
-                            " type="button" style="background: #6c757d; margin-left: 10px;">Clear Form</button>
+                            <button onclick="submitEntry()" type="button">Submit Entry</button>
+                            <button onclick="clearEntryForm()" type="button" style="background: #6c757d; margin-left: 10px;">Clear Form</button>
                         </div>
                     </div>
                 </div>
@@ -639,26 +477,14 @@
                     <h3>Entry Results & Running Orders</h3>
                     
                     <div class="form-group">
-                        <button onclick="alert('Running orders will be generated from submitted entries.')" style="background: #17a2b8;">Generate Running Orders</button>
-                        <button onclick="alert('Score sheets will be generated from confirmed running orders.')" style="background: #FF6B6B;">Generate Score Sheets</button>
-                        <button onclick="alert('CSV export functionality ready!')" style="background: #28a745;">Export to CSV</button>
+                        <button onclick="generateRunningOrders()" style="background: #17a2b8;">Generate Running Orders</button>
+                        <button onclick="generateScoreSheets()" style="background: #FF6B6B;">Generate Score Sheets</button>
+                        <button onclick="exportToCSV()" style="background: #28a745;">Export to CSV</button>
                     </div>
                     
                     <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
                         <h4>📊 Trial Statistics</h4>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #667eea;">0</div>
-                                <div style="color: #666;">Total Entries</div>
-                            </div>
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #28a745;">0</div>
-                                <div style="color: #666;">Classes Configured</div>
-                            </div>
-                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
-                                <div style="font-size: 24px; font-weight: bold; color: #ffc107;">0</div>
-                                <div style="color: #666;">Running Orders</div>
-                            </div>
                             <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
                                 <div style="font-size: 24px; font-weight: bold; color: #dc3545;">Ready</div>
                                 <div style="color: #666;">System Status</div>
@@ -668,7 +494,7 @@
                     
                     <div style="margin-top: 20px;">
                         <h4>📋 Recent Entries</h4>
-                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                        <div id="entriesList" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
                             <p style="color: #666; font-style: italic; text-align: center;">No entries yet. Entries will appear here after submission.</p>
                         </div>
                     </div>
@@ -678,12 +504,208 @@
     </div>
 
     <script>
-        // Global variables for GitHub compatibility
-        var trialDays = [];
-        var savedDays = 0;
-        var totalDays = 0;
-        
-        // Functions for trial setup - GitHub compatible
+        // Global variables for cross-browser compatibility
+        var globalData = {
+            dogs: [],
+            judges: [],
+            classes: [],
+            handlers: [],
+            trialDays: [],
+            entries: [],
+            savedDays: 0,
+            totalDays: 0
+        };
+
+        // Cross-browser compatibility for console.log
+        var log = function(message) {
+            if (typeof console !== 'undefined' && console.log) {
+                console.log(message);
+            }
+        };
+
+        // Load embedded data on startup
+        function loadEmbeddedData() {
+            log('Loading embedded trial data...');
+            
+            // Embedded data from Excel file
+            var embeddedData = {
+                dogs: [
+                    {"id":"07-0001-01","callName":"BJ","fullName":"Jed's Black Jack","handlerFullName":"Shirley   Ottmer","handlerFirstName":"Shirley ","handlerLastName":"Ottmer","className":"Patrol 1","judgeName":"Linda Alberda"},
+                    {"id":"07-0001-02","callName":"Jaidon","fullName":"Romyldale's Jaidon","handlerFullName":"Shirley  Ottmer","handlerFirstName":"Shirley","handlerLastName":"Ottmer","className":"Detective 2","judgeName":"Ginger Alpine"},
+                    {"id":"07-0001-03","callName":"Jake","fullName":"Jacob ","handlerFullName":"Shirley  Ottmer","handlerFirstName":"Shirley","handlerLastName":"Ottmer","className":"Investigator 3","judgeName":"Paige Alpine-Malone"},
+                    {"id":"07-0001-04","callName":"Ozone","fullName":"3BF O3 In The Stratosphere","handlerFullName":"Shirley  Ottmer","handlerFirstName":"Shirley","handlerLastName":"Ottmer","className":"Super Sleuth 4","judgeName":"Anita Ambani"},
+                    {"id":"07-0002-01","callName":"Demo","fullName":"Demo Dog for Testing","handlerFullName":"Demo Handler","handlerFirstName":"Demo","handlerLastName":"Handler","className":"Patrol 1","judgeName":"Sarah Knight"},
+                    {"id":"07-0003-01","callName":"Test","fullName":"Test Dog Entry","handlerFullName":"Test Handler","handlerFirstName":"Test","handlerLastName":"Handler","className":"Detective 2","judgeName":"Sharon Mounsey"}
+                ],
+                judges: ["Linda Alberda","Ginger Alpine","Paige Alpine-Malone","Anita Ambani","Sarah Knight","Sharon Mounsey"],
+                classes: ["Patrol 1","Detective 2","Investigator 3","Super Sleuth 4","Private Inv","Det Diversions","Ranger 1","Ranger 2","Ranger 3","Ranger 4","Ranger 5","Dasher 3","Dasher 4","Dasher 5","Dasher 6","Obedience 1","Obedience 2","Obedience 3","Obedience 4","Obedience 5","Starter","Advanced","Pro","ARF","Zoom 1","Zoom 1.5","Zoom 2","Games 1","Games 2","Games 3","Games 4"],
+                handlers: ["Shirley   Ottmer","Shirley  Ottmer","Demo Handler","Test Handler"]
+            };
+            
+            // Load the data into global variables
+            globalData.dogs = embeddedData.dogs;
+            globalData.judges = embeddedData.judges;
+            globalData.classes = embeddedData.classes;
+            globalData.handlers = embeddedData.handlers;
+            
+            // Update dashboard counters
+            updateDashboardCounters();
+            
+            log('Data loaded successfully!');
+            log('Dogs: ' + globalData.dogs.length);
+            log('Judges: ' + globalData.judges.length);
+            log('Classes: ' + globalData.classes.length);
+        }
+
+        // Update dashboard counters
+        function updateDashboardCounters() {
+            var dogCountElements = document.querySelectorAll('#dogCount, #setupDogCount');
+            var classCountElements = document.querySelectorAll('#classCount, #setupClassCount');
+            var judgeCountElements = document.querySelectorAll('#judgeCount, #setupJudgeCount');
+            var statusElement = document.getElementById('dataLoadStatus');
+            
+            for (var i = 0; i < dogCountElements.length; i++) {
+                dogCountElements[i].textContent = globalData.dogs.length;
+            }
+            for (var i = 0; i < classCountElements.length; i++) {
+                classCountElements[i].textContent = globalData.classes.length;
+            }
+            for (var i = 0; i < judgeCountElements.length; i++) {
+                judgeCountElements[i].textContent = globalData.judges.length;
+            }
+            
+            if (statusElement) {
+                statusElement.textContent = '✅ Data loaded successfully';
+                statusElement.style.color = '#28a745';
+            }
+        }
+
+        // Login tab switching
+        function switchLoginTab(tabId, element) {
+            var tabs = document.querySelectorAll('#loginSection .tab-content');
+            var navTabs = document.querySelectorAll('#loginSection .nav-tab');
+            
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            for (var i = 0; i < navTabs.length; i++) {
+                navTabs[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Main app tab switching
+        function switchTab(tabId, element) {
+            var tabs = document.querySelectorAll('#mainApp .tab-content');
+            var navTabs = document.querySelectorAll('#mainApp .nav-tab');
+            
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            for (var i = 0; i < navTabs.length; i++) {
+                navTabs[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Login functions
+        function fillDemoCredentials() {
+            document.getElementById('loginClubName').value = 'Demo Dog Club';
+            document.getElementById('loginSecretaryName').value = 'Demo Secretary';
+            document.getElementById('loginPassword').value = 'demo123';
+            log('Demo credentials filled');
+        }
+
+        function testSystem() {
+            alert('System Status: Ready\\nDemo credentials available\\nLogin system functional\\nData loaded: ' + globalData.dogs.length + ' dogs');
+        }
+
+        function handleLogin() {
+            log('Login attempt...');
+            var clubName = document.getElementById('loginClubName').value.trim();
+            var secretaryName = document.getElementById('loginSecretaryName').value.trim();
+            var password = document.getElementById('loginPassword').value.trim();
+            
+            if (clubName === 'Demo Dog Club' && secretaryName === 'Demo Secretary' && password === 'demo123') {
+                log('Login successful!');
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('clubInfo').textContent = 'Demo Dog Club';
+                document.getElementById('secretaryInfo').textContent = 'Secretary: Demo Secretary';
+            } else {
+                alert('Invalid credentials! Use: Demo Dog Club / Demo Secretary / demo123');
+            }
+        }
+
+        function handleRegistration() {
+            var clubName = document.getElementById('registerClubName').value.trim();
+            var secretaryName = document.getElementById('registerSecretaryName').value.trim();
+            var email = document.getElementById('registerEmail').value.trim();
+            var password = document.getElementById('registerPassword').value.trim();
+            var confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            if (clubName && secretaryName && email && password) {
+                alert('Club registered successfully! You can now sign in with your credentials.');
+                switchLoginTab('loginForm', document.querySelector('#loginSection .nav-tab'));
+            } else {
+                alert('Please fill in all fields!');
+            }
+        }
+
+        function signOut() {
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        }
+
+        // Trial setup functions
+        function generateDays() {
+            var numDays = parseInt(document.getElementById('trialDays').value);
+            if (!numDays || numDays < 1) {
+                alert('Please enter a valid number of days');
+                return;
+            }
+            
+            globalData.totalDays = numDays;
+            globalData.savedDays = 0;
+            
+            var container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+            
+            for (var i = 1; i <= numDays; i++) {
+                var dayDiv = document.createElement('div');
+                dayDiv.className = 'day-container';
+                dayDiv.innerHTML = 
+                    '<div class="day-header">Day ' + i + '</div>' +
+                    '<div class="form-group">' +
+                        '<label class="label">Date:</label>' +
+                        '<input type="date" id="date_' + i + '" style="margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
+                    '</div>' +
+                    '<div class="classes-section">' +
+                        '<div class="form-group">' +
+                            '<label class="label">How many classes?</label>' +
+                            '<input type="number" id="classes_' + i + '" min="1" max="20" placeholder="Number of classes" style="width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" onchange="generateClasses(' + i + ')">' +
+                        '</div>' +
+                        '<div id="classesContainer_' + i + '"></div>' +
+                    '</div>' +
+                    '<div class="form-group">' +
+                        '<button onclick="saveDay(' + i + ')" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Day ' + i + '</button>' +
+                        '<span id="dayStatus_' + i + '" style="margin-left: 15px; font-weight: bold;"></span>' +
+                    '</div>';
+                container.appendChild(dayDiv);
+            }
+            
+            alert('Generated ' + numDays + ' day(s) for your trial setup!');
+        }
+
         function generateClasses(dayNum) {
             var numClasses = parseInt(document.getElementById('classes_' + dayNum).value);
             var container = document.getElementById('classesContainer_' + dayNum);
@@ -696,18 +718,41 @@
             container.innerHTML = '';
             for (var i = 1; i <= numClasses; i++) {
                 var classDiv = document.createElement('div');
-                classDiv.style.cssText = 'border: 1px solid #28a745; margin: 15px 0; padding: 15px; border-radius: 6px; background: #f8fff8;';
-                classDiv.innerHTML = '<div style="background: #28a745; color: white; padding: 8px 12px; margin: -15px -15px 15px -15px; border-radius: 4px 4px 0 0; font-weight: bold;">Class ' + i + '</div>' +
+                classDiv.className = 'class-container';
+                classDiv.innerHTML = 
+                    '<div class="class-header">Class ' + i + '</div>' +
                     '<div class="form-group">' +
-                    '<label class="label">Class Name:</label>' +
-                    '<input type="text" id="className_' + dayNum + '_' + i + '" placeholder="Enter class name" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">' +
-                    '<label class="label">Judge:</label>' +
-                    '<input type="text" id="judge_' + dayNum + '_' + i + '" placeholder="Judge name" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
+                        '<label class="label">Class Name:</label>' +
+                        '<select id="className_' + dayNum + '_' + i + '" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">' +
+                            '<option value="">Select class...</option>' +
+                            generateClassOptions() +
+                        '</select>' +
+                        '<label class="label">Judge:</label>' +
+                        '<select id="judge_' + dayNum + '_' + i + '" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
+                            '<option value="">Select judge...</option>' +
+                            generateJudgeOptions() +
+                        '</select>' +
                     '</div>';
                 container.appendChild(classDiv);
             }
         }
-        
+
+        function generateClassOptions() {
+            var options = '';
+            for (var i = 0; i < globalData.classes.length; i++) {
+                options += '<option value="' + globalData.classes[i] + '">' + globalData.classes[i] + '</option>';
+            }
+            return options;
+        }
+
+        function generateJudgeOptions() {
+            var options = '';
+            for (var i = 0; i < globalData.judges.length; i++) {
+                options += '<option value="' + globalData.judges[i] + '">' + globalData.judges[i] + '</option>';
+            }
+            return options;
+        }
+
         function saveDay(dayNum) {
             var date = document.getElementById('date_' + dayNum).value;
             if (!date) {
@@ -734,19 +779,19 @@
             }
             
             if (!allValid) {
-                alert('Please fill in all class names and judges for Day ' + dayNum);
+                alert('Please select all class names and judges for Day ' + dayNum);
                 return;
             }
             
             // Save day data
-            trialDays[dayNum] = {
+            globalData.trialDays[dayNum] = {
                 date: date,
                 numClasses: numClasses,
                 classes: []
             };
             
             for (var i = 1; i <= numClasses; i++) {
-                trialDays[dayNum].classes.push({
+                globalData.trialDays[dayNum].classes.push({
                     name: document.getElementById('className_' + dayNum + '_' + i).value,
                     judge: document.getElementById('judge_' + dayNum + '_' + i).value
                 });
@@ -756,25 +801,234 @@
             document.getElementById('dayStatus_' + dayNum).innerHTML = '✅ Saved';
             document.getElementById('dayStatus_' + dayNum).style.color = '#28a745';
             
-            savedDays++;
+            globalData.savedDays++;
             alert('Day ' + dayNum + ' saved successfully!');
             
             // Show complete trial section if all days saved
-            if (savedDays >= totalDays) {
+            if (globalData.savedDays >= globalData.totalDays) {
                 document.getElementById('saveTrialSection').style.display = 'block';
             }
         }
-        
-        // Simple initialization that definitely works
-        console.log('Trial Management System loading...');
-        
-        window.onload = function() {
-            console.log('System loaded successfully!');
-            console.log('Ready for login - use Auto-Fill Demo button or enter manually:');
-            console.log('Club: Demo Dog Club');
-            console.log('Secretary: Demo Secretary'); 
-            console.log('Password: demo123');
-        };
+
+        function saveTrial() {
+            var trialName = prompt('Enter a name for this trial:', 'Trial_' + new Date().getFullYear());
+            if (trialName) {
+                alert('Trial setup saved successfully!\\n\\nTrial Name: ' + trialName + '\\nDays: ' + globalData.totalDays + '\\nClasses configured: ' + globalData.savedDays + '\\n\\nYou can now use the Entry Form to accept entries.');
+                
+                // Update trial options in entry form
+                updateTrialOptions();
+            }
+        }
+
+        function updateTrialOptions() {
+            var container = document.getElementById('trialOptions');
+            var html = '<h5>Available Classes:</h5>';
+            
+            for (var dayNum in globalData.trialDays) {
+                if (globalData.trialDays[dayNum]) {
+                    var day = globalData.trialDays[dayNum];
+                    html += '<div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">';
+                    html += '<div style="font-weight: bold; margin-bottom: 8px;">Day ' + dayNum + ' - ' + day.date + '</div>';
+                    
+                    for (var i = 0; i < day.classes.length; i++) {
+                        var cls = day.classes[i];
+                        html += '<label style="margin-right: 15px; display: block; margin-bottom: 5px;">';
+                        html += '<input type="checkbox" name="trialEntry" value="day' + dayNum + '_class' + i + '"> ';
+                        html += cls.name + ' - Judge: ' + cls.judge;
+                        html += '</label>';
+                    }
+                    html += '</div>';
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Entry form functions
+        function toggleEntryForm() {
+            var checkbox = document.getElementById('waiverAccepted');
+            var entryFormSection = document.getElementById('entryFormSection');
+            
+            if (checkbox.checked) {
+                entryFormSection.style.display = 'block';
+            } else {
+                entryFormSection.style.display = 'none';
+            }
+        }
+
+        function searchDog(regNumber) {
+            var resultsContainer = document.getElementById('dogSearchResults');
+            var dogInfo = document.getElementById('dogInfo');
+            
+            if (!regNumber || regNumber.length < 2) {
+                resultsContainer.innerHTML = '';
+                dogInfo.style.display = 'none';
+                return;
+            }
+            
+            var matches = [];
+            for (var i = 0; i < globalData.dogs.length; i++) {
+                var dog = globalData.dogs[i];
+                if (dog.id.toLowerCase().indexOf(regNumber.toLowerCase()) !== -1 ||
+                    dog.callName.toLowerCase().indexOf(regNumber.toLowerCase()) !== -1) {
+                    matches.push(dog);
+                }
+            }
+            
+            var html = '';
+            for (var i = 0; i < Math.min(5, matches.length); i++) {
+                var dog = matches[i];
+                html += '<div class="dog-search-result" onclick="selectDog(\'' + dog.id + '\')">';
+                html += '<strong>' + dog.callName + '</strong> (' + dog.id + ') - ' + dog.handlerFullName;
+                html += '</div>';
+            }
+            
+            resultsContainer.innerHTML = html;
+        }
+
+        function selectDog(dogId) {
+            var dog = null;
+            for (var i = 0; i < globalData.dogs.length; i++) {
+                if (globalData.dogs[i].id === dogId) {
+                    dog = globalData.dogs[i];
+                    break;
+                }
+            }
+            
+            if (dog) {
+                document.getElementById('regNumber').value = dog.id;
+                document.getElementById('handlerName').value = dog.handlerFullName;
+                document.getElementById('dogSearchResults').innerHTML = '';
+                
+                document.getElementById('selectedCallName').textContent = dog.callName;
+                document.getElementById('selectedFullName').textContent = dog.fullName;
+                document.getElementById('selectedHandler').textContent = dog.handlerFullName;
+                document.getElementById('selectedRegNumber').textContent = dog.id;
+                document.getElementById('dogInfo').style.display = 'block';
+            }
+        }
+
+        function submitEntry() {
+            var regNumber = document.getElementById('regNumber').value.trim();
+            var handlerName = document.getElementById('handlerName').value.trim();
+            var contactEmail = document.getElementById('contactEmail').value.trim();
+            
+            if (!regNumber || !handlerName || !contactEmail) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            var selectedEntries = document.querySelectorAll('input[name="trialEntry"]:checked');
+            if (selectedEntries.length === 0) {
+                alert('Please select at least one trial entry');
+                return;
+            }
+            
+            // Save entry
+            var entry = {
+                regNumber: regNumber,
+                handlerName: handlerName,
+                contactEmail: contactEmail,
+                entries: [],
+                timestamp: new Date()
+            };
+            
+            for (var i = 0; i < selectedEntries.length; i++) {
+                entry.entries.push(selectedEntries[i].value);
+            }
+            
+            globalData.entries.push(entry);
+            
+            alert('Entry submitted successfully!\\nRegistration: ' + regNumber + '\\nHandler: ' + handlerName + '\\nEntries: ' + selectedEntries.length);
+            
+            // Update results display
+            updateResults();
+            
+            // Clear form
+            clearEntryForm();
+        }
+
+        function clearEntryForm() {
+            document.getElementById('regNumber').value = '';
+            document.getElementById('handlerName').value = '';
+            document.getElementById('contactEmail').value = '';
+            document.getElementById('dogSearchResults').innerHTML = '';
+            document.getElementById('dogInfo').style.display = 'none';
+            
+            var checkboxes = document.querySelectorAll('input[name="trialEntry"]');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = false;
+            }
+            
+            document.getElementById('waiverAccepted').checked = false;
+            document.getElementById('entryFormSection').style.display = 'none';
+        }
+
+        // Results functions
+        function updateResults() {
+            document.getElementById('totalEntries').textContent = globalData.entries.length;
+            
+            var entriesList = document.getElementById('entriesList');
+            if (globalData.entries.length === 0) {
+                entriesList.innerHTML = '<p style="color: #666; font-style: italic; text-align: center;">No entries yet. Entries will appear here after submission.</p>';
+            } else {
+                var html = '';
+                for (var i = globalData.entries.length - 1; i >= Math.max(0, globalData.entries.length - 10); i--) {
+                    var entry = globalData.entries[i];
+                    html += '<div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">';
+                    html += '<strong>' + entry.regNumber + '</strong> - ' + entry.handlerName;
+                    html += '<div style="font-size: 14px; color: #666;">' + entry.entries.length + ' entries submitted</div>';
+                    html += '</div>';
+                }
+                entriesList.innerHTML = html;
+            }
+        }
+
+        function generateRunningOrders() {
+            alert('Running orders will be generated from submitted entries.\\nCurrent entries: ' + globalData.entries.length);
+        }
+
+        function generateScoreSheets() {
+            alert('Score sheets will be generated from confirmed running orders.\\nCurrent entries: ' + globalData.entries.length);
+        }
+
+        function exportData() {
+            alert('Export functionality ready!\\nAvailable data:\\n- Dogs: ' + globalData.dogs.length + '\\n- Entries: ' + globalData.entries.length);
+        }
+
+        function exportToCSV() {
+            alert('CSV export functionality ready!\\nWill export trial entries and running orders.');
+        }
+
+        // Initialize the application
+        function initializeApp() {
+            log('Trial Management System loading...');
+            loadEmbeddedData();
+            log('System loaded successfully!');
+            log('Ready for login - use Auto-Fill Demo button or enter manually:');
+            log('Club: Demo Dog Club, Secretary: Demo Secretary, Password: demo123');
+        }
+
+        // Cross-browser window load event
+        if (window.addEventListener) {
+            window.addEventListener('load', initializeApp, false);
+        } else if (window.attachEvent) {
+            window.attachEvent('onload', initializeApp);
+        } else {
+            window.onload = initializeApp;
+        }
     </script>
 </body>
-</html>
+</html> #667eea;" id="totalEntries">0</div>
+                                <div style="color: #666;">Total Entries</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #28a745;" id="classesConfigured">0</div>
+                                <div style="color: #666;">Classes Configured</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ffc107;" id="runningOrders">0</div>
+                                <div style="color: #666;">Running Orders</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color:
