@@ -734,6 +734,11 @@
                 </div>
                 <button type="submit" class="btn">Sign In</button>
                 <button type="button" class="btn btn-secondary" onclick="showRegistration()">Register New Club</button>
+                <br><br>
+                <button type="button" class="btn" onclick="demoLogin()" style="background: #28a745; width: 100%;">🎯 Demo Login</button>
+                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem; text-align: center;">
+                    Try the demo with one click!
+                </p>
             </form>
             
             <!-- Registration Form (hidden by default) -->
@@ -984,10 +989,20 @@
             handleRegistration();
         });
 
+        function demoLogin() {
+            document.getElementById('clubEmail').value = 'demo@dogclub.com';
+            document.getElementById('secretaryName').value = 'Demo Secretary';
+            document.getElementById('password').value = 'demo123';
+            handleLogin();
+        }
+
         function handleLogin() {
-            const clubEmail = document.getElementById('clubEmail').value;
-            const secretaryName = document.getElementById('secretaryName').value;
+            const clubEmail = document.getElementById('clubEmail').value.trim();
+            const secretaryName = document.getElementById('secretaryName').value.trim();
             const password = document.getElementById('password').value;
+
+            console.log('Login attempt:', {clubEmail, secretaryName, password});
+            console.log('Available clubs:', registeredClubs);
 
             const club = registeredClubs.find(c => 
                 c.clubEmail.toLowerCase() === clubEmail.toLowerCase() &&
@@ -995,12 +1010,16 @@
                 c.password === password
             );
 
+            console.log('Found club:', club);
+
             if (club) {
                 currentUser = club;
                 localStorage.setItem('currentUser', JSON.stringify(club));
                 showMainApp();
             } else {
                 showAlert('Invalid credentials. Please check your email, name, and password.', 'danger');
+                // Show available demo credentials for debugging
+                console.log('Demo credentials: demo@dogclub.com / Demo Secretary / demo123');
             }
         }
 
@@ -1063,23 +1082,40 @@
         function loadStoredData() {
             const storedClubs = localStorage.getItem('registeredClubs');
             if (storedClubs) {
-                registeredClubs = JSON.parse(storedClubs);
-            } else {
-                // Initialize with demo club
-                registeredClubs = [{
-                    clubName: "Demo Dog Club",
-                    clubEmail: "demo@dogclub.com",
-                    secretaryName: "Demo Secretary",
-                    password: "demo123",
-                    registrationDate: new Date().toISOString()
-                }];
+                try {
+                    registeredClubs = JSON.parse(storedClubs);
+                } catch (error) {
+                    console.error('Error parsing stored clubs:', error);
+                    registeredClubs = [];
+                }
+            }
+            
+            // Always ensure demo club exists
+            const demoClub = {
+                clubName: "Demo Dog Club",
+                clubEmail: "demo@dogclub.com",
+                secretaryName: "Demo Secretary",
+                password: "demo123",
+                registrationDate: new Date().toISOString()
+            };
+            
+            const existingDemo = registeredClubs.find(c => c.clubEmail === "demo@dogclub.com");
+            if (!existingDemo) {
+                registeredClubs.push(demoClub);
                 localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
             }
+            
+            console.log('Registered clubs:', registeredClubs);
 
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser) {
-                currentUser = JSON.parse(storedUser);
-                showMainApp();
+                try {
+                    currentUser = JSON.parse(storedUser);
+                    showMainApp();
+                } catch (error) {
+                    console.error('Error parsing stored user:', error);
+                    localStorage.removeItem('currentUser');
+                }
             }
         }
 
