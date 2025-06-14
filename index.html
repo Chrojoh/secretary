@@ -734,9 +734,9 @@
                 </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                     <button type="submit" class="btn" style="flex: 1;">Sign In</button>
-                    <button type="button" class="btn btn-secondary" onclick="window.showRegistration ? window.showRegistration() : console.error('showRegistration not found')" style="flex: 1;">Register New Club</button>
+                    <button type="button" class="btn btn-secondary" onclick="testLogin()" style="flex: 1;">Test & Register</button>
                 </div>
-                <button type="button" class="btn" onclick="console.log('Demo button clicked'); if(window.demoLogin) { window.demoLogin(); } else { console.error('demoLogin not found'); }" style="background: #28a745; width: 100%; margin-bottom: 0.5rem;">🎯 Demo Login</button>
+                <button type="button" class="btn" onclick="demoLogin()" style="background: #28a745; width: 100%; margin-bottom: 0.5rem;">🎯 Demo Login</button>
                 <p style="font-size: 0.9rem; color: #666; text-align: center; margin: 0;">
                     Click above to try the demo instantly!
                 </p>
@@ -962,7 +962,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Global Variables
+        // Global Variables - Define first
         let currentUser = null;
         let registeredClubs = [];
         let dogData = [];
@@ -975,65 +975,7 @@
         let totalDays = 0;
         let savedDays = 0;
 
-        // Initialize Application
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-            loadStoredData();
-            loadDogDatabase();
-            initializeForms();
-            
-            // Test if functions are available
-            console.log('Functions available:', {
-                showRegistration: typeof showRegistration,
-                demoLogin: typeof demoLogin,
-                handleLogin: typeof handleLogin
-            });
-        });
-
-        // Make sure all functions are available globally
-        window.showRegistration = showRegistration;
-        window.showLogin = showLogin;
-        window.demoLogin = demoLogin;
-        window.handleLogin = handleLogin;
-        window.handleRegistration = handleRegistration;
-        window.logout = logout;
-        window.showTab = showTab;
-
-        // Authentication Functions
-        function showRegistration() {
-            console.log('Showing registration form');
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registrationForm').style.display = 'block';
-        }
-
-        function showLogin() {
-            console.log('Showing login form');
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registrationForm').style.display = 'none';
-        }
-
-        // Initialize form event listeners
-        function initializeForms() {
-            const loginForm = document.getElementById('loginForm');
-            const registrationForm = document.getElementById('registrationForm');
-            
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    console.log('Login form submitted');
-                    handleLogin();
-                });
-            }
-            
-            if (registrationForm) {
-                registrationForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    console.log('Registration form submitted');
-                    handleRegistration();
-                });
-            }
-        }
-
+        // Define all functions globally first
         function demoLogin() {
             console.log('Demo login function called');
             try {
@@ -1047,6 +989,18 @@
                 console.error('Error in demoLogin:', error);
                 alert('Demo login failed: ' + error.message);
             }
+        }
+
+        function showRegistration() {
+            console.log('Showing registration form');
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+        }
+
+        function showLogin() {
+            console.log('Showing login form');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registrationForm').style.display = 'none';
         }
 
         function handleLogin() {
@@ -1153,6 +1107,24 @@
             clearForm();
         }
 
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '10000';
+            alertDiv.style.maxWidth = '400px';
+            alertDiv.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
         // Data Loading Functions
         function loadStoredData() {
             const storedClubs = localStorage.getItem('registeredClubs');
@@ -1223,24 +1195,7 @@
             }
         }
 
-        function saveUserTrialData() {
-            if (!currentUser) return;
-            
-            const userKey = `trialData_${currentUser.clubEmail}`;
-            const data = {
-                trialConfig,
-                entryResults,
-                runningOrders,
-                trialMetadata,
-                totalDays,
-                savedDays,
-                lastSaved: new Date().toISOString()
-            };
-            
-            localStorage.setItem(userKey, JSON.stringify(data));
-        }
-
-        // Dog Database Loading
+        // Initialize data with fallback
         async function loadDogDatabase() {
             try {
                 // Check if we're in Claude's artifact environment
@@ -1295,12 +1250,16 @@
                     console.log(`✅ Database loaded: ${dogData.length} dogs, ${availableClasses.length} classes, ${availableJudges.length} judges`);
                     
                     // Show success message
-                    document.getElementById('dataStatus').style.display = 'block';
-                    document.getElementById('dataStatusText').innerHTML = `
-                        🐕 ${dogData.length.toLocaleString()} dogs loaded<br>
-                        🏆 ${availableClasses.length} classes available<br>
-                        👨‍⚖️ ${availableJudges.length} judges in database
-                    `;
+                    const statusEl = document.getElementById('dataStatus');
+                    const textEl = document.getElementById('dataStatusText');
+                    if (statusEl && textEl) {
+                        statusEl.style.display = 'block';
+                        textEl.innerHTML = `
+                            🐕 ${dogData.length.toLocaleString()} dogs loaded<br>
+                            🏆 ${availableClasses.length} classes available<br>
+                            👨‍⚖️ ${availableJudges.length} judges in database
+                        `;
+                    }
                 } else {
                     console.log('Running in browser environment - using demo data');
                     throw new Error('Browser environment detected');
@@ -1314,6 +1273,86 @@
                     { regNumber: "07-0001-01", callName: "BJ", handler: "Shirley Ottmer", className: "Patrol 1", judge: "Linda Alberda" },
                     { regNumber: "07-0001-02", callName: "Jaidon", handler: "Shirley Ottmer", className: "Detective 2", judge: "Ginger Alpine" },
                     { regNumber: "07-0001-03", callName: "Jake", handler: "Shirley Ottmer", className: "Investigator 3", judge: "Paige Alpine-Malone" },
+                    { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer", className: "Super Sleuth 4", judge: "Sarah Knight" },
+                    { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher", className: "Ranger 1", judge: "Lane Michie" },
+                    { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher", className: "Detective 1", judge: "Gary Truitt" },
+                    { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher", className: "Ranger 1", judge: "Linda Alberda" },
+                    { regNumber: "07-0003-02", callName: "Becky", handler: "Bonnie Hornfisher", className: "Ranger 2", judge: "Ginger Alpine" },
+                    { regNumber: "07-0003-03", callName: "Ben", handler: "Bonnie Hornfisher", className: "Ranger 3", judge: "Paige Alpine-Malone" },
+                    { regNumber: "07-0004-01", callName: "Max", handler: "Demo Handler", className: "Patrol 1", judge: "Sarah Knight" },
+                    { regNumber: "07-0004-02", callName: "Bella", handler: "Demo Handler", className: "Detective 1", judge: "Lane Michie" },
+                    { regNumber: "07-0004-03", callName: "Charlie", handler: "Demo Handler", className: "Super Sleuth 1", judge: "Gary Truitt" }
+                ];
+                
+                availableClasses = [
+                    "Patrol 1", "Patrol 2", "Patrol 3",
+                    "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
+                    "Ranger 1", "Ranger 2", "Ranger 3",
+                    "Investigator 1", "Investigator 2", "Investigator 3",
+                    "Detective 1", "Detective 2", "Detective 3",
+                    "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
+                ];
+                
+                availableJudges = [
+                    "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                    "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
+                    "Judge Johnson", "Judge Williams", "Judge Davis"
+                ];
+                
+                // Show demo data message
+                const statusEl = document.getElementById('dataStatus');
+                const textEl = document.getElementById('dataStatusText');
+                if (statusEl && textEl) {
+                    statusEl.style.display = 'block';
+                    textEl.innerHTML = `
+                        🎯 Demo database loaded<br>
+                        🐕 ${dogData.length} demo dogs available<br>
+                        🏆 ${availableClasses.length} classes available<br>
+                        👨‍⚖️ ${availableJudges.length} judges in database<br>
+                        <small>💡 Upload your own Excel file to replace demo data</small>
+                    `;
+                }
+            }
+        }
+
+        // Basic functions needed for the demo
+        function updateDashboard() {
+            // Placeholder - will add full functionality
+            console.log('Dashboard updated');
+        }
+
+        function updateTrialOptions() {
+            // Placeholder - will add full functionality
+            console.log('Trial options updated');
+        }
+
+        function updateResultsDisplay() {
+            // Placeholder - will add full functionality
+            console.log('Results updated');
+        }
+
+        function clearForm() {
+            // Placeholder - will add full functionality
+            console.log('Form cleared');
+        }
+
+        // Now add a simple test button to verify functions work
+        function testLogin() {
+            console.log('Test function called successfully!');
+            alert('Functions are working! Now trying demo login...');
+            demoLogin();
+        }
+
+        // Make all functions globally available immediately
+        window.demoLogin = demoLogin;
+        window.showRegistration = showRegistration;
+        window.showLogin = showLogin;
+        window.handleLogin = handleLogin;
+        window.handleRegistration = handleRegistration;
+        window.testLogin = testLogin;
+        
+        console.log('All functions defined and made global');
+    </script>3", judge: "Paige Alpine-Malone" },
                     { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer", className: "Super Sleuth 4", judge: "Sarah Knight" },
                     { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher", className: "Ranger 1", judge: "Lane Michie" },
                     { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher", className: "Detective 1", judge: "Gary Truitt" },
