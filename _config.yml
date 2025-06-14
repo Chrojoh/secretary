@@ -24,6 +24,10 @@ exclude:
 # Include data files
 include:
   - data/
+  - "data/"
+  - _data/
+keep_files:
+  - data/
 
 # Plugin settings
 plugins:
