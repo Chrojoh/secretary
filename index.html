@@ -1,122 +1,4 @@
-const regNumber = row[0] ? String(row[0]).trim() : '';
-                                const callName = row[1] ? String(row[1]).trim() : '';
-                                
-                                // Only add valid, unique dog records
-                                if (regNumber && callName && 
-                                    regNumber.length > 5 && 
-                                    callName.length > 1 && 
-                                    regNumber.includes('-') && 
-                                    !uniqueDogs.has(regNumber)) {
-                                    
-                                    uniqueDogs.set(regNumber, {
-                                        regNumber: regNumber,
-                                        callName: callName,
-                                        handler: '', // Will be filled in during entry
-                                        fullName: callName
-                                    });
-                                    processedCount++;
-                                }
-                            }
-                        });
-
-                        const processedArray = Array.from(uniqueDogs.values());
-                        
-                        if (processedArray.length > 10) {
-                            dogData = processedArray;
-                            
-                            // Extract unique classes and judges from the data if available
-                            const classesFromData = new Set();
-                            const judgesFromData = new Set();
-                            
-                            jsonData.slice(1).forEach(row => {
-                                if (row && row.length >= 6) {
-                                    const level = row[3] ? String(row[3]).trim() : '';
-                                    const judge = row[5] ? String(row[5]).trim() : '';
-                                    
-                                    if (level && level.length > 2) classesFromData.add(level);
-                                    if (judge && judge.length > 3) judgesFromData.add(judge);
-                                }
-                            });
-                            
-                            if (classesFromData.size > 5) {
-                                availableClasses = [...classesFromData].sort();
-                            }
-                            if (judgesFromData.size > 3) {
-                                availableJudges = [...judgesFromData].sort();
-                            }
-
-                            updateDataStatusDisplay();
-                            updateDashboard();
-                            showStatusMessage(`✅ Excel data loaded successfully!<br>🐕 ${dogData.length} unique dogs imported<br>🏆 ${availableClasses.length} classes<br>👨‍⚖️ ${availableJudges.length} judges`, 'success');
-                        } else {
-                            // Try alternative Excel format (with headers)
-                            const headerData = XLSX.utils.sheet_to_json(dataSheet);
-                            if (headerData.length > 0) {
-                                const altProcessed = headerData.map(row => ({
-                                    regNumber: row['Registration Number'] || row.regNumber || row.RegNumber || row['Reg Number'],
-                                    callName: row['Call Name'] || row.callName || row.CallName || row['Dog Name'],
-                                    handler: row['Handler'] || row.handler || row.HandlerName || ''
-                                })).filter(dog => dog.regNumber && dog.callName);
-                                
-                                if (altProcessed.length > 10) {
-                                    dogData = altProcessed;
-                                    updateDataStatusDisplay();
-                                    updateDashboard();
-                                    showStatusMessage(`✅ Excel data loaded (header format)!<br>🐕 ${dogData.length} dogs imported`, 'success');
-                                } else {
-                                    showStatusMessage('❌ Not enough valid data found in Excel file', 'warning');
-                                }
-                            } else {
-                                showStatusMessage('❌ No valid data found in Excel file', 'warning');
-                            }
-                        }
-                    } else {
-                        showStatusMessage('❌ Excel file appears empty', 'warning');
-                    }
-                } catch (error) {
-                    console.error('Excel loading error:', error);
-                    showStatusMessage(`❌ Error reading Excel file: ${error.message}`, 'danger');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function saveTrialData() {
-            if (!currentUser) {
-                alert("Please log in before saving the trial.");
-                return;
-            }
-            
-            // Auto-generate trial name if not set
-            if (!trialMetadata.trialName) {
-                const firstDate = trialConfig.length > 0 ? trialConfig[0].date : new Date().toISOString().split('T')[0];
-                trialMetadata.trialName = `${currentUser.clubName} Trial ${firstDate}`;
-            }
-            
-            // Update metadata
-            trialMetadata.totalDays = totalDays;
-            trialMetadata.savedDays = savedDays;
-            trialMetadata.lastModified = new Date().toISOString();
-            
-            showStatusMessage("Trial configuration saved! Use 'Save Trial File' above to create a downloadable backup.", "success");
-        }
-
-        // Trial Setup Functions - EXACT from working file
-        function generateDays() {
-            const numDays = parseInt(document.getElementById('trialDays').value);
-            if (!numDays || numDays < 1) {
-                alert('Please enter a valid number of days');
-                return;
-            }
-
-            totalDays = numDays;
-            savedDays = 0;
-            const container = document.getElementById('daysContainer');
-            container.innerHTML = '';
-
-            for (let i = 1; i <= numDays; i++) {
-                createDaySection(i, container);
-            }
+}
         }
 
         function createDaySection(dayNum, container) {
@@ -322,7 +204,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                 return;
             }
 
-            // Save all class/round/judge combinations for this day
             for (let classNum = 1; classNum <= numClasses; classNum++) {
                 const className = document.getElementById(`className_${dayNum}_${classNum}`)?.value;
                 const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`)?.value || 0);
@@ -332,7 +213,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                         const judge = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`)?.value;
                         
                         if (judge) {
-                            // Remove existing entry if it exists
                             trialConfig = trialConfig.filter(config => 
                                 !(config.day === dayNum && config.classNum === classNum && config.roundNum === roundNum)
                             );
@@ -354,7 +234,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
             updateTrialOptions();
             showStatusMessage(`Day ${dayNum} configuration saved!`, 'success');
 
-            // Check if all days are saved
             if (savedDays === totalDays) {
                 document.getElementById('entryFormLink').style.display = 'block';
             }
@@ -384,7 +263,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                 dropdown.innerHTML = html;
                 dropdown.style.display = 'block';
 
-                // Auto-select if exact match
                 const exactMatch = matches.find(dog => dog.regNumber.toLowerCase() === query);
                 if (exactMatch) {
                     callNameDiv.textContent = exactMatch.callName;
@@ -420,7 +298,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
         function updateTrialOptions() {
             const container = document.getElementById('trialOptions');
             
-            // Group by day, then by class, then sort by round
             const groupedByDay = {};
             trialConfig.forEach(config => {
                 if (!groupedByDay[config.day]) {
@@ -432,7 +309,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                 groupedByDay[config.day][config.className].push(config);
             });
 
-            // Sort rounds within each class
             Object.keys(groupedByDay).forEach(day => {
                 Object.keys(groupedByDay[day]).forEach(className => {
                     groupedByDay[day][className].sort((a, b) => a.roundNum - b.roundNum);
@@ -440,15 +316,12 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
             });
 
             let html = '';
-            
-            // Sort days numerically
             const sortedDays = Object.keys(groupedByDay).sort((a, b) => parseInt(a) - parseInt(b));
             
             sortedDays.forEach(day => {
                 html += `<div class="day-group">`;
                 html += `<div class="day-group-header">Day ${day} - ${groupedByDay[day][Object.keys(groupedByDay[day])[0]][0].date}</div>`;
                 
-                // Sort classes alphabetically
                 const sortedClasses = Object.keys(groupedByDay[day]).sort();
                 
                 sortedClasses.forEach(className => {
@@ -491,65 +364,153 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
         }
 
         // Entry Form Functions
-        document.getElementById('entryForm')?.addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            const entryForm = document.getElementById('entryForm');
+            if (entryForm) {
+                entryForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const regNumber = document.getElementById('regNumber').value;
+                    const callName = document.getElementById('callName').textContent;
+                    const handler = document.getElementById('handlerName').value;
+                    const contactEmail = document.getElementById('contactEmail').value;
+                    const waiverAccepted = document.getElementById('waiverAccepted').checked;
+                    
+                    if (!regNumber || !handler || callName === 'Not found' || callName === '') {
+                        alert('Please complete all required fields and ensure registration number is valid');
+                        return;
+                    }
+
+                    if (!waiverAccepted) {
+                        alert('You must accept the waiver to submit an entry.');
+                        return;
+                    }
+
+                    const selectedEntries = [];
+                    document.querySelectorAll('input[name="trialEntry"]:checked').forEach(checkbox => {
+                        const [configIndex, entryType] = checkbox.value.split('-');
+                        const config = trialConfig[parseInt(configIndex)];
+                        selectedEntries.push({
+                            ...config,
+                            entry.contactEmail,
+                    entry.date,
+                    entry.judge,
+                    entry.className,
+                    entry.round,
+                    entry.entryType || 'regular',
+                    entry.timestamp
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAllData() {
+            if (entryResults.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            exportToCSV();
+        }
+
+        function updateDashboard() {
+            let activeTrialsHtml = 'No active trials';
+            if (trialConfig.length > 0) {
+                const uniqueDates = [...new Set(trialConfig.map(t => t.date))];
+                const trialName = trialMetadata.trialName || 'Current Trial';
+                activeTrialsHtml = `<strong>${trialName}</strong><br>${uniqueDates.length} trial days configured`;
+            }
+            document.getElementById('activeTrials').innerHTML = activeTrialsHtml;
+
+            let recentEntriesHtml = 'No recent entries';
+            if (entryResults.length > 0) {
+                const totalEntries = entryResults.length;
+                const recentEntries = entryResults.slice(-3);
+                recentEntriesHtml = `<strong>${totalEntries}</strong> total entries<br>` + 
+                    recentEntries.map(entry => 
+                        `<div style="margin-bottom: 8px; font-size: 12px;">${entry.callName} - ${entry.className}</div>`
+                    ).join('');
+            }
+            document.getElementById('recentEntries').innerHTML = recentEntriesHtml;
+        }
+
+        function generateTrialName() {
+            const today = new Date();
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[today.getMonth()];
+            const year = today.getFullYear();
             
-            const regNumber = document.getElementById('regNumber').value;
-            const callName = document.getElementById('callName').textContent;
-            const handler = document.getElementById('handlerName').value;
-            const contactEmail = document.getElementById('contactEmail').value;
-            const waiverAccepted = document.getElementById('waiverAccepted').checked;
+            const clubShort = currentUser ? currentUser.clubName.split(' ')[0] : 'Club';
+            return `${clubShort} ${month} ${year} Trial`;
+        }
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('dataStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // Initialize application
+        window.onload = function() {
+            console.log('🚀 Trial Management System initializing...');
+            initializeData();
+            updateTrialOptions();
+            updateDataStatusDisplay();
             
-            if (!regNumber || !handler || callName === 'Not found' || callName === '') {
-                alert('Please complete all required fields and ensure registration number is valid');
-                return;
-            }
+            // Try to auto-load dataforsite.xlsx after a short delay
+            setTimeout(() => {
+                loadDataForSiteFile();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>Type: entryType
+                        });
+                    });
 
-            if (!waiverAccepted) {
-                alert('You must accept the waiver to submit an entry.');
-                return;
-            }
+                    if (selectedEntries.length === 0) {
+                        alert('Please select at least one trial entry');
+                        return;
+                    }
 
-            const selectedEntries = [];
-            document.querySelectorAll('input[name="trialEntry"]:checked').forEach(checkbox => {
-                const [configIndex, entryType] = checkbox.value.split('-');
-                const config = trialConfig[parseInt(configIndex)];
-                selectedEntries.push({
-                    ...config,
-                    entryType: entryType
+                    selectedEntries.forEach(entry => {
+                        entryResults.push({
+                            regNumber: regNumber,
+                            callName: callName,
+                            handler: handler,
+                            contactEmail: contactEmail,
+                            date: entry.date,
+                            className: entry.className,
+                            round: entry.roundNum,
+                            judge: entry.judge,
+                            entryType: entry.entryType,
+                            waiverAccepted: waiverAccepted,
+                            timestamp: new Date().toISOString()
+                        });
+                    });
+
+                    updateResultsDisplay();
+                    updateDashboard();
+                    showStatusMessage(`${selectedEntries.length} entries submitted successfully!`, 'success');
+                    clearForm();
                 });
-            });
-
-            if (selectedEntries.length === 0) {
-                alert('Please select at least one trial entry');
-                return;
             }
-
-            // Add each selected entry as a separate row
-            selectedEntries.forEach(entry => {
-                entryResults.push({
-                    regNumber: regNumber,
-                    callName: callName,
-                    handler: handler,
-                    contactEmail: contactEmail,
-                    date: entry.date,
-                    className: entry.className,
-                    round: entry.roundNum,
-                    judge: entry.judge,
-                    entryType: entry.entryType,
-                    waiverAccepted: waiverAccepted,
-                    timestamp: new Date().toISOString()
-                });
-            });
-
-            updateResultsDisplay();
-            updateDashboard();
-            showStatusMessage(`${selectedEntries.length} entries submitted successfully!`, 'success');
-            clearForm();
         });
 
         function clearForm() {
-            document.getElementById('entryForm')?.reset();
+            const entryForm = document.getElementById('entryForm');
+            if (entryForm) {
+                entryForm.reset();
+            }
             document.getElementById('callName').textContent = '';
             document.querySelectorAll('input[name="trialEntry"]').forEach(cb => cb.checked = false);
         }
@@ -891,89 +852,7 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                     entry.regNumber,
                     entry.callName,
                     entry.handler,
-                    entry.contactEmail,
-                    entry.date,
-                    entry.judge,
-                    entry.className,
-                    entry.round,
-                    entry.entryType || 'regular',
-                    entry.timestamp
-                ].join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function exportAllData() {
-            if (entryResults.length === 0) {
-                alert('No data to export');
-                return;
-            }
-            exportToCSV();
-        }
-
-        function updateDashboard() {
-            let activeTrialsHtml = 'No active trials';
-            if (trialConfig.length > 0) {
-                const uniqueDates = [...new Set(trialConfig.map(t => t.date))];
-                const trialName = trialMetadata.trialName || 'Current Trial';
-                activeTrialsHtml = `<strong>${trialName}</strong><br>${uniqueDates.length} trial days configured`;
-            }
-            document.getElementById('activeTrials').innerHTML = activeTrialsHtml;
-
-            let recentEntriesHtml = 'No recent entries';
-            if (entryResults.length > 0) {
-                const totalEntries = entryResults.length;
-                const recentEntries = entryResults.slice(-3);
-                recentEntriesHtml = `<strong>${totalEntries}</strong> total entries<br>` + 
-                    recentEntries.map(entry => 
-                        `<div style="margin-bottom: 8px; font-size: 12px;">${entry.callName} - ${entry.className}</div>`
-                    ).join('');
-            }
-            document.getElementById('recentEntries').innerHTML = recentEntriesHtml;
-        }
-
-        function generateTrialName() {
-            const today = new Date();
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const month = monthNames[today.getMonth()];
-            const year = today.getFullYear();
-            
-            const clubShort = currentUser ? currentUser.clubName.split(' ')[0] : 'Club';
-            return `${clubShort} ${month} ${year} Trial`;
-        }
-
-        function showStatusMessage(message, type) {
-            const statusDiv = document.getElementById('dataStatus');
-            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 3000);
-        }
-
-        // Initialize application
-        window.onload = function() {
-            console.log('🚀 Trial Management System initializing...');
-            initializeData();
-            updateTrialOptions();
-            updateDataStatusDisplay();
-            
-            // Try to auto-load dataforsite.xlsx after a short delay
-            setTimeout(() => {
-                loadDataForSiteFile();
-            }, 1000);
-        };
-    </script>
-</body>
-</html>
-                <!DOCTYPE html>
+                    entry<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1054,7 +933,7 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
             margin-bottom: 20px;
         }
         
-        /* Trial Setup Styles - Exact from working file */
+        /* Trial Setup Styles */
         .day-container {
             border: 2px solid #2c5aa0;
             margin: 20px 0;
@@ -1372,32 +1251,6 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
             border: 1px solid #f5c6cb;
         }
         
-        /* Results display improvements */
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .results-table th {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 15px;
-            text-align: left;
-            vertical-align: top;
-        }
-        .results-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: top;
-        }
-        .results-table tr:hover {
-            background: #f8f9fa;
-        }
-        
         .day-group {
             background: #f8f9fa;
             padding: 15px;
@@ -1512,628 +1365,8 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                     <div class="form-group" style="flex-direction: column; align-items: stretch;">
                         <label class="label">Club Name:</label>
                         <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
-                    <p style="font-size: 14px; color: #666;">Share this link with participants to register for the trial</p>
-                </div>
-            </div>
-
-            <!-- Entry Form Tab -->
-            <div id="entry" class="tab-content">
-                <div class="initial-question">
-                    <h3>Trial Entry Form</h3>
-                    <form id="entryForm">
-                        <div class="form-group">
-                            <span class="label">Registration Number:</span>
-                            <div class="typeahead-container">
-                                <input type="text" id="regNumber" class="typeahead-input" 
-                                       placeholder="Type registration number" 
-                                       onkeyup="handleRegNumberTypeahead(this)" 
-                                       onblur="hideRegNumberDropdown()" 
-                                       onfocus="showRegNumberDropdown()">
-                                <div id="regNumberDropdown" class="typeahead-dropdown"></div>
-                            </div>
-                            <span id="callName" style="font-weight: bold; color: #667eea;"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <span class="label">Handler Name:</span>
-                            <input type="text" id="handlerName" placeholder="Handler name" required>
-                        </div>
-
-                        <div class="form-group">
-                            <span class="label">Contact Email:</span>
-                            <input type="email" id="contactEmail" placeholder="your.email@example.com" required>
-                        </div>
-
-                        <div id="trialOptionsContainer">
-                            <h4>Available Trial Options</h4>
-                            <div id="trialOptions"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
-                                <input type="checkbox" id="waiverAccepted" required style="margin-top: 4px; transform: scale(1.2);">
-                                <span>I have read and agree to the Liability Waiver and Agreement. This agreement must be accepted for a valid entry.</span>
-                            </label>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit">Submit Entry</button>
-                            <button type="button" onclick="clearForm()">Clear Form</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Running Orders Tab -->
-            <div id="runningOrders" class="tab-content">
-                <div class="initial-question">
-                    <h3>🏃‍♂️ Running Order Management</h3>
-                    <p>Generate and arrange running orders from trial entries</p>
-                    
-                    <div class="control-legend">
-                        <div class="control-legend-title">How to Reorder Entries:</div>
-                        <strong>⋮⋮</strong> Drag handle - drag and drop to new position | 
-                        <strong>↑↓</strong> Arrow buttons - move up/down one position | 
-                        <strong>TOP/BOT</strong> Quick move to first/last position |
-                        <strong>#</strong> Position numbers show current order
                     </div>
-                    
-                    <div class="form-group">
-                        <button onclick="generateRunningOrdersFromEntries()">Generate Running Orders</button>
-                        <button onclick="printRunningOrders()">Print Running Orders</button>
-                        <button onclick="confirmAndGenerateScoreSheets()" style="background: linear-gradient(45deg, #FF6B6B, #ee5a52); font-size: 16px; padding: 15px 30px;">✓ Confirm & Generate Score Sheets</button>
-                    </div>
-                    
-                    <div id="runningOrderStatus"></div>
-                    <div id="runningOrdersDisplay"></div>
-                </div>
-            </div>
-
-            <!-- Edit Entry Tab -->
-            <div id="edit" class="tab-content">
-                <div class="initial-question">
-                    <h3>Edit Entry</h3>
-                    <div class="form-group">
-                        <span class="label">Search by Registration Number or Handler Name:</span>
-                        <input type="text" id="searchEntry" placeholder="Enter registration number or handler name" onkeyup="searchEntries()" style="width: 300px;">
-                    </div>
-                    <div id="searchResults" style="margin-top: 20px;"></div>
-                </div>
-            </div>
-
-            <!-- Results Tab -->
-            <div id="results" class="tab-content">
-                <div class="initial-question">
-                    <h3>Entry Results</h3>
-                    <button onclick="exportToCSV()">Export to CSV</button>
-                    <div id="resultsDisplay"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        // Global data storage
-        let dogData = [];
-        let availableClasses = [];
-        let availableJudges = [];
-        let trialConfig = [];
-        let entryResults = [];
-        let runningOrders = {};
-        let scoreSheets = {}; // New: Store score sheets data
-        let judgeNotes = {}; // New: Store judge notes and transcriptions
-        let trialMetadata = {}; // New: Store trial name, dates, club info
-        let totalDays = 0;
-        let savedDays = 0;
-        let currentUser = null;
-        let registeredClubs = [];
-
-        // Initialize with demo data + auto-load real data
-        function initializeData() {
-            // Start with demo data
-            dogData = [
-                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
-                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
-                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
-                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
-                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
-                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
-                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
-                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
-            ];
-            
-            // Demo classes and judges that work for the system
-            availableClasses = [
-                "Patrol 1", "Patrol 2", "Patrol 3",
-                "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
-                "Ranger 1", "Ranger 2", "Ranger 3",
-                "Investigator 1", "Investigator 2", "Investigator 3",
-                "Detective 1", "Detective 2", "Detective 3",
-                "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
-            ];
-            
-            availableJudges = [
-                "Sarah Knight", "Lane Michie", "Gary Truitt", 
-                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
-                "Judge Johnson", "Judge Williams", "Judge Davis"
-            ];
-
-            registeredClubs = [
-                {
-                    clubName: "Demo Dog Club",
-                    secretaryName: "Demo Secretary",
-                    email: "demo@example.com",
-                    password: "demo123",
-                    registrationDate: new Date().toISOString()
-                }
-            ];
-        }
-
-        // Enhanced data loading with proper GitHub integration from CWAGS tracker
-        async function loadDataForSiteFile() {
-            const statusDiv = document.getElementById('autoLoadStatus');
-            
-            try {
-                console.log('🔄 Attempting to auto-load dataforsite.xlsx...');
-                statusDiv.innerHTML = `
-                    <h4>🔄 Loading dog database...</h4>
-                    <p>Fetching dataforsite.xlsx from server...</p>
-                `;
-                
-                // Set a timeout to prevent hanging
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Loading timeout')), 5000)
-                );
-                
-                const fetchPromise = fetch('dataforsite.xlsx', {
-                    method: 'GET',
-                    cache: 'no-cache'
-                });
-                
-                const response = await Promise.race([fetchPromise, timeoutPromise]);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                console.log('✅ File fetched successfully');
-                statusDiv.innerHTML = `
-                    <h4>🔄 Processing Excel data...</h4>
-                    <p>Reading and parsing Excel file...</p>
-                `;
-                
-                const arrayBuffer = await response.arrayBuffer();
-                console.log('📄 File size:', arrayBuffer.byteLength, 'bytes');
-                
-                // Process with SheetJS
-                const workbook = XLSX.read(new Uint8Array(arrayBuffer), { 
-                    cellStyles: true, 
-                    cellFormulas: true, 
-                    cellDates: true 
-                });
-                
-                console.log('📊 Workbook sheets:', workbook.SheetNames);
-                
-                // Process the data sheet
-                const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1, dateNF: 'yyyy-mm-dd'});
-                
-                console.log('📋 Raw data rows:', jsonData.length);
-                
-                if (jsonData.length > 1) {
-                    const processedDogs = [];
-                    let processedCount = 0;
-                    
-                    // Process each row - expected format: [RegNumber, CallName, Date, Level, Results, Judge, Points]
-                    // We want unique dogs, so extract from column A (reg numbers) and B (call names)
-                    const uniqueDogs = new Map();
-                    
-                    jsonData.slice(1).forEach((row, index) => {
-                        if (row && Array.isArray(row) && row.length >= 2) {
-                            const regNumber = row[0] ? String(row[0]).trim() : '';
-                            const callName = row[1] ? String(row[1]).trim() : '';
-                            
-                            // Only add valid, unique dog records
-                            if (regNumber && callName && 
-                                regNumber.length > 5 && 
-                                callName.length > 1 && 
-                                regNumber.includes('-') && 
-                                !uniqueDogs.has(regNumber)) {
-                                
-                                uniqueDogs.set(regNumber, {
-                                    regNumber: regNumber,
-                                    callName: callName,
-                                    handler: '', // Will be filled in during entry
-                                    fullName: callName
-                                });
-                                processedCount++;
-                            }
-                        }
-                    });
-
-                    const processedArray = Array.from(uniqueDogs.values());
-                    
-                    // Update global data if we got good results
-                    if (processedArray.length > 50) { // Only update if we got substantial data
-                        dogData = processedArray;
-                        console.log('✅ Successfully loaded', dogData.length, 'unique dogs from dataforsite.xlsx');
-                        
-                        // Extract unique classes and judges from the data if available
-                        const classesFromData = new Set();
-                        const judgesFromData = new Set();
-                        
-                        jsonData.slice(1).forEach(row => {
-                            if (row && row.length >= 6) {
-                                const level = row[3] ? String(row[3]).trim() : '';
-                                const judge = row[5] ? String(row[5]).trim() : '';
-                                
-                                if (level && level.length > 2) classesFromData.add(level);
-                                if (judge && judge.length > 3) judgesFromData.add(judge);
-                            }
-                        });
-                        
-                        if (classesFromData.size > 5) {
-                            availableClasses = [...classesFromData].sort();
-                        }
-                        if (judgesFromData.size > 3) {
-                            availableJudges = [...judgesFromData].sort();
-                        }
-                        
-                        // Update displays
-                        updateDataStatusDisplay();
-                        updateDashboard();
-                        
-                        statusDiv.className = 'data-loading-status success';
-                        statusDiv.innerHTML = `
-                            <h4>✅ Database loaded successfully!</h4>
-                            <p>🐕 ${dogData.length} dogs loaded from dataforsite.xlsx</p>
-                            <p>🏆 ${availableClasses.length} classes available | 👨‍⚖️ ${availableJudges.length} judges available</p>
-                        `;
-                        
-                        // Hide the status after 5 seconds
-                        setTimeout(() => {
-                            statusDiv.style.display = 'none';
-                        }, 5000);
-                        
-                    } else {
-                        throw new Error(`Only found ${processedArray.length} valid dogs - keeping demo data`);
-                    }
-                    
-                } else {
-                    throw new Error('Excel file appears empty or invalid');
-                }
-                
-            } catch (error) {
-                console.log('ℹ️ Auto-load failed (this is normal if file not available):', error.message);
-                
-                statusDiv.className = 'data-loading-status error';
-                statusDiv.innerHTML = `
-                    <h4>⚠️ Auto-load not available</h4>
-                    <p>Could not automatically load dataforsite.xlsx: ${error.message}</p>
-                    <p>💡 You can manually upload your Excel file using the upload section below</p>
-                `;
-                
-                // Hide the error status after 8 seconds
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 8000);
-            }
-        }
-
-        // Login/Registration Functions
-        function showLoginTab(tab) {
-            document.querySelectorAll('#loginSection .tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('#loginSection .nav-tab').forEach(t => t.classList.remove('active'));
-            
-            document.getElementById(tab + 'Form').classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const clubName = document.getElementById('loginClubName').value;
-            const secretaryName = document.getElementById('loginSecretaryName').value;
-            const password = document.getElementById('loginPassword').value;
-
-            const club = registeredClubs.find(c => 
-                c.clubName.toLowerCase() === clubName.toLowerCase() &&
-                c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
-                c.password === password
-            );
-
-            if (club) {
-                currentUser = club;
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('clubInfo').textContent = club.clubName;
-                document.getElementById('secretaryInfo').textContent = `Secretary: ${club.secretaryName}`;
-                updateDashboard();
-                updateTrialOptions();
-            } else {
-                alert('Invalid credentials. Try Demo Dog Club / Demo Secretary / demo123');
-            }
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            const clubName = document.getElementById('registerClubName').value;
-            const secretaryName = document.getElementById('registerSecretaryName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-
-            if (password !== confirmPassword) {
-                alert('Passwords do not match');
-                return;
-            }
-
-            const existingClub = registeredClubs.find(c => c.clubName.toLowerCase() === clubName.toLowerCase());
-            if (existingClub) {
-                alert('Club name already registered');
-                return;
-            }
-
-            const newClub = {
-                clubName,
-                secretaryName,
-                email,
-                password,
-                registrationDate: new Date().toISOString()
-            };
-
-            registeredClubs.push(newClub);
-            alert('Club registered successfully! You can now sign in.');
-            showLoginTab('login');
-        }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'block';
-        }
-
-        // Tab Management
-        function showTab(tabName, event) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function showEntryForm() {
-            showTab('entry', event);
-        }
-
-        // Data status update functions
-        function updateDataStatusDisplay() {
-            // Update dashboard
-            document.getElementById('dogCount').textContent = dogData.length;
-            document.getElementById('classCount').textContent = availableClasses.length;
-            document.getElementById('judgeCount').textContent = availableJudges.length;
-            
-            // Update setup tab
-            document.getElementById('dogCountStatus').textContent = dogData.length;
-            document.getElementById('classCountStatus').textContent = availableClasses.length;
-            document.getElementById('judgeCountStatus').textContent = availableJudges.length;
-            
-            // Update data source indicator
-            const dataSource = dogData.length > 8 ? 'Loaded from Excel' : 'Demo data';
-            document.getElementById('dataSource').textContent = dataSource;
-        }
-
-        function showDataPreview() {
-            const previewDiv = document.getElementById('dataPreview');
-            const isVisible = previewDiv.style.display !== 'none';
-            
-            if (isVisible) {
-                previewDiv.style.display = 'none';
-                return;
-            }
-            
-            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
-            
-            // Dogs preview
-            html += '<div><h6>🐕 Sample Dogs:</h6><div style="font-size: 12px;">';
-            dogData.slice(0, 5).forEach(dog => {
-                html += `<div>${dog.regNumber} - ${dog.callName}</div>`;
-            });
-            if (dogData.length > 5) html += `<div style="color: #666;">...and ${dogData.length - 5} more</div>`;
-            html += '</div></div>';
-            
-            // Classes preview
-            html += '<div><h6>🏆 Available Classes:</h6><div style="font-size: 12px;">';
-            availableClasses.slice(0, 5).forEach(className => {
-                html += `<div>${className}</div>`;
-            });
-            if (availableClasses.length > 5) html += `<div style="color: #666;">...and ${availableClasses.length - 5} more</div>`;
-            html += '</div></div>';
-            
-            // Judges preview
-            html += '<div><h6>👨‍⚖️ Available Judges:</h6><div style="font-size: 12px;">';
-            availableJudges.slice(0, 5).forEach(judge => {
-                html += `<div>${judge}</div>`;
-            });
-            if (availableJudges.length > 5) html += `<div style="color: #666;">...and ${availableJudges.length - 5} more</div>`;
-            html += '</div></div>';
-            
-            html += '</div>';
-            
-            document.getElementById('previewContent').innerHTML = html;
-            previewDiv.style.display = 'block';
-        }
-
-        // Save/Load Complete Trial Functions
-        function saveCompleteTrialFile() {
-            const trialName = document.getElementById('trialSaveName').value.trim();
-            if (!trialName) {
-                alert('Please enter a trial name before saving');
-                return;
-            }
-
-            if (!currentUser) {
-                alert('Please log in before saving trials');
-                return;
-            }
-
-            // Package everything into one comprehensive file
-            const completeTrialData = {
-                // File metadata
-                fileInfo: {
-                    version: "1.0",
-                    createdBy: currentUser.secretaryName,
-                    clubName: currentUser.clubName,
-                    trialName: trialName,
-                    savedDate: new Date().toISOString(),
-                    description: `Complete trial data for ${trialName}`
-                },
-                
-                // Core trial data
-                trialMetadata: {
-                    trialName: trialName,
-                    totalDays: totalDays,
-                    savedDays: savedDays,
-                    setupComplete: savedDays === totalDays,
-                    entryCount: entryResults.length
-                },
-                
-                // All data arrays
-                dogData: dogData,
-                availableClasses: availableClasses,
-                availableJudges: availableJudges,
-                trialConfig: trialConfig,
-                entryResults: entryResults,
-                runningOrders: runningOrders,
-                scoreSheets: scoreSheets,
-                judgeNotes: judgeNotes,
-                
-                // Current state
-                currentState: {
-                    hasRunningOrders: Object.keys(runningOrders).length > 0,
-                    hasEntries: entryResults.length > 0,
-                    hasScoreSheets: Object.keys(scoreSheets).length > 0
-                }
-            };
-
-            // Create downloadable file
-            const jsonString = JSON.stringify(completeTrialData, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            // Generate safe filename
-            const safeTrialName = trialName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const timestamp = new Date().toISOString().split('T')[0];
-            const filename = `trial_${safeTrialName}_${timestamp}.json`;
-            
-            // Download the file
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-
-            // Show success message
-            showSaveLoadMessage(`✅ Trial "${trialName}" saved successfully as ${filename}!<br>You can reload this file anytime to continue working.`, 'success');
-            
-            // Clear the input
-            document.getElementById('trialSaveName').value = '';
-        }
-
-        function loadCompleteTrialFile() {
-            const file = document.getElementById('trialLoadFile').files[0];
-            if (!file) return;
-
-            if (!currentUser) {
-                alert('Please log in before loading trials');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const completeTrialData = JSON.parse(e.target.result);
-                    
-                    // Validate file format
-                    if (!completeTrialData.fileInfo || !completeTrialData.trialConfig) {
-                        throw new Error('Invalid trial file format');
-                    }
-
-                    // Show confirmation dialog with file info
-                    const fileInfo = completeTrialData.fileInfo;
-                    const confirmMessage = `Load Trial: "${fileInfo.trialName}"?\n\n` +
-                        `Created by: ${fileInfo.createdBy} (${fileInfo.clubName})\n` +
-                        `Saved: ${new Date(fileInfo.savedDate).toLocaleString()}\n` +
-                        `Entries: ${completeTrialData.entryResults?.length || 0}\n` +
-                        `Running Orders: ${Object.keys(completeTrialData.runningOrders || {}).length > 0 ? 'Yes' : 'No'}\n\n` +
-                        `This will replace your current trial data.`;
-
-                    if (!confirm(confirmMessage)) {
-                        return;
-                    }
-
-                    // Load all data
-                    dogData = completeTrialData.dogData || [];
-                    availableClasses = completeTrialData.availableClasses || [];
-                    availableJudges = completeTrialData.availableJudges || [];
-                    trialConfig = completeTrialData.trialConfig || [];
-                    entryResults = completeTrialData.entryResults || [];
-                    runningOrders = completeTrialData.runningOrders || {};
-                    scoreSheets = completeTrialData.scoreSheets || {};
-                    judgeNotes = completeTrialData.judgeNotes || {};
-                    
-                    // Restore trial state
-                    if (completeTrialData.trialMetadata) {
-                        totalDays = completeTrialData.trialMetadata.totalDays || 0;
-                        savedDays = completeTrialData.trialMetadata.savedDays || 0;
-                        trialMetadata = completeTrialData.trialMetadata;
-                    }
-
-                    // Update all displays
-                    updateTrialOptions();
-                    updateResultsDisplay();
-                    updateDashboard();
-                    updateDataStatusDisplay();
-                    
-                    // Show running orders if they exist
-                    if (Object.keys(runningOrders).length > 0) {
-                        displayRunningOrders();
-                    }
-
-                    // Show success message with loaded data summary
-                    const summary = `
-                        <strong>✅ Trial "${fileInfo.trialName}" loaded successfully!</strong><br>
-                        📊 ${entryResults.length} entries loaded<br>
-                        🐕 ${dogData.length} dogs in database<br>
-                        📅 ${totalDays} trial days configured<br>
-                        ${Object.keys(runningOrders).length > 0 ? '🏃‍♂️ Running orders restored<br>' : ''}
-                        ${Object.keys(scoreSheets).length > 0 ? '📝 Score sheets restored<br>' : ''}
-                    `;
-                    
-                    showSaveLoadMessage(summary, 'success');
-
-                    // If trial setup was complete, show the entry form link
-                    if (savedDays === totalDays && totalDays > 0) {
-                        document.getElementById('entryFormLink').style.display = 'block';
-                    }
-
-                    // Clear the file input
-                    document.getElementById('trialLoadFile').value = '';
-
-                } catch (error) {
-                    showSaveLoadMessage(`❌ Error loading trial file: ${error.message}`, 'danger');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function showSaveLoadMessage(message, type) {
-            const statusDiv = document.getElementById('saveLoadStatus');
-            statusDiv.innerHTML = `<div class="alert alert-${type}" style="margin-top: 15px;">${message}</div>`;
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 8000);
-        }<div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <div class="form-group" style="flex-direction: column; align-items: stretch;">
                         <label class="label">Secretary Name:</label>
                         <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
                     </div>
@@ -2318,3 +1551,723 @@ const regNumber = row[0] ? String(row[0]).trim() : '';
                     <div style="margin: 15px 0;">
                         <a href="#" id="generatedEntryLink" style="display: inline-block; padding: 15px 30px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);" onclick="showEntryForm()">Go to Entry Form</a>
                     </div>
+                    <p style="font-size: 14px; color: #666;">Share this link with participants to register for the trial</p>
+                </div>
+            </div>
+
+            <!-- Entry Form Tab -->
+            <div id="entry" class="tab-content">
+                <div class="initial-question">
+                    <h3>Trial Entry Form</h3>
+                    <form id="entryForm">
+                        <div class="form-group">
+                            <span class="label">Registration Number:</span>
+                            <div class="typeahead-container">
+                                <input type="text" id="regNumber" class="typeahead-input" 
+                                       placeholder="Type registration number" 
+                                       onkeyup="handleRegNumberTypeahead(this)" 
+                                       onblur="hideRegNumberDropdown()" 
+                                       onfocus="showRegNumberDropdown()">
+                                <div id="regNumberDropdown" class="typeahead-dropdown"></div>
+                            </div>
+                            <span id="callName" style="font-weight: bold; color: #667eea;"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="label">Handler Name:</span>
+                            <input type="text" id="handlerName" placeholder="Handler name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="label">Contact Email:</span>
+                            <input type="email" id="contactEmail" placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div id="trialOptionsContainer">
+                            <h4>Available Trial Options</h4>
+                            <div id="trialOptions"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
+                                <input type="checkbox" id="waiverAccepted" required style="margin-top: 4px; transform: scale(1.2);">
+                                <span>I have read and agree to the Liability Waiver and Agreement. This agreement must be accepted for a valid entry.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">Submit Entry</button>
+                            <button type="button" onclick="clearForm()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Running Orders Tab -->
+            <div id="runningOrders" class="tab-content">
+                <div class="initial-question">
+                    <h3>🏃‍♂️ Running Order Management</h3>
+                    <p>Generate and arrange running orders from trial entries</p>
+                    
+                    <div class="control-legend">
+                        <div class="control-legend-title">How to Reorder Entries:</div>
+                        <strong>⋮⋮</strong> Drag handle - drag and drop to new position | 
+                        <strong>↑↓</strong> Arrow buttons - move up/down one position | 
+                        <strong>TOP/BOT</strong> Quick move to first/last position |
+                        <strong>#</strong> Position numbers show current order
+                    </div>
+                    
+                    <div class="form-group">
+                        <button onclick="generateRunningOrdersFromEntries()">Generate Running Orders</button>
+                        <button onclick="printRunningOrders()">Print Running Orders</button>
+                        <button onclick="confirmAndGenerateScoreSheets()" style="background: linear-gradient(45deg, #FF6B6B, #ee5a52); font-size: 16px; padding: 15px 30px;">✓ Confirm & Generate Score Sheets</button>
+                    </div>
+                    
+                    <div id="runningOrderStatus"></div>
+                    <div id="runningOrdersDisplay"></div>
+                </div>
+            </div>
+
+            <!-- Edit Entry Tab -->
+            <div id="edit" class="tab-content">
+                <div class="initial-question">
+                    <h3>Edit Entry</h3>
+                    <div class="form-group">
+                        <span class="label">Search by Registration Number or Handler Name:</span>
+                        <input type="text" id="searchEntry" placeholder="Enter registration number or handler name" onkeyup="searchEntries()" style="width: 300px;">
+                    </div>
+                    <div id="searchResults" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="results" class="tab-content">
+                <div class="initial-question">
+                    <h3>Entry Results</h3>
+                    <button onclick="exportToCSV()">Export to CSV</button>
+                    <div id="resultsDisplay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Global data storage
+        let dogData = [];
+        let availableClasses = [];
+        let availableJudges = [];
+        let trialConfig = [];
+        let entryResults = [];
+        let runningOrders = {};
+        let scoreSheets = {};
+        let judgeNotes = {};
+        let trialMetadata = {};
+        let totalDays = 0;
+        let savedDays = 0;
+        let currentUser = null;
+        let registeredClubs = [];
+
+        // Initialize with demo data
+        function initializeData() {
+            dogData = [
+                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
+                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
+                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
+                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
+                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
+                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
+                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
+                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
+            ];
+            
+            availableClasses = [
+                "Patrol 1", "Patrol 2", "Patrol 3",
+                "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
+                "Ranger 1", "Ranger 2", "Ranger 3",
+                "Investigator 1", "Investigator 2", "Investigator 3",
+                "Detective 1", "Detective 2", "Detective 3",
+                "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
+            ];
+            
+            availableJudges = [
+                "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
+                "Judge Johnson", "Judge Williams", "Judge Davis"
+            ];
+
+            registeredClubs = [
+                {
+                    clubName: "Demo Dog Club",
+                    secretaryName: "Demo Secretary",
+                    email: "demo@example.com",
+                    password: "demo123",
+                    registrationDate: new Date().toISOString()
+                }
+            ];
+        }
+
+        // Enhanced data loading with proper GitHub integration
+        async function loadDataForSiteFile() {
+            const statusDiv = document.getElementById('autoLoadStatus');
+            
+            try {
+                console.log('🔄 Attempting to auto-load dataforsite.xlsx...');
+                statusDiv.innerHTML = `
+                    <h4>🔄 Loading dog database...</h4>
+                    <p>Fetching dataforsite.xlsx from server...</p>
+                `;
+                
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Loading timeout')), 5000)
+                );
+                
+                const fetchPromise = fetch('dataforsite.xlsx', {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+                
+                const response = await Promise.race([fetchPromise, timeoutPromise]);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                console.log('✅ File fetched successfully');
+                statusDiv.innerHTML = `
+                    <h4>🔄 Processing Excel data...</h4>
+                    <p>Reading and parsing Excel file...</p>
+                `;
+                
+                const arrayBuffer = await response.arrayBuffer();
+                console.log('📄 File size:', arrayBuffer.byteLength, 'bytes');
+                
+                const workbook = XLSX.read(new Uint8Array(arrayBuffer), { 
+                    cellStyles: true, 
+                    cellFormulas: true, 
+                    cellDates: true 
+                });
+                
+                console.log('📊 Workbook sheets:', workbook.SheetNames);
+                
+                const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1, dateNF: 'yyyy-mm-dd'});
+                
+                console.log('📋 Raw data rows:', jsonData.length);
+                
+                if (jsonData.length > 1) {
+                    const uniqueDogs = new Map();
+                    let processedCount = 0;
+                    
+                    jsonData.slice(1).forEach((row, index) => {
+                        if (row && Array.isArray(row) && row.length >= 2) {
+                            const regNumber = row[0] ? String(row[0]).trim() : '';
+                            const callName = row[1] ? String(row[1]).trim() : '';
+                            
+                            if (regNumber && callName && 
+                                regNumber.length > 5 && 
+                                callName.length > 1 && 
+                                regNumber.includes('-') && 
+                                !uniqueDogs.has(regNumber)) {
+                                
+                                uniqueDogs.set(regNumber, {
+                                    regNumber: regNumber,
+                                    callName: callName,
+                                    handler: '',
+                                    fullName: callName
+                                });
+                                processedCount++;
+                            }
+                        }
+                    });
+
+                    const processedArray = Array.from(uniqueDogs.values());
+                    
+                    if (processedArray.length > 50) {
+                        dogData = processedArray;
+                        console.log('✅ Successfully loaded', dogData.length, 'unique dogs from dataforsite.xlsx');
+                        
+                        const classesFromData = new Set();
+                        const judgesFromData = new Set();
+                        
+                        jsonData.slice(1).forEach(row => {
+                            if (row && row.length >= 6) {
+                                const level = row[3] ? String(row[3]).trim() : '';
+                                const judge = row[5] ? String(row[5]).trim() : '';
+                                
+                                if (level && level.length > 2) classesFromData.add(level);
+                                if (judge && judge.length > 3) judgesFromData.add(judge);
+                            }
+                        });
+                        
+                        if (classesFromData.size > 5) {
+                            availableClasses = [...classesFromData].sort();
+                        }
+                        if (judgesFromData.size > 3) {
+                            availableJudges = [...judgesFromData].sort();
+                        }
+                        
+                        updateDataStatusDisplay();
+                        updateDashboard();
+                        
+                        statusDiv.className = 'data-loading-status success';
+                        statusDiv.innerHTML = `
+                            <h4>✅ Database loaded successfully!</h4>
+                            <p>🐕 ${dogData.length} dogs loaded from dataforsite.xlsx</p>
+                            <p>🏆 ${availableClasses.length} classes available | 👨‍⚖️ ${availableJudges.length} judges available</p>
+                        `;
+                        
+                        setTimeout(() => {
+                            statusDiv.style.display = 'none';
+                        }, 5000);
+                        
+                    } else {
+                        throw new Error(`Only found ${processedArray.length} valid dogs - keeping demo data`);
+                    }
+                    
+                } else {
+                    throw new Error('Excel file appears empty or invalid');
+                }
+                
+            } catch (error) {
+                console.log('ℹ️ Auto-load failed (this is normal if file not available):', error.message);
+                
+                statusDiv.className = 'data-loading-status error';
+                statusDiv.innerHTML = `
+                    <h4>⚠️ Auto-load not available</h4>
+                    <p>Could not automatically load dataforsite.xlsx: ${error.message}</p>
+                    <p>💡 You can manually upload your Excel file using the upload section below</p>
+                `;
+                
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 8000);
+            }
+        }
+
+        // Login/Registration Functions
+        function showLoginTab(tab) {
+            document.querySelectorAll('#loginSection .tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#loginSection .nav-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(tab + 'Form').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const clubName = document.getElementById('loginClubName').value;
+            const secretaryName = document.getElementById('loginSecretaryName').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const club = registeredClubs.find(c => 
+                c.clubName.toLowerCase() === clubName.toLowerCase() &&
+                c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
+                c.password === password
+            );
+
+            if (club) {
+                currentUser = club;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('clubInfo').textContent = club.clubName;
+                document.getElementById('secretaryInfo').textContent = `Secretary: ${club.secretaryName}`;
+                updateDashboard();
+                updateTrialOptions();
+            } else {
+                alert('Invalid credentials. Try Demo Dog Club / Demo Secretary / demo123');
+            }
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const clubName = document.getElementById('registerClubName').value;
+            const secretaryName = document.getElementById('registerSecretaryName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            const existingClub = registeredClubs.find(c => c.clubName.toLowerCase() === clubName.toLowerCase());
+            if (existingClub) {
+                alert('Club name already registered');
+                return;
+            }
+
+            const newClub = {
+                clubName,
+                secretaryName,
+                email,
+                password,
+                registrationDate: new Date().toISOString()
+            };
+
+            registeredClubs.push(newClub);
+            alert('Club registered successfully! You can now sign in.');
+            showLoginTab('login');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        }
+
+        // Tab Management
+        function showTab(tabName, event) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showEntryForm() {
+            showTab('entry', event);
+        }
+
+        // Data status update functions
+        function updateDataStatusDisplay() {
+            document.getElementById('dogCount').textContent = dogData.length;
+            document.getElementById('classCount').textContent = availableClasses.length;
+            document.getElementById('judgeCount').textContent = availableJudges.length;
+            
+            document.getElementById('dogCountStatus').textContent = dogData.length;
+            document.getElementById('classCountStatus').textContent = availableClasses.length;
+            document.getElementById('judgeCountStatus').textContent = availableJudges.length;
+            
+            const dataSource = dogData.length > 8 ? 'Loaded from Excel' : 'Demo data';
+            document.getElementById('dataSource').textContent = dataSource;
+        }
+
+        function showDataPreview() {
+            const previewDiv = document.getElementById('dataPreview');
+            const isVisible = previewDiv.style.display !== 'none';
+            
+            if (isVisible) {
+                previewDiv.style.display = 'none';
+                return;
+            }
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+            
+            html += '<div><h6>🐕 Sample Dogs:</h6><div style="font-size: 12px;">';
+            dogData.slice(0, 5).forEach(dog => {
+                html += `<div>${dog.regNumber} - ${dog.callName}</div>`;
+            });
+            if (dogData.length > 5) html += `<div style="color: #666;">...and ${dogData.length - 5} more</div>`;
+            html += '</div></div>';
+            
+            html += '<div><h6>🏆 Available Classes:</h6><div style="font-size: 12px;">';
+            availableClasses.slice(0, 5).forEach(className => {
+                html += `<div>${className}</div>`;
+            });
+            if (availableClasses.length > 5) html += `<div style="color: #666;">...and ${availableClasses.length - 5} more</div>`;
+            html += '</div></div>';
+            
+            html += '<div><h6>👨‍⚖️ Available Judges:</h6><div style="font-size: 12px;">';
+            availableJudges.slice(0, 5).forEach(judge => {
+                html += `<div>${judge}</div>`;
+            });
+            if (availableJudges.length > 5) html += `<div style="color: #666;">...and ${availableJudges.length - 5} more</div>`;
+            html += '</div></div>';
+            
+            html += '</div>';
+            
+            document.getElementById('previewContent').innerHTML = html;
+            previewDiv.style.display = 'block';
+        }
+
+        // Save/Load Complete Trial Functions
+        function saveCompleteTrialFile() {
+            const trialName = document.getElementById('trialSaveName').value.trim();
+            if (!trialName) {
+                alert('Please enter a trial name before saving');
+                return;
+            }
+
+            if (!currentUser) {
+                alert('Please log in before saving trials');
+                return;
+            }
+
+            const completeTrialData = {
+                fileInfo: {
+                    version: "1.0",
+                    createdBy: currentUser.secretaryName,
+                    clubName: currentUser.clubName,
+                    trialName: trialName,
+                    savedDate: new Date().toISOString(),
+                    description: `Complete trial data for ${trialName}`
+                },
+                trialMetadata: {
+                    trialName: trialName,
+                    totalDays: totalDays,
+                    savedDays: savedDays,
+                    setupComplete: savedDays === totalDays,
+                    entryCount: entryResults.length
+                },
+                dogData: dogData,
+                availableClasses: availableClasses,
+                availableJudges: availableJudges,
+                trialConfig: trialConfig,
+                entryResults: entryResults,
+                runningOrders: runningOrders,
+                scoreSheets: scoreSheets,
+                judgeNotes: judgeNotes,
+                currentState: {
+                    hasRunningOrders: Object.keys(runningOrders).length > 0,
+                    hasEntries: entryResults.length > 0,
+                    hasScoreSheets: Object.keys(scoreSheets).length > 0
+                }
+            };
+
+            const jsonString = JSON.stringify(completeTrialData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const safeTrialName = trialName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const timestamp = new Date().toISOString().split('T')[0];
+            const filename = `trial_${safeTrialName}_${timestamp}.json`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showSaveLoadMessage(`✅ Trial "${trialName}" saved successfully as ${filename}!<br>You can reload this file anytime to continue working.`, 'success');
+            document.getElementById('trialSaveName').value = '';
+        }
+
+        function loadCompleteTrialFile() {
+            const file = document.getElementById('trialLoadFile').files[0];
+            if (!file) return;
+
+            if (!currentUser) {
+                alert('Please log in before loading trials');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const completeTrialData = JSON.parse(e.target.result);
+                    
+                    if (!completeTrialData.fileInfo || !completeTrialData.trialConfig) {
+                        throw new Error('Invalid trial file format');
+                    }
+
+                    const fileInfo = completeTrialData.fileInfo;
+                    const confirmMessage = `Load Trial: "${fileInfo.trialName}"?\n\n` +
+                        `Created by: ${fileInfo.createdBy} (${fileInfo.clubName})\n` +
+                        `Saved: ${new Date(fileInfo.savedDate).toLocaleString()}\n` +
+                        `Entries: ${completeTrialData.entryResults?.length || 0}\n` +
+                        `Running Orders: ${Object.keys(completeTrialData.runningOrders || {}).length > 0 ? 'Yes' : 'No'}\n\n` +
+                        `This will replace your current trial data.`;
+
+                    if (!confirm(confirmMessage)) {
+                        return;
+                    }
+
+                    dogData = completeTrialData.dogData || [];
+                    availableClasses = completeTrialData.availableClasses || [];
+                    availableJudges = completeTrialData.availableJudges || [];
+                    trialConfig = completeTrialData.trialConfig || [];
+                    entryResults = completeTrialData.entryResults || [];
+                    runningOrders = completeTrialData.runningOrders || {};
+                    scoreSheets = completeTrialData.scoreSheets || {};
+                    judgeNotes = completeTrialData.judgeNotes || {};
+                    
+                    if (completeTrialData.trialMetadata) {
+                        totalDays = completeTrialData.trialMetadata.totalDays || 0;
+                        savedDays = completeTrialData.trialMetadata.savedDays || 0;
+                        trialMetadata = completeTrialData.trialMetadata;
+                    }
+
+                    updateTrialOptions();
+                    updateResultsDisplay();
+                    updateDashboard();
+                    updateDataStatusDisplay();
+                    
+                    if (Object.keys(runningOrders).length > 0) {
+                        displayRunningOrders();
+                    }
+
+                    const summary = `
+                        <strong>✅ Trial "${fileInfo.trialName}" loaded successfully!</strong><br>
+                        📊 ${entryResults.length} entries loaded<br>
+                        🐕 ${dogData.length} dogs in database<br>
+                        📅 ${totalDays} trial days configured<br>
+                        ${Object.keys(runningOrders).length > 0 ? '🏃‍♂️ Running orders restored<br>' : ''}
+                        ${Object.keys(scoreSheets).length > 0 ? '📝 Score sheets restored<br>' : ''}
+                    `;
+                    
+                    showSaveLoadMessage(summary, 'success');
+
+                    if (savedDays === totalDays && totalDays > 0) {
+                        document.getElementById('entryFormLink').style.display = 'block';
+                    }
+
+                    document.getElementById('trialLoadFile').value = '';
+
+                } catch (error) {
+                    showSaveLoadMessage(`❌ Error loading trial file: ${error.message}`, 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showSaveLoadMessage(message, type) {
+            const statusDiv = document.getElementById('saveLoadStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}" style="margin-top: 15px;">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 8000);
+        }
+
+        function loadExcelData() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { 
+                        type: 'array',
+                        cellStyles: true, 
+                        cellFormulas: true, 
+                        cellDates: true 
+                    });
+                    
+                    console.log('📊 Excel file loaded, sheets:', workbook.SheetNames);
+                    
+                    const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1, dateNF: 'yyyy-mm-dd'});
+                    
+                    console.log('📋 Raw data rows:', jsonData.length);
+                    
+                    if (jsonData.length > 1) {
+                        const uniqueDogs = new Map();
+                        let processedCount = 0;
+                        
+                        jsonData.slice(1).forEach((row, index) => {
+                            if (row && Array.isArray(row) && row.length >= 2) {
+                                const regNumber = row[0] ? String(row[0]).trim() : '';
+                                const callName = row[1] ? String(row[1]).trim() : '';
+                                
+                                if (regNumber && callName && 
+                                    regNumber.length > 5 && 
+                                    callName.length > 1 && 
+                                    regNumber.includes('-') && 
+                                    !uniqueDogs.has(regNumber)) {
+                                    
+                                    uniqueDogs.set(regNumber, {
+                                        regNumber: regNumber,
+                                        callName: callName,
+                                        handler: '',
+                                        fullName: callName
+                                    });
+                                    processedCount++;
+                                }
+                            }
+                        });
+
+                        const processedArray = Array.from(uniqueDogs.values());
+                        
+                        if (processedArray.length > 10) {
+                            dogData = processedArray;
+                            
+                            const classesFromData = new Set();
+                            const judgesFromData = new Set();
+                            
+                            jsonData.slice(1).forEach(row => {
+                                if (row && row.length >= 6) {
+                                    const level = row[3] ? String(row[3]).trim() : '';
+                                    const judge = row[5] ? String(row[5]).trim() : '';
+                                    
+                                    if (level && level.length > 2) classesFromData.add(level);
+                                    if (judge && judge.length > 3) judgesFromData.add(judge);
+                                }
+                            });
+                            
+                            if (classesFromData.size > 5) {
+                                availableClasses = [...classesFromData].sort();
+                            }
+                            if (judgesFromData.size > 3) {
+                                availableJudges = [...judgesFromData].sort();
+                            }
+
+                            updateDataStatusDisplay();
+                            updateDashboard();
+                            showStatusMessage(`✅ Excel data loaded successfully!<br>🐕 ${dogData.length} unique dogs imported<br>🏆 ${availableClasses.length} classes<br>👨‍⚖️ ${availableJudges.length} judges`, 'success');
+                        } else {
+                            const headerData = XLSX.utils.sheet_to_json(dataSheet);
+                            if (headerData.length > 0) {
+                                const altProcessed = headerData.map(row => ({
+                                    regNumber: row['Registration Number'] || row.regNumber || row.RegNumber || row['Reg Number'],
+                                    callName: row['Call Name'] || row.callName || row.CallName || row['Dog Name'],
+                                    handler: row['Handler'] || row.handler || row.HandlerName || ''
+                                })).filter(dog => dog.regNumber && dog.callName);
+                                
+                                if (altProcessed.length > 10) {
+                                    dogData = altProcessed;
+                                    updateDataStatusDisplay();
+                                    updateDashboard();
+                                    showStatusMessage(`✅ Excel data loaded (header format)!<br>🐕 ${dogData.length} dogs imported`, 'success');
+                                } else {
+                                    showStatusMessage('❌ Not enough valid data found in Excel file', 'warning');
+                                }
+                            } else {
+                                showStatusMessage('❌ No valid data found in Excel file', 'warning');
+                            }
+                        }
+                    } else {
+                        showStatusMessage('❌ Excel file appears empty', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Excel loading error:', error);
+                    showStatusMessage(`❌ Error reading Excel file: ${error.message}`, 'danger');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Continue with remaining functions...
+        function saveTrialData() {
+            if (!currentUser) {
+                alert("Please log in before saving the trial.");
+                return;
+            }
+            
+            if (!trialMetadata.trialName) {
+                const firstDate = trialConfig.length > 0 ? trialConfig[0].date : new Date().toISOString().split('T')[0];
+                trialMetadata.trialName = `${currentUser.clubName} Trial ${firstDate}`;
+            }
+            
+            trialMetadata.totalDays = totalDays;
+            trialMetadata.savedDays = savedDays;
+            trialMetadata.lastModified = new Date().toISOString();
+            
+            showStatusMessage("Trial configuration saved! Use 'Save Trial File' above to create a downloadable backup.", "success");
+        }
+
+        function generateDays() {
+            const numDays = parseInt(document.getElementById('trialDays').value);
+            if (!numDays || numDays < 1) {
+                alert('Please enter a valid number of days');
+                return;
+            }
+
+            totalDays = numDays;
+            savedDays = 0;
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= numDays; i++) {
+                createDaySection(i, container);
