@@ -36,6 +36,7 @@
             display: flex;
             border-bottom: 2px solid #e0e0e0;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
         .nav-tab {
             padding: 15px 25px;
@@ -44,6 +45,7 @@
             cursor: pointer;
             border-radius: 10px 10px 0 0;
             margin-right: 5px;
+            margin-bottom: 5px;
             font-weight: bold;
             transition: all 0.3s ease;
             color: #666;
@@ -76,186 +78,224 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
-        .day-container {
-            border: 2px solid #2c5aa0;
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
-        .day-header {
-            background: #2c5aa0;
-            color: white;
-            padding: 10px 15px;
-            margin: -20px -20px 20px -20px;
-            border-radius: 6px 6px 0 0;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .classes-section {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            border-left: 4px solid #ffc107;
-        }
-        .class-container {
-            border: 1px solid #28a745;
-            margin: 15px 0;
-            padding: 15px;
-            border-radius: 6px;
-            background: #f8fff8;
-        }
-        .class-header {
-            background: #28a745;
-            color: white;
-            padding: 8px 12px;
-            margin: -15px -15px 15px -15px;
-            border-radius: 4px 4px 0 0;
-            font-weight: bold;
-        }
-        .rounds-section {
-            background: #e7f3ff;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 10px 0;
-            border-left: 3px solid #007bff;
-        }
         .form-group {
             display: flex;
             align-items: center;
+            margin-bottom: 15px;
             gap: 15px;
-            margin: 10px 0;
-            flex-wrap: wrap;
         }
         .label {
+            min-width: 120px;
             font-weight: bold;
-            margin-right: 10px;
+            color: #333;
         }
-        
-        /* Typeahead dropdown styles */
-        .typeahead-container {
-            position: relative;
-            display: inline-block;
-        }
-        .typeahead-input {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            width: 250px;
-        }
-        .typeahead-input:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .typeahead-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-        .typeahead-item {
-            padding: 10px 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .typeahead-item:hover, .typeahead-item.highlighted {
-            background: #f8f9fa;
-        }
-        .typeahead-item:last-child {
-            border-bottom: none;
-        }
-        
         input, select, textarea {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
             font-size: 14px;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #667eea;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        input[type="number"] { width: 100px; }
-        input[type="text"] { width: 250px; }
-        input[type="date"] { width: 180px; }
-        input[type="email"] { width: 250px; }
-        input[type="password"] { width: 250px; }
-        select { width: 250px; }
-        textarea { width: 100%; min-height: 150px; resize: vertical; }
-        .yellow-highlight {
-            background-color: #ffff99 !important;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
         }
         button {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
+            padding: 12px 24px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: bold;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .data-upload {
-            background: #e8f4f8;
-            padding: 20px;
-            border-radius: 10px;
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
             margin-bottom: 20px;
         }
-        .entry-form-link {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            text-decoration: none;
-            display: inline-block;
-            margin: 20px 0;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        .entry-form-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-            text-decoration: none;
-            color: white;
-        }
-        .entry-link-message {
-            background: #e8f5e8;
-            border: 2px solid #28a745;
+        .dashboard-card {
+            background: white;
             padding: 20px;
             border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
         }
-        .entry-link-message h4 {
-            color: #28a745;
-            margin-bottom: 15px;
+        .dashboard-card h4 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        /* Running Orders Styles */
+        .running-order-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .running-order-table {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .table-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .table-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .entry-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+            min-height: 45px;
+        }
+        .entry-row:hover {
+            background: #f8f9fa;
+        }
+        .position-number {
+            min-width: 35px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+            background: #f0f0f0;
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        .drag-handle {
+            margin-right: 10px;
+            color: #999;
+            cursor: grab;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        .drag-handle:hover {
+            background: #e0e0e0;
+            color: #666;
+        }
+        .entry-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-right: 10px;
+        }
+        .handler-dog {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+        .entry-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .entry-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            align-items: center;
+        }
+        .move-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .move-btn:hover {
+            background: #495057;
+            transform: scale(1.1);
+        }
+        .move-btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .quick-move-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 9px;
+            transition: all 0.2s ease;
+        }
+        .quick-move-btn:hover {
+            background: #138496;
+        }
+        .quick-move-controls {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+        }
+        .control-legend {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #495057;
+        }
+        .control-legend-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .status-message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
         .alert {
             padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
         }
         .alert-success {
             background: #d4edda;
@@ -267,2252 +307,1002 @@
             color: #856404;
             border: 1px solid #ffeaa7;
         }
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .results-table th {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 15px;
-            text-align: left;
-            vertical-align: top;
-        }
-        .results-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: top;
-        }
-        .results-table tr:hover {
-            background: #f8f9fa;
-        }
-        .entry-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .day-group {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            margin-bottom: 20px;
-        }
-        .day-group-header {
-            font-weight: bold;
-            font-size: 16px;
-            color: #2c5aa0;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #2c5aa0;
-        }
-        .class-group {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid #28a745;
-        }
-        .class-group-header {
-            font-weight: bold;
-            color: #28a745;
-            margin-bottom: 10px;
-        }
-        .trial-option {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
-        }
-        .trial-option:hover {
-            border-color: #667eea;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        .trial-option label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-        .entry-type-options {
-            display: flex;
-            gap: 15px;
-            margin-left: 20px;
-        }
-        .entry-type-options label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 14px;
-        }
-        
-        /* Results display improvements */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .result-column {
-            background: white;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .column-header {
-            padding: 15px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            text-align: center;
-        }
-        .column-date {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .column-judge {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .column-class-round {
-            font-size: 14px;
-        }
-        .column-entries {
-            padding: 15px;
-        }
-        .entry-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-        .entry-item:last-child {
-            border-bottom: none;
-        }
-        .entry-type-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-        .badge-regular {
-            background: #28a745;
-            color: white;
-        }
-        .badge-feo {
-            background: #ffc107;
-            color: #333;
-        }
-        
-        /* Login specific styles */
-        .login-form-container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            max-width: 500px;
-            margin: 30px auto;
-        }
-        
-        /* Dashboard styles */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .dashboard-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .dashboard-card h4 {
-            color: #667eea;
-            margin-bottom: 15px;
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        /* Admin specific styles */
-        .admin-section {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        .admin-section h3 {
-            color: #856404;
-            margin-top: 0;
-        }
-
-        /* Score Sheet Print Styles */
-        .score-sheet {
-            page-break-after: always;
-            background: white;
-            padding: 0.75in 0.5in;
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            width: 8.5in;
-            height: 11in;
-            margin: 0;
-            box-sizing: border-box;
-            position: relative;
-        }
-        .score-sheet:last-child {
-            page-break-after: auto;
-        }
-        .score-sheet-header {
-            margin-bottom: 25px;
-            position: relative;
-        }
-        .score-sheet-title {
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .score-sheet-date {
-            position: absolute;
-            top: 0;
-            right: 0;
-            font-size: 12px;
-        }
-        .score-sheet-class {
-            font-size: 12px;
-            font-weight: bold;
-            margin: 15px 0 10px 0;
-        }
-        .score-sheet-round {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .round-label {
-            margin-right: 15px;
-        }
-        .round-boxes {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        .round-checkbox {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #000;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .round-number {
-            font-size: 12px;
-            margin-left: 3px;
-        }
-        .scent-header-section {
-            margin: 20px 0;
-        }
-        .scent-header-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-            border: 2px solid #000;
-        }
-        .scent-box {
-            border-right: 1px solid #000;
-            padding: 25px 10px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 12px;
-            background: white;
-        }
-        .scent-box:last-child {
-            border-right: none;
-        }
-        .scent-location-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-            border: 2px solid #000;
-            border-top: none;
-        }
-        .scent-location {
-            border-right: 1px solid #000;
-            padding: 15px 8px;
-            font-size: 10px;
-            min-height: 20px;
-        }
-        .scent-location:last-child {
-            border-right: none;
-        }
-        .faults-section {
-            font-size: 10px;
-            margin: 15px 0;
-            line-height: 1.3;
-        }
-        .scoring-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 2px solid #000;
-            margin-top: 15px;
-            font-size: 9px;
-        }
-        .scoring-table th,
-        .scoring-table td {
-            border: 1px solid #000;
-            text-align: center;
-            vertical-align: middle;
-            padding: 3px 1px;
-        }
-        .scoring-table th {
-            font-weight: bold;
-            font-size: 8px;
-        }
-        .team-header {
-            width: 80px;
-            font-size: 9px;
-            line-height: 1.1;
-        }
-        .team-cell {
-            width: 80px;
-            font-size: 9px;
-            line-height: 1.1;
-            height: 35px;
-            vertical-align: middle;
-        }
-        .scent-header-cell {
-            width: 20px;
-            font-size: 7px;
-            line-height: 1;
-            padding: 2px 1px;
-        }
-        .scent-data-cell {
-            width: 20px;
-            font-size: 7px;
-            height: 35px;
-        }
-        .fault-time-header {
-            width: 35px;
-            font-size: 8px;
-        }
-        .fault-time-cell {
-            width: 35px;
-            height: 35px;
-        }
-        .copyright-bottom {
-            position: absolute;
-            bottom: 0.5in;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-        }
-        @media print {
-            body { 
-                margin: 0 !important; 
-                padding: 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .running-order-grid {
+                grid-template-columns: 1fr;
             }
-            .container, #mainApp, #scoreSheetContainer { 
-                background: none !important; 
-                box-shadow: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                max-width: none !important;
+            .entry-row {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 12px;
             }
-            .score-sheet {
-                margin: 0 !important;
-                padding: 0.75in 0.5in !important;
-                box-shadow: none !important;
-                transform: none !important;
+            .entry-info {
+                margin-bottom: 8px;
             }
-            @page {
-                margin: 0;
-                size: letter;
+            .entry-controls {
+                flex-direction: row;
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-   <div class="container">
-       <!-- Site Host Admin Panel -->
-       <div id="adminSection" class="admin-section" style="display: none;">
-           <h3>🛠️ Site Host Admin Panel</h3>
-           <div class="dashboard-grid">
-               <div class="dashboard-card">
-                   <h4>Registered Clubs</h4>
-                   <div id="allClubsList">No clubs registered</div>
-                   <button onclick="exportAllClubData()" style="margin-top: 15px; width: 100%;">Export All Club Data</button>
-               </div>
-               <div class="dashboard-card">
-                   <h4>All Trial Entries</h4>
-                   <div id="allEntriesList">No entries</div>
-                   <button onclick="exportAllTrialData()" style="margin-top: 15px; width: 100%;">Export All Trial Data</button>
-               </div>
-           </div>
-           <div style="text-align: center; margin-top: 20px;">
-               <button onclick="hideAdminPanel()">Exit Admin Panel</button>
-           </div>
-       </div>
-
-       <!-- Login Section -->
-       <div id="loginSection" class="header" style="display: block;">
-           <h1>Trial Management System</h1>
-           <p>Multi-Club Trial Management Platform</p>
-           
-           <!-- Admin Access Button -->
-           <div style="text-align: center; margin-bottom: 20px;">
-               <button onclick="showAdminPanel()" style="background: linear-gradient(45deg, #dc3545, #c82333); font-size: 12px; padding: 8px 15px;">Site Host Admin Access</button>
-           </div>
-           
-           <div class="login-form-container">
-               <div class="nav-tabs" style="margin-bottom: 20px;">
-                   <button class="nav-tab active" onclick="showLoginTab('login')">Sign In</button>
-                   <button class="nav-tab" onclick="showLoginTab('register')">Register Club</button>
-               </div>
-               
-               <!-- Sign In Form -->
-               <div id="loginForm" class="tab-content active">
-                   <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
-                   <form onsubmit="handleLogin(event)">
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Club Name:</label>
-                           <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
-                       </div>
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Secretary Name:</label>
-                           <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
-                       </div>
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Password:</label>
-                           <input type="password" id="loginPassword" placeholder="Enter password" required style="width: 100%; margin-bottom: 20px;">
-                       </div>
-                       <div class="form-group" style="justify-content: center;">
-                           <button type="submit">Sign In</button>
-                       </div>
-                   </form>
-               </div>
-               
-               <!-- Register Form -->
-               <div id="registerForm" class="tab-content">
-                   <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
-                   <form onsubmit="handleRegister(event)">
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Club Name:</label>
-                           <input type="text" id="registerClubName" placeholder="Enter club name" required style="width: 100%; margin-bottom: 15px;">
-                       </div>
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Secretary Name:</label>
-                           <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" required style="width: 100%; margin-bottom: 15px;">
-                       </div>
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Email:</label>
-                           <input type="email" id="registerEmail" placeholder="Enter email address" required style="width: 100%; margin-bottom: 15px;">
-                       </div>
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Password:</label>
-                           <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" required minlength="6" style="width: 100%; margin-bottom: 15px;">
-                       </div>
-                       <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                           <label class="label">Confirm Password:</label>
-                           <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required style="width: 100%; margin-bottom: 20px;">
-                       </div>
-                       <div class="form-group" style="justify-content: center;">
-                           <button type="submit">Register Club</button>
-                       </div>
-                   </form>
-               </div>
-           </div>
-       </div>
-
-       <!-- Main Application -->
-       <div id="mainApp" style="display: none;">
-           <div class="header">
-               <h1>Trial Management System</h1>
-               <div style="display: flex; justify-content: space-between; align-items: center;">
-                   <p>Track judges across multiple days, classes, and rounds</p>
-                   <div style="text-align: right;">
-                       <div style="color: #667eea; font-weight: bold; margin-bottom: 5px;" id="clubInfo"></div>
-                       <div style="font-size: 14px; color: #666;" id="secretaryInfo"></div>
-                       <button onclick="logout()" style="margin-top: 10px; padding: 8px 15px; font-size: 12px;">Sign Out</button>
-                   </div>
-               </div>
-           </div>
-
-           <div class="nav-tabs">
-               <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
-               <button class="nav-tab" onclick="showTab('setup')">Trial Setup</button>
-               <button class="nav-tab" onclick="showTab('entry')">Entry Form</button>
-               <button class="nav-tab" onclick="showTab('edit')">Edit Entry</button>
-               <button class="nav-tab" onclick="showTab('results')">Results</button>
-           </div>
-
-           <!-- Dashboard Tab -->
-           <div id="dashboard" class="tab-content active">
-               <div class="initial-question">
-                   <h3>Club Dashboard</h3>
-                   <div id="dashboardContent">
-                       <div class="dashboard-grid">
-                           <div class="dashboard-card">
-                               <h4>Active Trials</h4>
-                               <div id="activeTrials">No active trials</div>
-                           </div>
-                           <div class="dashboard-card">
-                               <h4>Recent Entries</h4>
-                               <div id="recentEntries">No recent entries</div>
-                           </div>
-                           <div class="dashboard-card">
-                               <h4>Club Settings</h4>
-                               <div>
-                                   <button onclick="showWaiverSettings()" style="width: 100%; margin-bottom: 10px;">Customize Waiver Text</button>
-                                   <button onclick="exportTrialDocument()" style="width: 100%; margin-bottom: 10px;">Export Trial for Approval</button>
-                               </div>
-                           </div>
-                           <div class="dashboard-card">
-                               <h4>Quick Actions</h4>
-                               <div>
-                                   <button onclick="showTab('setup')" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
-                                   <button onclick="showTab('results')" style="width: 100%; margin-bottom: 10px;">View All Results</button>
-                                   <button onclick="showPrintScoreSheets()" style="width: 100%; margin-bottom: 10px;">Print Score Sheets</button>
-                                   <button onclick="exportAllData()" style="width: 100%;">Export All Data</button>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
-               </div>
-           </div>
-
-           <!-- Setup Tab -->
-           <div id="setup" class="tab-content">
-               <!-- Waiver Settings -->
-               <div id="waiverSettings" style="display: none; background: #e8f4f8; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                   <h3>Customize Club Waiver Text</h3>
-                   <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                       <label class="label">Waiver Text for Your Club:</label>
-                       <textarea id="clubWaiverText" placeholder="Enter your club's liability waiver text here..." style="width: 100%; height: 200px;"></textarea>
-                   </div>
-                   <div class="form-group">
-                       <button onclick="saveWaiverText()">Save Waiver Text</button>
-                       <button onclick="hideWaiverSettings()">Cancel</button>
-                   </div>
-               </div>
-
-               <div class="data-upload">
-                   <h3>Data Management</h3>
-                   <div class="form-group">
-                       <label class="label">Upload JSON Data:</label>
-                       <input type="file" id="jsonFile" accept=".json" onchange="loadJSONData()">
-                   </div>
-                   <div id="dataStatus"></div>
-               </div>
-
-               <div class="initial-question">
-                   <div class="form-group">
-                       <span class="label">How many days in trial?</span>
-                       <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number">
-                       <button onclick="generateDays()">Generate Days</button>
-                   </div>
-               </div>
-
-               <div id="daysContainer"></div>
-               <div id="entryFormLink" style="display: none; margin-top: 20px; padding: 20px; background: #e8f4f8; border-radius: 8px; text-align: center;">
-                   <h3 style="color: #2c5aa0;">Trial Setup Complete!</h3>
-                   <p>Your trial has been configured. You can now:</p>
-                   <div style="margin: 15px 0;">
-                       <button onclick="exportTrialDocument()" style="margin-right: 10px;">Export Trial Document for Approval</button>
-                       <button onclick="showEntryForm()">Preview Entry Form</button>
-                   </div>
-                   <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border: 1px solid #ffc107;">
-                       <h4 style="color: #856404; margin-top: 0;">Entry Form Link (For Publication After Approval):</h4>
-                       <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Share this link in your show premium once the trial is approved:</p>
-                       <input type="text" id="entryFormUrl" readonly style="width: 100%; background: #f8f9fa;" value="[This would be your actual website URL with trial ID]">
-                       <button onclick="copyEntryFormLink()" style="margin-top: 10px;">Copy Link</button>
-                   </div>
-               </div>
-           </div>
-
-           <!-- Entry Form Tab -->
-           <div id="entry" class="tab-content">
-               <div class="initial-question">
-                   <h3>Dog Entry Form</h3>
-                   <form id="entryForm">
-                       <div class="form-group">
-                           <span class="label">Registration Number:</span>
-                           <div class="typeahead-container">
-                               <input type="text" id="regNumber" class="typeahead-input" 
-                                      placeholder="Type registration number" 
-                                      onkeyup="handleRegNumberTypeahead(this)" 
-                                      onblur="hideRegNumberDropdown()" 
-                                      onfocus="showRegNumberDropdown()">
-                               <div id="regNumberDropdown" class="typeahead-dropdown"></div>
-                           </div>
-                           <span id="callName" style="font-weight: bold; color: #667eea;"></span>
-                       </div>
-                       
-                       <div class="form-group">
-                           <span class="label">Handler:</span>
-                           <input type="text" id="handlerName" placeholder="Enter handler name" required>
-                       </div>
-
-                       <div class="form-group">
-                           <span class="label">Email Address:</span>
-                           <input type="email" id="handlerEmail" placeholder="Enter email address" required>
-                       </div>
-
-                       <div id="trialOptionsContainer">
-                           <h4>Available Trial Options</h4>
-                           <div id="trialOptions"></div>
-                       </div>
-
-                       <div class="form-group" style="flex-direction: column; align-items: flex-start; margin: 20px 0;">
-                           <div id="waiverDisplay" style="background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 15px; max-height: 200px; overflow-y: auto; font-size: 12px; line-height: 1.4;">
-                               <h4 style="margin-top: 0; color: #495057;">LIABILITY WAIVER AND AGREEMENT</h4>
-                               <div id="waiverContent">
-                                   <p>I/we acknowledge that I am/we are familiar with the current rules applying to Canine-Work and Games Trials. I/we agree that the Host holding the Trial, Marla Williamson or any other officiate at trial, has the right to refuse entry for cause which the Host shall deem to be sufficient.</p>
-                                   
-                                   <p>Upon acceptance of this entry, I/we agree to hold Canine-Work And Games, LLC, and its members and officers, this Host, its members, directors, officers agents, show secretary, show chairperson, show committee and the owner or lessor of the premises and any employees of the aforementioned parties, any sponsors of this event, harmless from any claim or loss or injury which may be alleged to have been caused directly or indirectly to any person or thing by the act of this dog or handler while in or upon the show trial premises or grounds or near any entrance thereto.</p>
-                                   
-                                   <p>I/we further agree to hold the aforementioned parties harmless from any claim or loss of this dog by disappearance, theft, death or otherwise, and from any claim for damage or injury to the dog, whether any claim be caused or alleged to be caused by the negligence of the Host or any of the parties aforementioned, or by the negligence of any other person, or any other cause or causes.</p>
-                                   
-                                   <p>I/we hereby assume sole responsibility for, and agree to indemnify and save the aforementioned parties harmless from, any and all loss and expense (including legal fees) by reason of the liability imposed by law upon any of the aforementioned parties for damage because of bodily injuries, including death at any time resulting from, or sustained by any person or persons, including myself/ourselves or on account of damage to property, arising out of or in consequence of my/our participation in the Trial, howsoever such injuries, death or damage to property may be caused and whether or not the same may have been caused by negligence of the aforementioned parties or any of their employees or agents, or any other persons.</p>
-                                   
-                                   <p><strong>I/we agree to abide by the rules of C-WAGS currently in effect at the time of the trial. I/we testify that the dog entered is healthy and vaccinated or tittered. I/we certify that the dog entered is not dangerous to any person or other dog.</strong></p>
-                               </div>
-                           </div>
-                           
-                           <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
-                               <input type="checkbox" id="waiverAccepted" required style="margin-top: 4px; transform: scale(1.2);">
-                               <span>I have read and agree to the above Liability Waiver and Agreement. This agreement must be accepted for a valid entry.</span>
-                           </label>
-                       </div>
-
-                       <div class="form-group">
-                           <button type="submit">Submit Entry</button>
-                           <button type="button" onclick="clearForm()">Clear Form</button>
-                       </div>
-                   </form>
-               </div>
-           </div>
-
-           <!-- Edit Entry Tab -->
-           <div id="edit" class="tab-content">
-               <div class="initial-question">
-                   <h3>Edit Entry</h3>
-                   <div class="form-group">
-                       <span class="label">Search by Registration Number or Handler Name:</span>
-                       <input type="text" id="searchEntry" placeholder="Enter registration number or handler name" onkeyup="searchEntries()" style="width: 300px;">
-                   </div>
-                   <div id="searchResults" style="margin-top: 20px;"></div>
-               </div>
-           </div>
-
-           <!-- Results Tab -->
-           <div id="results" class="tab-content">
-               <div class="initial-question">
-                   <h3>Entry Results</h3>
-                   <button onclick="exportToCSV()">Export to CSV</button>
-                   <div id="resultsDisplay"></div>
-               </div>
-           </div>
-       </div>
-   </div>
-
-   <!-- Print Score Sheets Modal -->
-   <div id="printModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-       <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%;">
-           <h3>Print Score Sheets</h3>
-           <p>Select a trial date to generate score sheets:</p>
-           <div id="dateSelectionList" style="max-height: 300px; overflow-y: auto; margin: 20px 0;"></div>
-           <div style="text-align: center; margin-top: 20px;">
-               <button onclick="closePrintModal()" style="margin-right: 10px;">Cancel</button>
-           </div>
-       </div>
-   </div>
-
-   <!-- Entry Confirmation Modal -->
-   <div id="confirmationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-       <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 90%;">
-           <h3 style="color: #28a745;">Entry Submitted Successfully! ✅</h3>
-           <div id="confirmationContent"></div>
-           <div style="text-align: center; margin-top: 20px;">
-               <button onclick="closeConfirmationModal()" style="margin-right: 10px;">Close</button>
-               <button onclick="printConfirmation()">Print Confirmation</button>
-           </div>
-           <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; margin-top: 15px; font-size: 14px;">
-               <strong>📧 Email Confirmation:</strong> In a live system, a confirmation email would be automatically sent to <span id="confirmationEmail"></span>
-           </div>
-       </div>
-   </div>
-
-   <!-- Score Sheet Print Area -->
-   <div id="scoreSheetContainer" style="display: none;"></div>
-
-   <script>
-       // Global data storage
-       let dogData = [];
-       let availableClasses = [];
-       let availableJudges = [];
-       let trialConfig = [];
-       let entryResults = [];
-       let totalDays = 0;
-       let savedDays = 0;
-       let currentUser = null;
-       let registeredClubs = [];
-       let allTrialData = []; // Store all trials from all clubs
-
-       // Admin Functions
-       function showAdminPanel() {
-           document.getElementById('loginSection').style.display = 'none';
-           document.getElementById('adminSection').style.display = 'block';
-           updateAdminPanel();
-       }
-
-       function hideAdminPanel() {
-           document.getElementById('adminSection').style.display = 'none';
-           document.getElementById('loginSection').style.display = 'block';
-       }
-
-       function updateAdminPanel() {
-           // Display all registered clubs
-           const clubsList = document.getElementById('allClubsList');
-           if (registeredClubs.length === 0) {
-               clubsList.innerHTML = 'No clubs registered';
-           } else {
-               let html = '<div style="max-height: 200px; overflow-y: auto;">';
-               registeredClubs.forEach((club, index) => {
-                   html += `
-                       <div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px; background: #f9f9f9;">
-                           <strong>${club.clubName}</strong><br>
-                           Secretary: ${club.secretaryName}<br>
-                           Email: ${club.email}<br>
-                           Registered: ${new Date(club.registrationDate).toLocaleDateString()}
-                       </div>
-                   `;
-               });
-               html += '</div>';
-               clubsList.innerHTML = html;
-           }
-
-           // Display all entries from all clubs
-           const entriesList = document.getElementById('allEntriesList');
-           if (allTrialData.length === 0) {
-               entriesList.innerHTML = 'No entries';
-           } else {
-               const totalEntries = allTrialData.reduce((sum, trial) => sum + trial.entries.length, 0);
-               entriesList.innerHTML = `<strong>${totalEntries}</strong> total entries across <strong>${allTrialData.length}</strong> trials`;
-           }
-       }
-
-       function exportAllClubData() {
-           if (registeredClubs.length === 0) {
-               alert('No club data to export');
-               return;
-           }
-
-           let csv = 'Club Name,Secretary Name,Email,Registration Date\n';
-           registeredClubs.forEach(club => {
-               csv += `"${club.clubName}","${club.secretaryName}","${club.email}","${club.registrationDate}"\n`;
-           });
-
-           downloadFile(csv, 'all_clubs_data.csv', 'text/csv');
-       }
-
-       function exportAllTrialData() {
-           if (allTrialData.length === 0) {
-               alert('No trial data to export');
-               return;
-           }
-
-           let csv = 'Club Name,Registration,Call Name,Handler,Email,Date,Class,Round,Judge,Entry Type,Timestamp\n';
-           allTrialData.forEach(trial => {
-               trial.entries.forEach(entry => {
-                   csv += `"${trial.clubName}","${entry.regNumber}","${entry.callName}","${entry.handler}","${entry.email || ''}","${entry.date}","${entry.className}","${entry.round}","${entry.judge}","${entry.entryType}","${entry.timestamp}"\n`;
-               });
-           });
-
-           downloadFile(csv, 'all_trial_data.csv', 'text/csv');
-       }
-
-       // Login/Authentication functions
-       function showLoginTab(tabName) {
-           document.querySelectorAll('#loginSection .tab-content').forEach(tab => {
-               tab.classList.remove('active');
-           });
-           document.querySelectorAll('#loginSection .nav-tab').forEach(tab => {
-               tab.classList.remove('active');
-           });
-           document.getElementById(tabName + 'Form').classList.add('active');
-           event.target.classList.add('active');
-       }
-
-       function handleLogin(event) {
-           event.preventDefault();
-           
-           const clubName = document.getElementById('loginClubName').value;
-           const secretaryName = document.getElementById('loginSecretaryName').value;
-           const password = document.getElementById('loginPassword').value;
-
-           // Simple authentication - in real app, this would be server-side
-           const club = registeredClubs.find(c => 
-               c.clubName === clubName && 
-               c.secretaryName === secretaryName && 
-               c.password === password
-           );
-
-           if (club) {
-               currentUser = club;
-               document.getElementById('loginSection').style.display = 'none';
-               document.getElementById('mainApp').style.display = 'block';
-               document.getElementById('clubInfo').textContent = club.clubName;
-               document.getElementById('secretaryInfo').textContent = 'Secretary: ' + club.secretaryName;
-               
-               // Load club's waiver text if exists
-               if (club.waiverText) {
-                   document.getElementById('waiverContent').innerHTML = club.waiverText;
-                   document.getElementById('clubWaiverText').value = club.waiverText;
-               }
-               
-               updateDashboard();
-           } else {
-               alert('Invalid credentials. Please check your club name, secretary name, and password.');
-           }
-       }
-
-       function handleRegister(event) {
-           event.preventDefault();
-           
-           const clubName = document.getElementById('registerClubName').value;
-           const secretaryName = document.getElementById('registerSecretaryName').value;
-           const email = document.getElementById('registerEmail').value;
-           const password = document.getElementById('registerPassword').value;
-           const confirmPassword = document.getElementById('registerConfirmPassword').value;
-
-           if (password !== confirmPassword) {
-               alert('Passwords do not match');
-               return;
-           }
-
-           // Check if club already exists
-           if (registeredClubs.find(c => c.clubName === clubName)) {
-               alert('Club name already exists');
-               return;
-           }
-
-           // Register new club
-           const newClub = {
-               clubName,
-               secretaryName,
-               email,
-               password,
-               registrationDate: new Date().toISOString(),
-               waiverText: null // Will be customized later
-           };
-
-           registeredClubs.push(newClub);
-           alert('Club registered successfully! Please sign in.');
-           showLoginTab('login');
-       }
-
-       function logout() {
-           currentUser = null;
-           document.getElementById('loginSection').style.display = 'block';
-           document.getElementById('mainApp').style.display = 'none';
-           
-           // Clear login form
-           document.getElementById('loginClubName').value = '';
-           document.getElementById('loginSecretaryName').value = '';
-           document.getElementById('loginPassword').value = '';
-       }
-
-       // Waiver Management
-       function showWaiverSettings() {
-           document.getElementById('waiverSettings').style.display = 'block';
-           // Load current waiver text
-           if (currentUser && currentUser.waiverText) {
-               document.getElementById('clubWaiverText').value = currentUser.waiverText;
-           }
-       }
-
-       function hideWaiverSettings() {
-           document.getElementById('waiverSettings').style.display = 'none';
-       }
-
-       function saveWaiverText() {
-           const waiverText = document.getElementById('clubWaiverText').value.trim();
-           if (!waiverText) {
-               alert('Please enter waiver text');
-               return;
-           }
-
-           // Save to current user
-           if (currentUser) {
-               currentUser.waiverText = waiverText;
-               
-               // Update the club in the registered clubs array
-               const clubIndex = registeredClubs.findIndex(c => c.clubName === currentUser.clubName);
-               if (clubIndex !== -1) {
-                   registeredClubs[clubIndex].waiverText = waiverText;
-               }
-
-               // Update the waiver display in entry form
-               document.getElementById('waiverContent').innerHTML = waiverText;
-               
-               showStatusMessage('Waiver text saved successfully!', 'success');
-               hideWaiverSettings();
-           }
-       }
-
-       function updateDashboard() {
-           // Update active trials
-           let activeTrialsHtml = 'No active trials';
-           if (trialConfig.length > 0) {
-               const uniqueDates = [...new Set(trialConfig.map(t => t.date))];
-               activeTrialsHtml = `<strong>${uniqueDates.length}</strong> trial days configured`;
-           }
-           document.getElementById('activeTrials').innerHTML = activeTrialsHtml;
-
-           // Update recent entries
-           let recentEntriesHtml = 'No recent entries';
-           if (entryResults.length > 0) {
-               const recentEntries = entryResults.slice(-3);
-               recentEntriesHtml = recentEntries.map(entry => 
-                   `<div style="margin-bottom: 8px;">${entry.callName} - ${entry.className}</div>`
-               ).join('');
-           }
-           document.getElementById('recentEntries').innerHTML = recentEntriesHtml;
-       }
-
-       function exportAllData() {
-           if (entryResults.length === 0) {
-               alert('No data to export');
-               return;
-           }
-           exportToCSV();
-       }
-
-       // Export Trial Document for Approval
-       function exportTrialDocument() {
-           if (trialConfig.length === 0) {
-               alert('No trial configuration to export. Please set up your trial first.');
-               return;
-           }
-
-           // Create a comprehensive trial document
-           let document = `TRIAL APPLICATION DOCUMENT\n`;
-           document += `=====================================\n\n`;
-           document += `Club Information:\n`;
-           document += `Club Name: ${currentUser.clubName}\n`;
-           document += `Secretary: ${currentUser.secretaryName}\n`;
-           document += `Email: ${currentUser.email}\n`;
-           document += `Application Date: ${new Date().toLocaleDateString()}\n\n`;
-
-           document += `Trial Configuration:\n`;
-           document += `=====================================\n\n`;
-
-           // Group by day
-           const groupedByDay = {};
-           trialConfig.forEach(config => {
-               if (!groupedByDay[config.day]) {
-                   groupedByDay[config.day] = {};
-               }
-               if (!groupedByDay[config.day][config.className]) {
-                   groupedByDay[config.day][config.className] = [];
-               }
-               groupedByDay[config.day][config.className].push(config);
-           });
-
-           // Sort days numerically
-           const sortedDays = Object.keys(groupedByDay).sort((a, b) => parseInt(a) - parseInt(b));
-           
-           sortedDays.forEach(day => {
-               const dayConfig = groupedByDay[day];
-               const firstClass = Object.keys(dayConfig)[0];
-               const date = dayConfig[firstClass][0].date;
-               
-               document += `DAY ${day} - ${date}\n`;
-               document += `${'='.repeat(30)}\n`;
-               
-               // Sort classes alphabetically
-               const sortedClasses = Object.keys(dayConfig).sort();
-               
-               sortedClasses.forEach(className => {
-                   document += `\nClass: ${className}\n`;
-                   document += `${'─'.repeat(20)}\n`;
-                   
-                   // Sort rounds
-                   dayConfig[className].sort((a, b) => a.roundNum - b.roundNum);
-                   
-                   dayConfig[className].forEach(config => {
-                       document += `  Round ${config.roundNum}: ${config.judge}\n`;
-                   });
-               });
-               document += `\n`;
-           });
-
-           document += `\nTotal Trial Days: ${sortedDays.length}\n`;
-           document += `Total Classes: ${[...new Set(trialConfig.map(c => c.className))].length}\n`;
-           document += `Total Rounds: ${trialConfig.length}\n\n`;
-
-           document += `=====================================\n`;
-           document += `This trial application is submitted for approval.\n`;
-           document += `Please review and approve for publication.\n`;
-           document += `=====================================\n`;
-
-           // Download as text file (could be enhanced to Word format with a library)
-           downloadFile(document, `${currentUser.clubName}_Trial_Application.txt`, 'text/plain');
-           showStatusMessage('Trial document exported! Send this to the organization for approval.', 'success');
-       }
-
-       function copyEntryFormLink() {
-           const linkField = document.getElementById('entryFormUrl');
-           linkField.select();
-           linkField.setSelectionRange(0, 99999); // For mobile devices
-           
-           try {
-               document.execCommand('copy');
-               showStatusMessage('Entry form link copied to clipboard!', 'success');
-           } catch (err) {
-               alert('Could not copy link. Please manually select and copy the link.');
-           }
-       }
-
-       // Tab management
-       function showTab(tabName) {
-           document.querySelectorAll('#mainApp .tab-content').forEach(tab => {
-               tab.classList.remove('active');
-           });
-           document.querySelectorAll('#mainApp .nav-tab').forEach(tab => {
-               tab.classList.remove('active');
-           });
-           document.getElementById(tabName).classList.add('active');
-           event.target.classList.add('active');
-       }
-
-       function showEntryForm() {
-           showTab('entry');
-       }
-
-       // Typeahead functionality for registration numbers
-       function handleRegNumberTypeahead(input) {
-           const query = input.value.toLowerCase();
-           const dropdown = document.getElementById('regNumberDropdown');
-           
-           if (query.length === 0) {
-               dropdown.style.display = 'none';
-               document.getElementById('callName').textContent = '';
-               return;
-           }
-
-           const matches = dogData.filter(dog => 
-               dog.regNumber.toLowerCase().includes(query)
-           );
-
-           if (matches.length > 0) {
-               let html = '';
-               matches.forEach(dog => {
-                   html += `<div class="typeahead-item" onclick="selectRegNumber('${dog.regNumber}', '${dog.callName}')">${dog.regNumber} - ${dog.callName}</div>`;
-               });
-               dropdown.innerHTML = html;
-               dropdown.style.display = 'block';
-
-               // Auto-select if exact match
-               const exactMatch = matches.find(dog => dog.regNumber.toLowerCase() === query);
-               if (exactMatch) {
-                   document.getElementById('callName').textContent = exactMatch.callName;
-                   document.getElementById('callName').style.color = '#28a745';
-               }
-           } else {
-               dropdown.style.display = 'none';
-               document.getElementById('callName').textContent = 'Not found';
-               document.getElementById('callName').style.color = '#dc3545';
-           }
-       }
-
-       function selectRegNumber(regNumber, callName) {
-           document.getElementById('regNumber').value = regNumber;
-           document.getElementById('callName').textContent = callName;
-           document.getElementById('callName').style.color = '#28a745';
-           document.getElementById('regNumberDropdown').style.display = 'none';
-       }
-
-       function hideRegNumberDropdown() {
-           setTimeout(() => {
-               document.getElementById('regNumberDropdown').style.display = 'none';
-           }, 200);
-       }
-
-       function showRegNumberDropdown() {
-           const input = document.getElementById('regNumber');
-           if (input.value.length > 0) {
-               handleRegNumberTypeahead(input);
-           }
-       }
-
-       // Load JSON data from file
-       function loadJSONData() {
-           const file = document.getElementById('jsonFile').files[0];
-           if (!file) return;
-
-           const reader = new FileReader();
-           reader.onload = function(e) {
-               try {
-                   const data = JSON.parse(e.target.result);
-                   if (Array.isArray(data) && data.length > 0) {
-                       dogData = data;
-                       
-                       // Extract unique classes and judges from the data
-                       availableClasses = [...new Set(data.map(item => item.className || item.class).filter(Boolean))];
-                       availableJudges = [...new Set(data.map(item => item.judge).filter(Boolean))];
-                       
-                       showStatusMessage('JSON data loaded successfully!', 'success');
-                   } else {
-                       showStatusMessage('JSON file appears to be empty or invalid format', 'warning');
-                   }
-               } catch (error) {
-                   showStatusMessage('Error parsing JSON file: ' + error.message, 'warning');
-               }
-           };
-           reader.readAsText(file);
-       }
-
-       // Generate days (original flow)
-       function generateDays() {
-           const numDays = parseInt(document.getElementById('trialDays').value);
-           if (!numDays || numDays < 1) {
-               alert('Please enter a valid number of days');
-               return;
-           }
-
-           totalDays = numDays;
-           savedDays = 0;
-           const container = document.getElementById('daysContainer');
-           container.innerHTML = '';
-
-           for (let i = 1; i <= numDays; i++) {
-               createDaySection(i, container);
-           }
-       }
-
-       function createDaySection(dayNum, container) {
-           const dayDiv = document.createElement('div');
-           dayDiv.className = 'day-container';
-           dayDiv.innerHTML = `
-               <div class="day-header">Day ${dayNum}</div>
-               <div class="form-group">
-                   <span class="label">Date for Day ${dayNum}:</span>
-                   <input type="date" id="date_${dayNum}">
-               </div>
-               <div class="classes-section">
-                   <div class="form-group">
-                       <span class="label">How many classes this day?</span>
-                       <input type="number" id="classes_${dayNum}" min="1" max="20" class="yellow-highlight" 
-                              placeholder="Number" onchange="generateClasses(${dayNum})">
-                   </div>
-                   <div id="classesContainer_${dayNum}"></div>
-               </div>
-               <div class="form-group">
-                   <button onclick="saveTrialDay(${dayNum})">Save Day ${dayNum}</button>
-               </div>
-           `;
-           container.appendChild(dayDiv);
-       }
-
-       function generateClasses(dayNum) {
-           const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
-           const container = document.getElementById(`classesContainer_${dayNum}`);
-           
-           if (!numClasses || numClasses < 1) {
-               container.innerHTML = '';
-               return;
-           }
-
-           container.innerHTML = '';
-
-           for (let i = 1; i <= numClasses; i++) {
-               createClassSection(dayNum, i, container);
-           }
-       }
-
-       function createClassSection(dayNum, classNum, container) {
-           const classDiv = document.createElement('div');
-           classDiv.className = 'class-container';
-           
-           let classOptions = '<option value="">Select a class</option>';
-           availableClasses.forEach(className => {
-               classOptions += `<option value="${className}">${className}</option>`;
-           });
-
-           classDiv.innerHTML = `
-               <div class="class-header">Class ${classNum}</div>
-               <div class="form-group">
-                   <span class="label">Class Name:</span>
-                   <div class="typeahead-container">
-                       <input type="text" id="className_${dayNum}_${classNum}" class="typeahead-input" 
-                              placeholder="Type class name" 
-                              onkeyup="handleClassTypeahead(this, ${dayNum}, ${classNum})"
-                              onblur="hideClassDropdown(${dayNum}, ${classNum})"
-                              onfocus="showClassDropdown(${dayNum}, ${classNum})">
-                       <div id="classDropdown_${dayNum}_${classNum}" class="typeahead-dropdown"></div>
-                   </div>
-               </div>
-               <div class="form-group">
-                   <span class="label">How many rounds?</span>
-                   <input type="number" id="rounds_${dayNum}_${classNum}" min="1" max="10" 
-                          placeholder="Number" onchange="generateRounds(${dayNum}, ${classNum})">
-               </div>
-               <div id="roundsContainer_${dayNum}_${classNum}"></div>
-           `;
-           container.appendChild(classDiv);
-       }
-
-       function handleClassTypeahead(input, dayNum, classNum) {
-           const query = input.value.toLowerCase();
-           const dropdown = document.getElementById(`classDropdown_${dayNum}_${classNum}`);
-           
-           if (query.length === 0) {
-               dropdown.style.display = 'none';
-               return;
-           }
-
-           const matches = availableClasses.filter(className => 
-               className.toLowerCase().includes(query)
-           );
-
-           if (matches.length > 0) {
-               let html = '';
-               matches.forEach(className => {
-                   html += `<div class="typeahead-item" onclick="selectClass('${className}', ${dayNum}, ${classNum})">${className}</div>`;
-               });
-               dropdown.innerHTML = html;
-               dropdown.style.display = 'block';
-           } else {
-               dropdown.style.display = 'none';
-           }
-       }
-
-       function selectClass(className, dayNum, classNum) {
-           document.getElementById(`className_${dayNum}_${classNum}`).value = className;
-           document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
-       }
-
-       function hideClassDropdown(dayNum, classNum) {
-           setTimeout(() => {
-               document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
-           }, 200);
-       }
-
-       function showClassDropdown(dayNum, classNum) {
-           const input = document.getElementById(`className_${dayNum}_${classNum}`);
-           if (input.value.length > 0) {
-               handleClassTypeahead(input, dayNum, classNum);
-           }
-       }
-
-       function generateRounds(dayNum, classNum) {
-           const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`).value);
-           const container = document.getElementById(`roundsContainer_${dayNum}_${classNum}`);
-           
-           if (!numRounds || numRounds < 1) {
-               container.innerHTML = '';
-               return;
-           }
-
-           container.innerHTML = '';
-
-           for (let i = 1; i <= numRounds; i++) {
-               createRoundSection(dayNum, classNum, i, container);
-           }
-       }
-
-       function createRoundSection(dayNum, classNum, roundNum, container) {
-           const roundDiv = document.createElement('div');
-           roundDiv.className = 'rounds-section';
-           
-           let judgeOptions = '<option value="">Select a judge</option>';
-           availableJudges.forEach(judgeName => {
-               judgeOptions += `<option value="${judgeName}">${judgeName}</option>`;
-           });
-
-           roundDiv.innerHTML = `
-               <div class="form-group">
-                   <span class="label">Round ${roundNum} - Judge:</span>
-                   <div class="typeahead-container">
-                       <input type="text" id="judge_${dayNum}_${classNum}_${roundNum}" class="typeahead-input" 
-                              placeholder="Type judge name" 
-                              onkeyup="handleJudgeTypeahead(this, ${dayNum}, ${classNum}, ${roundNum})"
-                              onblur="hideJudgeDropdown(${dayNum}, ${classNum}, ${roundNum})"
-                              onfocus="showJudgeDropdown(${dayNum}, ${classNum}, ${roundNum})">
-                       <div id="judgeDropdown_${dayNum}_${classNum}_${roundNum}" class="typeahead-dropdown"></div>
-                   </div>
-               </div>
-           `;
-           container.appendChild(roundDiv);
-       }
-
-       function handleJudgeTypeahead(input, dayNum, classNum, roundNum) {
-           const query = input.value.toLowerCase();
-           const dropdown = document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`);
-           
-           if (query.length === 0) {
-               dropdown.style.display = 'none';
-               return;
-           }
-
-           const matches = availableJudges.filter(judgeName => 
-               judgeName.toLowerCase().includes(query)
-           );
-
-           if (matches.length > 0) {
-               let html = '';
-               matches.forEach(judgeName => {
-                   html += `<div class="typeahead-item" onclick="selectJudge('${judgeName}', ${dayNum}, ${classNum}, ${roundNum})">${judgeName}</div>`;
-               });
-               dropdown.innerHTML = html;
-               dropdown.style.display = 'block';
-           } else {
-               dropdown.style.display = 'none';
-           }
-       }
-
-       function selectJudge(judgeName, dayNum, classNum, roundNum) {
-           document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`).value = judgeName;
-           document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
-       }
-
-       function hideJudgeDropdown(dayNum, classNum, roundNum) {
-           setTimeout(() => {
-               document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
-           }, 200);
-       }
-
-       function showJudgeDropdown(dayNum, classNum, roundNum) {
-           const input = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`);
-           if (input.value.length > 0) {
-               handleJudgeTypeahead(input, dayNum, classNum, roundNum);
-           }
-       }
-
-       function saveTrialDay(dayNum) {
-           const date = document.getElementById(`date_${dayNum}`).value;
-           if (!date) {
-               alert('Please enter a date for this day');
-               return;
-           }
-
-           const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
-           if (!numClasses) {
-               alert('Please enter the number of classes');
-               return;
-           }
-
-           // Save all class/round/judge combinations for this day
-           for (let classNum = 1; classNum <= numClasses; classNum++) {
-               const className = document.getElementById(`className_${dayNum}_${classNum}`)?.value;
-               const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`)?.value || 0);
-
-               if (className && numRounds > 0) {
-                   for (let roundNum = 1; roundNum <= numRounds; roundNum++) {
-                       const judge = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`)?.value;
-                       
-                       if (judge) {
-                           // Remove existing entry if it exists
-                           trialConfig = trialConfig.filter(config => 
-                               !(config.day === dayNum && config.classNum === classNum && config.roundNum === roundNum)
-                           );
-
-                           trialConfig.push({
-                               day: dayNum,
-                               date: date,
-                               classNum: classNum,
-                               className: className,
-                               roundNum: roundNum,
-                               judge: judge
-                           });
-                       }
-                   }
-               }
-           }
-
-           savedDays++;
-           updateTrialOptions();
-           showStatusMessage(`Day ${dayNum} configuration saved!`, 'success');
-           updateDashboard();
-
-           // Check if all days are saved
-           if (savedDays === totalDays) {
-               document.getElementById('entryFormLink').style.display = 'block';
-           }
-       }
-
-       function updateTrialOptions() {
-           const container = document.getElementById('trialOptions');
-           
-           // Group by day, then by class, then sort by round
-           const groupedByDay = {};
-           trialConfig.forEach(config => {
-               if (!groupedByDay[config.day]) {
-                   groupedByDay[config.day] = {};
-               }
-               if (!groupedByDay[config.day][config.className]) {
-                   groupedByDay[config.day][config.className] = [];
-               }
-               groupedByDay[config.day][config.className].push(config);
-           });
-
-           // Sort rounds within each class
-           Object.keys(groupedByDay).forEach(day => {
-               Object.keys(groupedByDay[day]).forEach(className => {
-                   groupedByDay[day][className].sort((a, b) => a.roundNum - b.roundNum);
-               });
-           });
-
-           let html = '';
-           
-           // Sort days numerically
-           const sortedDays = Object.keys(groupedByDay).sort((a, b) => parseInt(a) - parseInt(b));
-           
-           sortedDays.forEach(day => {
-               html += `<div class="day-group">`;
-               html += `<div class="day-group-header">Day ${day} - ${groupedByDay[day][Object.keys(groupedByDay[day])[0]][0].date}</div>`;
-               
-               // Sort classes alphabetically
-               const sortedClasses = Object.keys(groupedByDay[day]).sort();
-               
-               sortedClasses.forEach(className => {
-                   html += `<div class="class-group">`;
-                   html += `<div class="class-group-header">${className}</div>`;
-                   
-                   groupedByDay[day][className].forEach((config, index) => {
-                       const configIndex = trialConfig.findIndex(c => 
-                           c.day === config.day && 
-                           c.classNum === config.classNum && 
-                           c.roundNum === config.roundNum
-                       );
-                       
-                       html += `
-                           <div class="trial-option">
-                               <div style="font-weight: bold; margin-bottom: 8px;">
-                                   Round ${config.roundNum} - ${config.judge}
-                               </div>
-                               <div class="entry-type-options">
-                                   <label>
-                                       <input type="checkbox" name="trialEntry" value="${configIndex}-regular">
-                                       Regular
-                                   </label>
-                                   <label>
-                                       <input type="checkbox" name="trialEntry" value="${configIndex}-feo">
-                                       FEO
-                                   </label>
-                               </div>
-                           </div>
-                       `;
-                   });
-                   
-                   html += `</div>`;
-               });
-               
-               html += `</div>`;
-           });
-
-           container.innerHTML = html;
-       }
-
-       // Entry Confirmation Modal Functions
-       function showEntryConfirmation(submittedEntries) {
-           const modal = document.getElementById('confirmationModal');
-           const content = document.getElementById('confirmationContent');
-           const email = document.getElementById('handlerEmail').value;
-           
-           document.getElementById('confirmationEmail').textContent = email;
-           
-           let html = `
-               <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                   <h4 style="margin-top: 0; color: #495057;">Entry Details:</h4>
-                   <p><strong>Dog:</strong> ${submittedEntries[0].callName} (${submittedEntries[0].regNumber})</p>
-                   <p><strong>Handler:</strong> ${submittedEntries[0].handler}</p>
-                   <p><strong>Email:</strong> ${submittedEntries[0].email}</p>
-                   <p><strong>Submission Date:</strong> ${new Date().toLocaleString()}</p>
-               </div>
-               
-               <h5>Trial Entries (${submittedEntries.length}):</h5>
-               <div style="max-height: 200px; overflow-y: auto;">
-           `;
-           
-           submittedEntries.forEach(entry => {
-               html += `
-                   <div style="padding: 8px; border: 1px solid #ddd; margin: 5px 0; border-radius: 3px; background: #f9f9f9;">
-                       ${entry.date} | ${entry.className} Round ${entry.round} | ${entry.judge} | ${entry.entryType.toUpperCase()}
-                   </div>
-               `;
-           });
-           
-           html += '</div>';
-           content.innerHTML = html;
-           modal.style.display = 'block';
-       }
-
-       function closeConfirmationModal() {
-           document.getElementById('confirmationModal').style.display = 'none';
-       }
-
-       function printConfirmation() {
-           const content = document.getElementById('confirmationContent').innerHTML;
-           const printWindow = window.open('', '_blank');
-           printWindow.document.write(`
-               <!DOCTYPE html>
-               <html>
-               <head>
-                   <title>Entry Confirmation</title>
-                   <style>
-                       body { font-family: Arial, sans-serif; padding: 20px; }
-                       h3 { color: #28a745; }
-                   </style>
-               </head>
-               <body>
-                   <h3>Entry Confirmation</h3>
-                   ${content}
-                   <div style="margin-top: 30px; padding: 15px; border: 2px solid #28a745; border-radius: 5px;">
-                       <strong>Status:</strong> Entry Received and Processed<br>
-                       <strong>Confirmation ID:</strong> ${new Date().getTime()}
-                   </div>
-               </body>
-               </html>
-           `);
-           printWindow.document.close();
-           printWindow.focus();
-           printWindow.print();
-           printWindow.close();
-       }
-
-       // Handle form submission
-       document.getElementById('entryForm').addEventListener('submit', function(e) {
-           e.preventDefault();
-           
-           const regNumber = document.getElementById('regNumber').value;
-           const callName = document.getElementById('callName').textContent;
-           const handler = document.getElementById('handlerName').value;
-           const email = document.getElementById('handlerEmail').value;
-           const waiverAccepted = document.getElementById('waiverAccepted').checked;
-           
-           if (!regNumber || !handler || !email || callName === 'Not found' || callName === '') {
-               alert('Please complete all required fields and ensure registration number is valid');
-               return;
-           }
-
-           if (!waiverAccepted) {
-               alert('You must read and accept the Liability Waiver and Agreement to submit an entry');
-               return;
-           }
-
-           const selectedEntries = [];
-           document.querySelectorAll('input[name="trialEntry"]:checked').forEach(checkbox => {
-               const [configIndex, entryType] = checkbox.value.split('-');
-               const config = trialConfig[parseInt(configIndex)];
-               selectedEntries.push({
-                   ...config,
-                   entryType: entryType
-               });
-           });
-
-           if (selectedEntries.length === 0) {
-               alert('Please select at least one trial entry');
-               return;
-           }
-
-           // Add each selected entry as a separate row
-           const submittedEntries = [];
-           selectedEntries.forEach(entry => {
-               const newEntry = {
-                   regNumber: regNumber,
-                   callName: callName,
-                   handler: handler,
-                   email: email,
-                   date: entry.date,
-                   className: entry.className,
-                   round: entry.roundNum,
-                   judge: entry.judge,
-                   entryType: entry.entryType,
-                   timestamp: new Date().toISOString()
-               };
-               entryResults.push(newEntry);
-               submittedEntries.push(newEntry);
-           });
-
-           // Store this trial's data for admin access
-           const existingTrialIndex = allTrialData.findIndex(t => t.clubName === currentUser.clubName);
-           if (existingTrialIndex !== -1) {
-               allTrialData[existingTrialIndex].entries.push(...submittedEntries);
-           } else {
-               allTrialData.push({
-                   clubName: currentUser.clubName,
-                   entries: submittedEntries
-               });
-           }
-
-           updateResultsDisplay();
-           updateDashboard();
-           clearForm();
-           
-           // Show confirmation modal
-           showEntryConfirmation(submittedEntries);
-           
-           // Scroll back to the top of the entry form
-           document.getElementById('entry').scrollIntoView({ behavior: 'smooth', block: 'start' });
-       });
-
-       // Clear form
-       function clearForm() {
-           document.getElementById('entryForm').reset();
-           document.getElementById('callName').textContent = '';
-           document.getElementById('waiverAccepted').checked = false;
-           document.querySelectorAll('input[name="trialEntry"]').forEach(cb => cb.checked = false);
-       }
-
-       // Update results display in column format
-       function updateResultsDisplay() {
-           const container = document.getElementById('resultsDisplay');
-           
-           // Group results by date, judge, class, and round
-           const groupedResults = {};
-           
-           entryResults.forEach(entry => {
-               const key = `${entry.date}-${entry.judge}-${entry.className}-${entry.round}`;
-               if (!groupedResults[key]) {
-                   groupedResults[key] = {
-                       date: entry.date,
-                       judge: entry.judge,
-                       className: entry.className,
-                       round: entry.round,
-                       entries: []
-                   };
-               }
-               groupedResults[key].entries.push(entry);
-           });
-
-           let html = '<div class="results-grid">';
-           
-           // Sort groups by date, then class, then round
-           const sortedGroups = Object.values(groupedResults).sort((a, b) => {
-               if (a.date !== b.date) return new Date(a.date) - new Date(b.date);
-               if (a.className !== b.className) return a.className.localeCompare(b.className);
-               return a.round - b.round;
-           });
-
-           sortedGroups.forEach(group => {
-               html += `
-                   <div class="result-column">
-                       <div class="column-header">
-                           <div class="column-date">${group.date}</div>
-                           <div class="column-judge">${group.judge}</div>
-                           <div class="column-class-round">${group.className} - Round ${group.round}</div>
-                       </div>
-                       <div class="column-entries">
-               `;
-
-               // Sort entries within group by handler name
-               group.entries.sort((a, b) => a.handler.localeCompare(b.handler));
-
-               group.entries.forEach(entry => {
-                   html += `
-                       <div class="entry-item">
-                           ${entry.handler} - ${entry.callName}
-                           <span class="entry-type-badge badge-${entry.entryType}">${entry.entryType.toUpperCase()}</span>
-                       </div>
-                   `;
-               });
-
-               html += `
-                       </div>
-                   </div>
-               `;
-           });
-
-           html += '</div>';
-           container.innerHTML = html;
-       }
-
-       // Export to CSV
-       function exportToCSV() {
-           if (entryResults.length === 0) {
-               alert('No data to export');
-               return;
-           }
-
-           let csv = 'Registration,Call Name,Handler,Email,Date,Class,Round,Judge,Entry Type,Timestamp\n';
-           
-           entryResults.forEach(entry => {
-               csv += `${entry.regNumber},${entry.callName},${entry.handler},${entry.email || ''},${entry.date},${entry.className},${entry.round},${entry.judge},${entry.entryType},${entry.timestamp}\n`;
-           });
-
-           downloadFile(csv, 'trial_entries.csv', 'text/csv');
-           showStatusMessage('CSV exported successfully!', 'success');
-       }
-
-       // Helper functions
-       function downloadFile(content, filename, contentType) {
-           const blob = new Blob([content], { type: contentType });
-           const url = URL.createObjectURL(blob);
-           const a = document.createElement('a');
-           a.href = url;
-           a.download = filename;
-           a.click();
-           URL.revokeObjectURL(url);
-       }
-
-       function showStatusMessage(message, type) {
-           const statusDiv = document.getElementById('dataStatus');
-           statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-           setTimeout(() => {
-               statusDiv.innerHTML = '';
-           }, 3000);
-       }
-
-       // Print Score Sheets functionality
-       function showPrintScoreSheets() {
-           if (entryResults.length === 0) {
-               alert('No trial entries found. Please add some entries first.');
-               return;
-           }
-
-           // Get unique dates from entries
-           const uniqueDates = [...new Set(entryResults.map(entry => entry.date))].sort();
-           
-           if (uniqueDates.length === 0) {
-               alert('No trial dates found.');
-               return;
-           }
-
-           // Populate date selection
-           const dateList = document.getElementById('dateSelectionList');
-           let html = '';
-           
-           uniqueDates.forEach(date => {
-               const entriesForDate = entryResults.filter(entry => entry.date === date);
-               const uniqueTrials = [...new Set(entriesForDate.map(entry => `${entry.className} Round ${entry.round}`))];
-               
-               html += `
-                   <div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px; cursor: pointer; background: #f9f9f9;" onclick="generateScoreSheets('${date}')">
-                       <strong>${date}</strong><br>
-                       <small>${entriesForDate.length} entries across ${uniqueTrials.length} trials</small>
-                   </div>
-               `;
-           });
-           
-           dateList.innerHTML = html;
-           document.getElementById('printModal').style.display = 'block';
-       }
-
-       function closePrintModal() {
-           document.getElementById('printModal').style.display = 'none';
-       }
-
-       function generateScoreSheets(selectedDate) {
-           closePrintModal();
-           
-           // Filter entries for selected date
-           const dateEntries = entryResults.filter(entry => entry.date === selectedDate);
-           
-           // Group by class and round
-           const groupedEntries = {};
-           dateEntries.forEach(entry => {
-               const key = `${entry.className}-${entry.round}`;
-               if (!groupedEntries[key]) {
-                   groupedEntries[key] = {
-                       className: entry.className,
-                       round: entry.round,
-                       judge: entry.judge,
-                       date: entry.date,
-                       entries: []
-                   };
-               }
-               groupedEntries[key].entries.push(entry);
-           });
-
-           // Generate score sheets
-           let allSheetsHtml = '';
-           
-           Object.values(groupedEntries).forEach(group => {
-               allSheetsHtml += generateSingleScoreSheet(group);
-           });
-
-           // Create a new window/document for printing only score sheets
-           const printWindow = window.open('', '_blank');
-           printWindow.document.write(`
-               <!DOCTYPE html>
-               <html>
-               <head>
-                   <title>Score Sheets - ${selectedDate}</title>
-                   <style>
-                       body {
-                           margin: 0;
-                           padding: 0;
-                           font-family: Arial, sans-serif;
-                           -webkit-print-color-adjust: exact;
-                           print-color-adjust: exact;
-                       }
-                       .score-sheet {
-                           page-break-after: always;
-                           background: white;
-                           padding: 0.75in 0.5in;
-                           font-size: 12px;
-                           width: 8.5in;
-                           height: 11in;
-                           margin: 0;
-                           box-sizing: border-box;
-                           position: relative;
-                       }
-                       .score-sheet:last-child {
-                           page-break-after: auto;
-                       }
-                       .score-sheet-header {
-                           margin-bottom: 25px;
-                           position: relative;
-                       }
-                       .score-sheet-title {
-                           font-size: 16px;
-                           font-weight: bold;
-                           text-align: center;
-                           margin-bottom: 15px;
-                       }
-                       .score-sheet-date {
-                           position: absolute;
-                           top: 0;
-                           right: 0;
-                           font-size: 12px;
-                       }
-                       .score-sheet-class {
-                           font-size: 12px;
-                           font-weight: bold;
-                           margin: 15px 0 10px 0;
-                       }
-                       .score-sheet-round {
-                           display: flex;
-                           align-items: center;
-                           margin: 15px 0;
-                           font-size: 12px;
-                           font-weight: bold;
-                       }
-                       .round-label {
-                           margin-right: 15px;
-                       }
-                       .round-boxes {
-                           display: flex;
-                           gap: 15px;
-                           align-items: center;
-                       }
-                       .round-checkbox {
-                           width: 18px;
-                           height: 18px;
-                           border: 2px solid #000;
-                           display: inline-flex;
-                           align-items: center;
-                           justify-content: center;
-                           font-size: 14px;
-                           font-weight: bold;
-                       }
-                       .round-number {
-                           font-size: 12px;
-                           margin-left: 3px;
-                       }
-                       .scent-header-section {
-                           margin: 20px 0;
-                       }
-                       .scent-header-row {
-                           display: grid;
-                           grid-template-columns: repeat(4, 1fr);
-                           gap: 0;
-                           border: 2px solid #000;
-                       }
-                       .scent-box {
-                           border-right: 1px solid #000;
-                           padding: 25px 10px;
-                           text-align: center;
-                           font-weight: bold;
-                           font-size: 12px;
-                           background: white;
-                       }
-                       .scent-box:last-child {
-                           border-right: none;
-                       }
-                       .scent-location-row {
-                           display: grid;
-                           grid-template-columns: repeat(4, 1fr);
-                           gap: 0;
-                           border: 2px solid #000;
-                           border-top: none;
-                       }
-                       .scent-location {
-                           border-right: 1px solid #000;
-                           padding: 15px 8px;
-                           font-size: 10px;
-                           min-height: 20px;
-                       }
-                       .scent-location:last-child {
-                           border-right: none;
-                       }
-                       .faults-section {
-                           font-size: 10px;
-                           margin: 15px 0;
-                           line-height: 1.3;
-                       }
-                       .scoring-table {
-                           width: 100%;
-                           border-collapse: collapse;
-                           border: 2px solid #000;
-                           margin-top: 15px;
-                           font-size: 9px;
-                       }
-                       .scoring-table th,
-                       .scoring-table td {
-                           border: 1px solid #000;
-                           text-align: center;
-                           vertical-align: middle;
-                           padding: 3px 1px;
-                       }
-                       .scoring-table th {
-                           font-weight: bold;
-                           font-size: 8px;
-                       }
-                       .team-header {
-                           width: 80px;
-                           font-size: 9px;
-                           line-height: 1.1;
-                       }
-                       .team-cell {
-                           width: 80px;
-                           font-size: 9px;
-                           line-height: 1.1;
-                           height: 35px;
-                           vertical-align: middle;
-                       }
-                       .scent-data-cell {
-                           width: 60px;
-                           font-size: 9px;
-                           height: 35px;
-                           min-width: 60px;
-                       }
-                       .fault-time-header {
-                           width: 50px;
-                           font-size: 8px;
-                       }
-                       .fault-time-cell {
-                           width: 50px;
-                           height: 35px;
-                       }
-                       .copyright-bottom {
-                           position: absolute;
-                           bottom: 0.5in;
-                           left: 50%;
-                           transform: translateX(-50%);
-                           font-size: 10px;
-                       }
-                       @media print {
-                           @page {
-                               margin: 0;
-                               size: letter;
-                           }
-                           body {
-                               margin: 0 !important;
-                               padding: 0 !important;
-                           }
-                           .score-sheet {
-                               margin: 0 !important;
-                               padding: 0.75in 0.5in !important;
-                           }
-                       }
-                   </style>
-               </head>
-               <body>
-                   ${allSheetsHtml}
-               </body>
-               </html>
-           `);
-           
-           printWindow.document.close();
-           
-           // Wait for content to load then print
-           setTimeout(() => {
-               printWindow.focus();
-               printWindow.print();
-               printWindow.close();
-           }, 500);
-       }
-
-       function generateSingleScoreSheet(group) {
-           const { className, round, judge, date, entries } = group;
-           
-           let html = `
-               <div class="score-sheet">
-                   <div style="text-align: center; font-size: 10px; margin-bottom: 15px;">
-                       Copyright © by Canine–Work And Games, LLC, 2024
-                   </div>
-                   
-                   <div class="score-sheet-header">
-                       <div class="score-sheet-title">Scent Detective Master Score Sheet</div>
-                       <div class="score-sheet-date">Date: ${date}</div>
-                   </div>
-                   
-                   <div class="score-sheet-class">
-                       CLASS: ${className}
-                   </div>
-                   
-                   <div class="score-sheet-round">
-                       <span class="round-label">Round</span>
-                       <div class="round-boxes">
-                           ${[1,2,3,4].map(r => `
-                               <div style="display: flex; flex-direction: column; align-items: center;">
-                                   <div class="round-checkbox">${r == round ? 'X' : ''}</div>
-                                   <div class="round-number">${r}</div>
-                               </div>
-                           `).join('')}
-                       </div>
-                   </div>
-                   
-                   <div class="scent-header-section">
-                       <div class="scent-header-row">
-                           <div class="scent-box">Scent 1</div>
-                           <div class="scent-box">Scent 2</div>
-                           <div class="scent-box">Scent 3</div>
-                           <div class="scent-box">Scent 4</div>
-                       </div>
-                       <div class="scent-location-row">
-                           <div class="scent-location">Located in/on:</div>
-                           <div class="scent-location">Located in/on:</div>
-                           <div class="scent-location">Located in/on:</div>
-                           <div class="scent-location">Located in/on:</div>
-                       </div>
-                   </div>
-                   
-                   <div class="faults-section">
-                       <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior;<br>
-                       Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert";<br>
-                       SR crossing line less than half.
-                   </div>
-                   
-                   <table class="scoring-table">
-                       <thead>
-                           <tr>
-                               <th rowspan="2" class="team-header">Team<br><br>Dog –<br>Handler</th>
-                               <th class="scent-data-cell"><div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">Scent 1</div></th>
-                               <th class="scent-data-cell"><div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">Scent 2</div></th>
-                               <th class="scent-data-cell"><div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">Scent 3</div></th>
-                               <th class="scent-data-cell"><div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">Scent 4</div></th>
-                               <th rowspan="2" class="fault-time-header">Fault</th>
-                               <th rowspan="2" class="fault-time-header">Fault</th>
-                               <th rowspan="2" class="fault-time-header">Time</th>
-                               <th rowspan="2" class="fault-time-header">Pass<br>/Fail</th>
-                           </tr>
-                       </thead>
-                       <tbody>
-           `;
-           
-           // Add entry rows
-           entries.forEach(entry => {
-               const handlerFirstName = entry.handler.split(' ')[0];
-               const dogDisplayName = entry.entryType === 'feo' ? `${entry.callName} FEO` : entry.callName;
-               
-               html += `
-                   <tr>
-                       <td class="team-cell" style="color: blue; font-weight: bold;">${handlerFirstName} -<br>${dogDisplayName}</td>
-                       <td class="scent-data-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="fault-time-cell"></td>
-                       <td class="fault-time-cell"></td>
-                       <td class="fault-time-cell"></td>
-                       <td class="fault-time-cell"></td>
-                   </tr>
-               `;
-           });
-           
-           // Add empty rows to fill the sheet (total 9 rows like in the PDF)
-           const emptyRows = Math.max(0, 9 - entries.length);
-           for (let i = 0; i < emptyRows; i++) {
-               html += `
-                   <tr>
-                       <td class="team-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="scent-data-cell"></td>
-                       <td class="fault-time-cell"></td>
-                       <td class="fault-time-cell"></td>
-                       <td class="fault-time-cell"></td>
-                       <td class="fault-time-cell"></td>
-                   </tr>
-               `;
-           }
-           
-           html += `
-                       </tbody>
-                   </table>
-                   
-                   <div class="copyright-bottom">
-                       Copyright © by Canine–Work And Games, LLC, 2024
-                   </div>
-               </div>
-           `;
-           
-           return html;
-       }
-
-       // Edit Entry functionality
-       function searchEntries() {
-           const searchTerm = document.getElementById('searchEntry').value.toLowerCase().trim();
-           const resultsContainer = document.getElementById('searchResults');
-           
-           if (searchTerm.length < 2) {
-               resultsContainer.innerHTML = '';
-               return;
-           }
-
-           // Filter entries based on search term
-           const matchingEntries = entryResults.filter(entry => 
-               entry.regNumber.toLowerCase().includes(searchTerm) ||
-               entry.handler.toLowerCase().includes(searchTerm) ||
-               entry.callName.toLowerCase().includes(searchTerm)
-           );
-
-           if (matchingEntries.length === 0) {
-               resultsContainer.innerHTML = '<p style="color: #666; font-style: italic;">No entries found matching your search.</p>';
-               return;
-           }
-
-           // Display matching entries with edit option that redirects to entry form
-           let html = '<h4>Found Entries:</h4>';
-           matchingEntries.forEach((entry, index) => {
-               const entryIndex = entryResults.findIndex(e => 
-                   e.regNumber === entry.regNumber && 
-                   e.handler === entry.handler && 
-                   e.date === entry.date &&
-                   e.className === entry.className &&
-                   e.round === entry.round
-               );
-               
-               html += `
-                   <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; background: white;">
-                       <div style="display: flex; justify-content: space-between; align-items: center;">
-                           <div>
-                               <strong>${entry.callName}</strong> (${entry.regNumber}) - Handler: ${entry.handler}
-                               <br>
-                               <small style="color: #666;">
-                                   ${entry.date} | ${entry.className} Round ${entry.round} | ${entry.judge} 
-                                   ${entry.entryType === 'feo' ? '| FEO' : ''}
-                               </small>
-                           </div>
-                           <div>
-                               <button onclick="editEntryForResubmission(${entryIndex})" style="margin-right: 10px;">Edit & Resubmit</button>
-                               <button onclick="deleteEntry(${entryIndex})" style="background: linear-gradient(45deg, #dc3545, #c82333);">Delete</button>
-                           </div>
-                       </div>
-                   </div>
-               `;
-           });
-           
-           resultsContainer.innerHTML = html;
-       }
-
-       function editEntryForResubmission(entryIndex) {
-           const entry = entryResults[entryIndex];
-           if (!entry) return;
-
-           // Remove the original entry
-           entryResults.splice(entryIndex, 1);
-           updateResultsDisplay();
-           updateDashboard();
-
-           // Go to entry form and pre-populate with existing data
-           showTab('entry');
-           
-           // Pre-populate the form
-           document.getElementById('regNumber').value = entry.regNumber;
-           document.getElementById('callName').textContent = entry.callName;
-           document.getElementById('callName').style.color = '#28a745';
-           document.getElementById('handlerName').value = entry.handler;
-           document.getElementById('handlerEmail').value = entry.email || '';
-
-           // Scroll to top of entry form
-           document.getElementById('entry').scrollIntoView({ behavior: 'smooth', block: 'start' });
-           
-           showStatusMessage('Entry loaded for editing. Please make changes and resubmit.', 'success');
-       }
-
-       function deleteEntry(entryIndex) {
-           const entry = entryResults[entryIndex];
-           
-           if (confirm(`Are you sure you want to delete the entry for ${entry.callName} (${entry.handler}) in ${entry.className} Round ${entry.round} on ${entry.date}?`)) {
-               // Remove entry from results
-               entryResults.splice(entryIndex, 1);
-               
-               // Remove from global trial data too
-               allTrialData.forEach(trial => {
-                   if (trial.clubName === currentUser.clubName) {
-                       trial.entries = trial.entries.filter(e => 
-                           !(e.regNumber === entry.regNumber && 
-                             e.handler === entry.handler && 
-                             e.date === entry.date &&
-                             e.className === entry.className &&
-                             e.round === entry.round)
-                       );
-                   }
-               });
-               
-               // Update displays
-               updateResultsDisplay();
-               updateDashboard();
-               
-               // Show success message
-               showStatusMessage('Entry deleted successfully!', 'success');
-               
-               // Refresh search results
-               searchEntries();
-           }
-       }
-
-       // Initialize the application
-       window.onload = function() {
-           // Initialize with demo data
-           dogData = [
-               { regNumber: "12345", callName: "Buddy" },
-               { regNumber: "67890", callName: "Luna" },
-               { regNumber: "11111", callName: "Max" },
-               { regNumber: "22222", callName: "Bella" },
-               { regNumber: "33333", callName: "Charlie" },
-               { regNumber: "44444", callName: "Daisy" },
-               { regNumber: "55555", callName: "Rocky" },
-               { regNumber: "66666", callName: "Molly" }
-           ];
-           
-           availableClasses = ["Novice A", "Novice B", "Open A", "Open B", "Utility A", "Utility B"];
-           availableJudges = ["Judge Smith", "Judge Johnson", "Judge Williams", "Judge Brown", "Judge Davis"];
-
-           // Initialize with demo club for testing
-           registeredClubs = [
-               {
-                   clubName: "Demo Dog Club",
-                   secretaryName: "Demo Secretary",
-                   email: "demo@example.com",
-                   password: "demo123",
-                   registrationDate: new Date().toISOString(),
-                   waiverText: null
-               }
-           ];
-       };
-   </script>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="header" style="display: block;">
+            <h1>Trial Management System</h1>
+            <p>Multi-Club Trial Management Platform</p>
+            
+            <div class="login-form-container">
+                <div class="nav-tabs" style="margin-bottom: 20px;">
+                    <button class="nav-tab active" onclick="showLoginTab('login')">Sign In</button>
+                    <button class="nav-tab" onclick="showLoginTab('register')">Register Club</button>
+                </div>
+                
+                <!-- Sign In Form -->
+                <div id="loginForm" class="tab-content active">
+                    <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Club Name:</label>
+                            <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
+                        </div>
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Secretary Name:</label>
+                            <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
+                        </div>
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Password:</label>
+                            <input type="password" id="loginPassword" placeholder="Enter password" required style="width: 100%; margin-bottom: 20px;">
+                        </div>
+                        <div class="form-group" style="justify-content: center;">
+                            <button type="submit">Sign In</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Register Form -->
+                <div id="registerForm" class="tab-content">
+                    <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Club Name:</label>
+                            <input type="text" id="registerClubName" placeholder="Enter club name" required style="width: 100%; margin-bottom: 15px;">
+                        </div>
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Secretary Name:</label>
+                            <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" required style="width: 100%; margin-bottom: 15px;">
+                        </div>
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Email:</label>
+                            <input type="email" id="registerEmail" placeholder="Enter email address" required style="width: 100%; margin-bottom: 15px;">
+                        </div>
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Password:</label>
+                            <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" required minlength="6" style="width: 100%; margin-bottom: 15px;">
+                        </div>
+                        <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                            <label class="label">Confirm Password:</label>
+                            <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required style="width: 100%; margin-bottom: 20px;">
+                        </div>
+                        <div class="form-group" style="justify-content: center;">
+                            <button type="submit">Register Club</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" style="display: none;">
+            <div class="header">
+                <h1>Trial Management System</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p>Track judges across multiple days, classes, and rounds</p>
+                    <div style="text-align: right;">
+                        <div style="color: #667eea; font-weight: bold; margin-bottom: 5px;" id="clubInfo"></div>
+                        <div style="font-size: 14px; color: #666;" id="secretaryInfo"></div>
+                        <button onclick="logout()" style="margin-top: 10px; padding: 8px 15px; font-size: 12px;">Sign Out</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
+                <button class="nav-tab" onclick="showTab('setup')">Trial Setup</button>
+                <button class="nav-tab" onclick="showTab('entry')">Entry Form</button>
+                <button class="nav-tab" onclick="showTab('runningOrders')">Running Orders</button>
+                <button class="nav-tab" onclick="showTab('edit')">Edit Entry</button>
+                <button class="nav-tab" onclick="showTab('results')">Results</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="initial-question">
+                    <h3>Club Dashboard</h3>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h4>Active Trials</h4>
+                            <div id="activeTrials">No active trials</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Recent Entries</h4>
+                            <div id="recentEntries">No recent entries</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Quick Actions</h4>
+                            <div>
+                                <button onclick="showTab('setup')" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
+                                <button onclick="showTab('runningOrders')" style="width: 100%; margin-bottom: 10px;">Manage Running Orders</button>
+                                <button onclick="exportAllData()" style="width: 100%;">Export All Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trial Setup Tab -->
+            <div id="setup" class="tab-content">
+                <div class="initial-question">
+                    <h3>Data Management</h3>
+                    <div class="form-group">
+                        <label class="label">Upload JSON Data:</label>
+                        <input type="file" id="jsonFile" accept=".json" onchange="loadJSONData()">
+                    </div>
+                    <div id="dataStatus"></div>
+                </div>
+
+                <div class="initial-question">
+                    <div class="form-group">
+                        <span class="label">How many days in trial?</span>
+                        <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number">
+                        <button onclick="generateDays()">Generate Days</button>
+                    </div>
+                </div>
+
+                <div id="daysContainer"></div>
+            </div>
+
+            <!-- Entry Form Tab -->
+            <div id="entry" class="tab-content">
+                <div class="initial-question">
+                    <h3>Trial Entry Form</h3>
+                    <form id="entryForm">
+                        <div class="form-group">
+                            <span class="label">Registration Number:</span>
+                            <input type="text" id="regNumber" placeholder="Enter registration number" required>
+                            <div id="callName" style="margin-left: 10px; font-weight: bold; color: #666;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="label">Handler Name:</span>
+                            <input type="text" id="handlerName" placeholder="Handler name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="label">Contact Email:</span>
+                            <input type="email" id="contactEmail" placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div id="trialSelections" style="margin: 20px 0;">
+                            <!-- Trial checkboxes will be populated here -->
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
+                                <input type="checkbox" id="waiverAccepted" required style="margin-top: 4px; transform: scale(1.2);">
+                                <span>I have read and agree to the Liability Waiver and Agreement. This agreement must be accepted for a valid entry.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">Submit Entry</button>
+                            <button type="button" onclick="clearForm()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Running Orders Tab -->
+            <div id="runningOrders" class="tab-content">
+                <div class="initial-question">
+                    <h3>🏃‍♂️ Running Order Management</h3>
+                    <p>Generate and arrange running orders from trial entries</p>
+                    
+                    <div class="control-legend">
+                        <div class="control-legend-title">How to Reorder Entries:</div>
+                        <strong>⋮⋮</strong> Drag handle - drag and drop to new position | 
+                        <strong>↑↓</strong> Arrow buttons - move up/down one position | 
+                        <strong>TOP/BOT</strong> Quick move to first/last position |
+                        <strong>#</strong> Position numbers show current order
+                    </div>
+                    
+                    <div class="form-group">
+                        <button onclick="generateRunningOrdersFromEntries()">Generate Running Orders</button>
+                        <button onclick="printRunningOrders()">Print Running Orders</button>
+                        <button onclick="confirmAndGenerateScoreSheets()" style="background: linear-gradient(45deg, #FF6B6B, #ee5a52); font-size: 16px; padding: 15px 30px;">✓ Confirm & Generate Score Sheets</button>
+                    </div>
+                    
+                    <div id="runningOrderStatus"></div>
+                    <div id="runningOrdersDisplay"></div>
+                </div>
+            </div>
+
+            <!-- Edit Entry Tab -->
+            <div id="edit" class="tab-content">
+                <div class="initial-question">
+                    <h3>Edit Entry</h3>
+                    <div class="form-group">
+                        <span class="label">Search by Registration Number or Handler Name:</span>
+                        <input type="text" id="searchEntry" placeholder="Enter registration number or handler name" onkeyup="searchEntries()" style="width: 300px;">
+                    </div>
+                    <div id="searchResults" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="results" class="tab-content">
+                <div class="initial-question">
+                    <h3>Entry Results</h3>
+                    <button onclick="exportToCSV()">Export to CSV</button>
+                    <div id="resultsDisplay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global data storage
+        let dogData = [];
+        let availableClasses = [];
+        let availableJudges = [];
+        let trialConfig = [];
+        let entryResults = [];
+        let runningOrders = {};
+        let totalDays = 0;
+        let savedDays = 0;
+        let currentUser = null;
+        let registeredClubs = [];
+
+        // Initialize with demo data
+        function initializeData() {
+            dogData = [
+                { regNumber: "12345", callName: "Buddy" },
+                { regNumber: "67890", callName: "Luna" },
+                { regNumber: "11111", callName: "Max" },
+                { regNumber: "22222", callName: "Bella" },
+                { regNumber: "33333", callName: "Charlie" },
+                { regNumber: "44444", callName: "Daisy" },
+                { regNumber: "55555", callName: "Rocky" },
+                { regNumber: "66666", callName: "Molly" }
+            ];
+            
+            availableClasses = ["Patrol 1", "Super Sleuth 4", "Ranger 3", "Investigator 3", "Detective", "Dasher 4", "Dasher 5"];
+            availableJudges = ["Sarah Knight", "Lane Michie", "Gary Truitt", "Judge Johnson", "Judge Williams"];
+
+            registeredClubs = [
+                {
+                    clubName: "Demo Dog Club",
+                    secretaryName: "Demo Secretary",
+                    email: "demo@example.com",
+                    password: "demo123",
+                    registrationDate: new Date().toISOString()
+                }
+            ];
+        }
+
+        // Login/Registration Functions
+        function showLoginTab(tab) {
+            document.querySelectorAll('#loginSection .tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#loginSection .nav-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(tab + 'Form').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const clubName = document.getElementById('loginClubName').value;
+            const secretaryName = document.getElementById('loginSecretaryName').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const club = registeredClubs.find(c => 
+                c.clubName.toLowerCase() === clubName.toLowerCase() &&
+                c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
+                c.password === password
+            );
+
+            if (club) {
+                currentUser = club;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('clubInfo').textContent = club.clubName;
+                document.getElementById('secretaryInfo').textContent = `Secretary: ${club.secretaryName}`;
+                updateDashboard();
+            } else {
+                alert('Invalid credentials. Try Demo Dog Club / Demo Secretary / demo123');
+            }
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const clubName = document.getElementById('registerClubName').value;
+            const secretaryName = document.getElementById('registerSecretaryName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            const existingClub = registeredClubs.find(c => c.clubName.toLowerCase() === clubName.toLowerCase());
+            if (existingClub) {
+                alert('Club name already registered');
+                return;
+            }
+
+            const newClub = {
+                clubName,
+                secretaryName,
+                email,
+                password,
+                registrationDate: new Date().toISOString()
+            };
+
+            registeredClubs.push(newClub);
+            alert('Club registered successfully! You can now sign in.');
+            showLoginTab('login');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Trial Setup Functions
+        function loadJSONData() {
+            const file = document.getElementById('jsonFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data) && data.length > 0) {
+                        dogData = data;
+                        availableClasses = [...new Set(data.map(item => item.className || item.class).filter(Boolean))];
+                        availableJudges = [...new Set(data.map(item => item.judge).filter(Boolean))];
+                        showStatusMessage('JSON data loaded successfully!', 'success');
+                    } else {
+                        showStatusMessage('Invalid JSON format', 'danger');
+                    }
+                } catch (error) {
+                    showStatusMessage('Error parsing JSON file', 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function generateDays() {
+            const days = parseInt(document.getElementById('trialDays').value);
+            if (!days || days < 1) {
+                alert('Please enter a valid number of days');
+                return;
+            }
+
+            totalDays = days;
+            savedDays = 0;
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= days; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'initial-question';
+                dayDiv.innerHTML = `
+                    <h4>Day ${i} Configuration</h4>
+                    <div class="form-group">
+                        <span class="label">Date:</span>
+                        <input type="date" id="date${i}" required>
+                    </div>
+                    <div id="classContainer${i}">
+                        <div class="form-group">
+                            <span class="label">Class:</span>
+                            <select id="class${i}-1" required>
+                                <option value="">Select Class</option>
+                                ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
+                            </select>
+                            <span class="label">Judge:</span>
+                            <select id="judge${i}-1" required>
+                                <option value="">Select Judge</option>
+                                ${availableJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
+                            </select>
+                            <span class="label">Rounds:</span>
+                            <input type="number" id="rounds${i}-1" min="1" max="5" value="2" style="width: 60px;">
+                        </div>
+                    </div>
+                    <button onclick="addClassToDay(${i})">Add Another Class</button>
+                    <button onclick="saveDay(${i})">Save Day ${i}</button>
+                `;
+                container.appendChild(dayDiv);
+            }
+        }
+
+        function addClassToDay(day) {
+            const container = document.getElementById(`classContainer${day}`);
+            const classCount = container.children.length + 1;
+            
+            const newClassDiv = document.createElement('div');
+            newClassDiv.className = 'form-group';
+            newClassDiv.innerHTML = `
+                <span class="label">Class:</span>
+                <select id="class${day}-${classCount}" required>
+                    <option value="">Select Class</option>
+                    ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
+                </select>
+                <span class="label">Judge:</span>
+                <select id="judge${day}-${classCount}" required>
+                    <option value="">Select Judge</option>
+                    ${availableJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
+                </select>
+                <span class="label">Rounds:</span>
+                <input type="number" id="rounds${day}-${classCount}" min="1" max="5" value="2" style="width: 60px;">
+            `;
+            container.appendChild(newClassDiv);
+        }
+
+        function saveDay(day) {
+            const date = document.getElementById(`date${day}`).value;
+            if (!date) {
+                alert('Please select a date for Day ' + day);
+                return;
+            }
+
+            const container = document.getElementById(`classContainer${day}`);
+            const classes = container.children;
+            let dayConfig = [];
+
+            for (let i = 0; i < classes.length; i++) {
+                const classIndex = i + 1;
+                const className = document.getElementById(`class${day}-${classIndex}`).value;
+                const judge = document.getElementById(`judge${day}-${classIndex}`).value;
+                const rounds = parseInt(document.getElementById(`rounds${day}-${classIndex}`).value) || 2;
+
+                if (className && judge) {
+                    for (let r = 1; r <= rounds; r++) {
+                        dayConfig.push({
+                            day: day,
+                            date: date,
+                            className: className,
+                            judge: judge,
+                            round: `Round ${r}`,
+                            roundNum: r
+                        });
+                    }
+                }
+            }
+
+            if (dayConfig.length === 0) {
+                alert('Please configure at least one class for Day ' + day);
+                return;
+            }
+
+            // Remove existing config for this day
+            trialConfig = trialConfig.filter(config => config.day !== day);
+            // Add new config
+            trialConfig.push(...dayConfig);
+
+            savedDays++;
+            updateTrialSelections();
+            updateDashboard();
+            showStatusMessage(`Day ${day} saved successfully!`, 'success');
+
+            if (savedDays === totalDays) {
+                showStatusMessage('All trial days configured! You can now accept entries.', 'success');
+            }
+        }
+
+        function updateTrialSelections() {
+            const container = document.getElementById('trialSelections');
+            if (trialConfig.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">No trials configured yet. Please set up your trial first.</p>';
+                return;
+            }
+
+            let html = '<h4>Available Trial Entries:</h4>';
+            trialConfig.forEach((config, index) => {
+                html += `
+                    <label style="display: block; margin: 10px 0; cursor: pointer;">
+                        <input type="checkbox" name="trialEntry" value="${index}" style="margin-right: 10px;">
+                        <strong>${config.date}</strong> - ${config.className} ${config.round} (Judge: ${config.judge})
+                    </label>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Entry Form Functions
+        document.getElementById('regNumber')?.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            if (query.length > 0) {
+                const match = dogData.find(dog => dog.regNumber.toLowerCase() === query);
+                const callNameDiv = document.getElementById('callName');
+                if (match) {
+                    callNameDiv.textContent = match.callName;
+                    callNameDiv.style.color = '#28a745';
+                } else {
+                    callNameDiv.textContent = 'Not found';
+                    callNameDiv.style.color = '#dc3545';
+                }
+            } else {
+                document.getElementById('callName').textContent = '';
+            }
+        });
+
+        document.getElementById('entryForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const regNumber = document.getElementById('regNumber').value;
+            const handlerName = document.getElementById('handlerName').value;
+            const contactEmail = document.getElementById('contactEmail').value;
+            const waiverAccepted = document.getElementById('waiverAccepted').checked;
+            
+            if (!waiverAccepted) {
+                alert('You must accept the waiver to submit an entry.');
+                return;
+            }
+
+            const selectedTrials = Array.from(document.querySelectorAll('input[name="trialEntry"]:checked'));
+            if (selectedTrials.length === 0) {
+                alert('Please select at least one trial entry.');
+                return;
+            }
+
+            const dog = dogData.find(d => d.regNumber === regNumber);
+            const callName = dog ? dog.callName : 'Unknown';
+
+            selectedTrials.forEach(checkbox => {
+                const configIndex = parseInt(checkbox.value);
+                const config = trialConfig[configIndex];
+                
+                const newEntry = {
+                    regNumber: regNumber,
+                    callName: callName,
+                    handler: handlerName,
+                    contactEmail: contactEmail,
+                    date: config.date,
+                    judge: config.judge,
+                    className: config.className,
+                    round: config.round,
+                    waiverAccepted: waiverAccepted,
+                    timestamp: new Date().toISOString()
+                };
+                entryResults.push(newEntry);
+            });
+
+            updateResultsDisplay();
+            updateDashboard();
+            clearForm();
+            showStatusMessage(`Entry submitted successfully for ${selectedTrials.length} trial(s)!`, 'success');
+        });
+
+        function clearForm() {
+            document.getElementById('entryForm')?.reset();
+            document.getElementById('callName').textContent = '';
+        }
+
+        // Running Orders Functions
+        function generateRunningOrdersFromEntries() {
+            if (entryResults.length === 0) {
+                showRunningOrderMessage("No entries found. Please add some trial entries first.", "warning");
+                return;
+            }
+
+            runningOrders = {};
+            
+            entryResults.forEach(entry => {
+                const key = `${entry.date}|${entry.judge}|${entry.className}|${entry.round}`;
+                if (!runningOrders[key]) {
+                    runningOrders[key] = {
+                        date: entry.date,
+                        judge: entry.judge,
+                        className: entry.className,
+                        round: entry.round,
+                        entries: []
+                    };
+                }
+                runningOrders[key].entries.push({...entry});
+            });
+
+            displayRunningOrders();
+            showRunningOrderMessage("Running orders generated! Use the controls to rearrange entries as needed.", "success");
+        }
+
+        function displayRunningOrders() {
+            const container = document.getElementById('runningOrdersDisplay');
+            
+            if (Object.keys(runningOrders).length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>No running orders to display</h3></div>';
+                return;
+            }
+
+            let html = '<div class="running-order-grid">';
+
+            const sortedKeys = Object.keys(runningOrders).sort((a, b) => {
+                const [dateA, judgeA, classA, roundA] = a.split('|');
+                const [dateB, judgeB, classB, roundB] = b.split('|');
+                
+                if (dateA !== dateB) return dateA.localeCompare(dateB);
+                if (judgeA !== judgeB) return judgeA.localeCompare(judgeB);
+                if (classA !== classB) return classA.localeCompare(classB);
+                return roundA.localeCompare(roundB);
+            });
+
+            sortedKeys.forEach(key => {
+                const group = runningOrders[key];
+                html += `
+                    <div class="running-order-table">
+                        <div class="table-header">
+                            ${group.date}<br>
+                            <strong>${group.judge}</strong><br>
+                            ${group.className} - ${group.round}
+                        </div>
+                        <div class="table-content">
+                `;
+
+                group.entries.forEach((entry, index) => {
+                    const isFirst = index === 0;
+                    const isLast = index === group.entries.length - 1;
+                    
+                    html += `
+                        <div class="entry-row">
+                            <div class="position-number">${index + 1}</div>
+                            <span class="drag-handle" title="Drag to reorder">⋮⋮</span>
+                            <div class="entry-info">
+                                <div class="handler-dog">${entry.handler} - ${entry.callName}</div>
+                                <div class="entry-details">${entry.regNumber}</div>
+                            </div>
+                            <div class="entry-controls">
+                                <button class="move-btn" onclick="moveEntry('${key}', ${index}, 'up')" 
+                                        ${isFirst ? 'disabled' : ''} title="Move up one position">↑</button>
+                                <button class="move-btn" onclick="moveEntry('${key}', ${index}, 'down')" 
+                                        ${isLast ? 'disabled' : ''} title="Move down one position">↓</button>
+                                <div class="quick-move-controls">
+                                    <button class="quick-move-btn" onclick="moveEntry('${key}', ${index}, 'top')" 
+                                            ${isFirst ? 'disabled' : ''} title="Move to top">TOP</button>
+                                    <button class="quick-move-btn" onclick="moveEntry('${key}', ${index}, 'bottom')" 
+                                            ${isLast ? 'disabled' : ''} title="Move to bottom">BOT</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function moveEntry(groupKey, fromIndex, direction) {
+            const group = runningOrders[groupKey];
+            const entries = group.entries;
+            let toIndex;
+
+            switch(direction) {
+                case 'up':
+                    if (fromIndex === 0) return;
+                    toIndex = fromIndex - 1;
+                    break;
+                case 'down':
+                    if (fromIndex === entries.length - 1) return;
+                    toIndex = fromIndex + 1;
+                    break;
+                case 'top':
+                    if (fromIndex === 0) return;
+                    toIndex = 0;
+                    break;
+                case 'bottom':
+                    if (fromIndex === entries.length - 1) return;
+                    toIndex = entries.length - 1;
+                    break;
+                default:
+                    return;
+            }
+
+            const entry = entries.splice(fromIndex, 1)[0];
+            entries.splice(toIndex, 0, entry);
+
+            displayRunningOrders();
+            
+            const directionText = direction === 'up' ? 'up' : direction === 'down' ? 'down' : 
+                                direction === 'top' ? 'to top' : 'to bottom';
+            showRunningOrderMessage(`Moved ${entry.handler} - ${entry.callName} ${directionText}`, "success");
+        }
+
+        function confirmAndGenerateScoreSheets() {
+            if (Object.keys(runningOrders).length === 0) {
+                showRunningOrderMessage("No running orders to confirm. Please generate running orders first.", "warning");
+                return;
+            }
+
+            const newEntryResults = [];
+            Object.values(runningOrders).forEach(group => {
+                group.entries.forEach(entry => {
+                    newEntryResults.push(entry);
+                });
+            });
+            entryResults = newEntryResults;
+
+            showRunningOrderMessage("✅ Running orders confirmed! Score sheets are being generated...", "success");
+            
+            setTimeout(() => {
+                showRunningOrderMessage("✅ Running orders finalized and score sheets generated! Orders are now locked.", "success");
+            }, 2000);
+        }
+
+        function printRunningOrders() {
+            if (Object.keys(runningOrders).length === 0) {
+                showRunningOrderMessage("No running orders to print. Please generate running orders first.", "warning");
+                return;
+            }
+
+            let printHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h1 style="text-align: center; margin-bottom: 30px;">Final Running Orders</h1>
+            `;
+
+            const sortedKeys = Object.keys(runningOrders).sort();
+            
+            sortedKeys.forEach(key => {
+                const group = runningOrders[key];
+                printHTML += `
+                    <div style="margin-bottom: 30px; page-break-inside: avoid;">
+                        <h2 style="background: #667eea; color: white; padding: 10px; text-align: center; margin: 0;">
+                            ${group.date} - ${group.judge}<br>
+                            ${group.className} - ${group.round}
+                        </h2>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                `;
+
+                group.entries.forEach((entry, index) => {
+                    printHTML += `
+                        <tr style="border: 1px solid #ddd;">
+                            <td style="padding: 8px; width: 40px; text-align: center; background: #f5f5f5; font-weight: bold;">${index + 1}</td>
+                            <td style="padding: 8px; font-weight: bold;">${entry.handler} - ${entry.callName}</td>
+                            <td style="padding: 8px; color: #666;">${entry.regNumber}</td>
+                        </tr>
+                    `;
+                });
+
+                printHTML += `</table></div>`;
+            });
+
+            printHTML += `
+                <div style="margin-top: 40px; text-align: center; color: #666; font-size: 12px;">
+                    Generated on ${new Date().toLocaleString()}<br>
+                    Running orders confirmed and finalized
+                </div>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Running Orders - ${new Date().toLocaleDateString()}</title>
+                    <style>
+                        @media print {
+                            @page { margin: 0.5in; }
+                            body { margin: 0; }
+                        }
+                    </style>
+                </head>
+                <body>${printHTML}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        }
+
+        function showRunningOrderMessage(message, type) {
+            const statusDiv = document.getElementById('runningOrderStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 4000);
+        }
+
+        // Search and Edit Functions
+        function searchEntries() {
+            const query = document.getElementById('searchEntry').value.toLowerCase();
+            const container = document.getElementById('searchResults');
+            
+            if (query.length < 2) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const matches = entryResults.filter(entry => 
+                entry.regNumber.toLowerCase().includes(query) ||
+                entry.handler.toLowerCase().includes(query) ||
+                entry.callName.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                container.innerHTML = '<p style="color: #666;">No matching entries found.</p>';
+                return;
+            }
+
+            let html = '<h4>Search Results:</h4>';
+            matches.forEach((entry, index) => {
+                html += `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f9f9f9;">
+                        <div style="font-weight: bold;">${entry.handler} - ${entry.callName}</div>
+                        <div style="color: #666; font-size: 14px;">${entry.regNumber} | ${entry.date} | ${entry.className} ${entry.round}</div>
+                        <div style="color: #666; font-size: 12px;">Judge: ${entry.judge} | Email: ${entry.contactEmail}</div>
+                        <button onclick="deleteEntry(${entryResults.indexOf(entry)})" style="margin-top: 10px; background: #dc3545;">Delete Entry</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function deleteEntry(index) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                entryResults.splice(index, 1);
+                updateResultsDisplay();
+                updateDashboard();
+                searchEntries();
+                showStatusMessage('Entry deleted successfully!', 'success');
+            }
+        }
+
+        // Results and Export Functions
+        function updateResultsDisplay() {
+            const container = document.getElementById('resultsDisplay');
+            
+            if (entryResults.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">No entries yet.</p>';
+                return;
+            }
+
+            const groupedResults = {};
+            entryResults.forEach(entry => {
+                const key = `${entry.date}-${entry.judge}-${entry.className}-${entry.round}`;
+                if (!groupedResults[key]) {
+                    groupedResults[key] = {
+                        date: entry.date,
+                        judge: entry.judge,
+                        className: entry.className,
+                        round: entry.round,
+                        entries: []
+                    };
+                }
+                groupedResults[key].entries.push(entry);
+            });
+
+            let html = '<div style="display: grid; gap: 20px;">';
+            
+            Object.values(groupedResults).forEach(group => {
+                html += `
+                    <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                        <div style="background: #667eea; color: white; padding: 10px; text-align: center; font-weight: bold;">
+                            ${group.date} - ${group.judge}<br>
+                            ${group.className} - ${group.round}
+                        </div>
+                        <div style="padding: 10px;">
+                `;
+                
+                group.entries.forEach((entry, index) => {
+                    html += `
+                        <div style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                            <span><strong>${entry.handler}</strong> - ${entry.callName}</span>
+                            <span style="color: #666;">${entry.regNumber}</span>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function exportToCSV() {
+            if (entryResults.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Registration Number', 'Call Name', 'Handler', 'Email', 'Date', 'Judge', 'Class', 'Round', 'Timestamp'];
+            const csvContent = [
+                headers.join(','),
+                ...entryResults.map(entry => [
+                    entry.regNumber,
+                    entry.callName,
+                    entry.handler,
+                    entry.contactEmail,
+                    entry.date,
+                    entry.judge,
+                    entry.className,
+                    entry.round,
+                    entry.timestamp
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAllData() {
+            if (entryResults.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            exportToCSV();
+        }
+
+        function updateDashboard() {
+            let activeTrialsHtml = 'No active trials';
+            if (trialConfig.length > 0) {
+                const uniqueDates = [...new Set(trialConfig.map(t => t.date))];
+                activeTrialsHtml = `<strong>${uniqueDates.length}</strong> trial days configured`;
+            }
+            document.getElementById('activeTrials').innerHTML = activeTrialsHtml;
+
+            let recentEntriesHtml = 'No recent entries';
+            if (entryResults.length > 0) {
+                const recentEntries = entryResults.slice(-3);
+                recentEntriesHtml = recentEntries.map(entry => 
+                    `<div style="margin-bottom: 8px;">${entry.callName} - ${entry.className}</div>`
+                ).join('');
+            }
+            document.getElementById('recentEntries').innerHTML = recentEntriesHtml;
+        }
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('dataStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        // Initialize application
+        window.onload = function() {
+            initializeData();
+            updateTrialSelections();
+        };
+    </script>
 </body>
 </html>
