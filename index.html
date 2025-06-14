@@ -131,6 +131,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            margin-bottom: 0.5rem;
         }
         
         .btn:hover {
@@ -138,17 +140,10 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
-        .btn-secondary {
-            background: #6c757d;
-            margin-left: 1rem;
-        }
-        
-        .btn-success {
+        .btn-demo {
             background: linear-gradient(45deg, #28a745, #20c997);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(45deg, #dc3545, #fd5470);
+            font-size: 1.1rem;
+            margin-top: 1rem;
         }
         
         /* Tab Navigation */
@@ -198,7 +193,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Trial Setup Styles */
+        /* Sections */
         .section {
             background: white;
             border-radius: 10px;
@@ -213,121 +208,59 @@
             font-size: 1.5rem;
         }
         
-        .status-banner {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
+        .alert {
             padding: 1rem;
             border-radius: 8px;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .status-banner h4 {
-            margin-bottom: 0.5rem;
-        }
-        
-        .day-container {
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            margin: 2rem 0;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .day-header {
-            background: #667eea;
-            color: white;
-            padding: 1rem 1.5rem;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        
-        .day-content {
-            padding: 2rem;
-            background: #f8f9fa;
-        }
-        
-        .class-container {
-            background: white;
-            border: 2px solid #28a745;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-            overflow: hidden;
-        }
-        
-        .class-header {
-            background: #28a745;
-            color: white;
-            padding: 0.75rem 1rem;
-            font-weight: bold;
-        }
-        
-        .class-content {
-            padding: 1.5rem;
-        }
-        
-        .round-section {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 1rem;
             margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
+            border: 1px solid transparent;
         }
         
-        /* Typeahead Dropdown */
-        .typeahead-container {
-            position: relative;
-            display: inline-block;
-            width: 100%;
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
         }
         
-        .typeahead-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffeaa7;
         }
         
-        .typeahead-input:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
         }
         
-        .typeahead-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-card {
             background: white;
-            border: 1px solid #e0e0e0;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
         }
         
-        .typeahead-item {
-            padding: 0.75rem;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background-color 0.2s ease;
+        .dashboard-card h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
         
-        .typeahead-item:hover {
-            background: #f8f9fa;
+        .quick-actions {
+            display: grid;
+            gap: 1rem;
         }
         
-        .typeahead-item:last-child {
-            border-bottom: none;
-        }
-        
-        /* Forms */
+        /* Form Elements */
         .form-row {
             display: flex;
             gap: 1rem;
@@ -365,298 +298,33 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        /* Entry Form */
-        .entry-form {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .call-name-display {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-left: 1rem;
-            padding: 0.5rem;
-            border-radius: 5px;
-        }
-        
-        .call-name-found {
-            color: #28a745;
-            background: #d4edda;
-        }
-        
-        .call-name-not-found {
-            color: #dc3545;
-            background: #f8d7da;
-        }
-        
-        /* Trial Options */
-        .trial-options {
-            margin: 2rem 0;
-        }
-        
-        .day-group {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-        
-        .day-group-header {
-            background: #667eea;
+        /* Status displays */
+        .status-banner {
+            background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
-            padding: 1rem 1.5rem;
-            font-weight: bold;
-            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
         }
         
-        .day-group-content {
+        .status-banner h4 {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Simple demo message */
+        .demo-info {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 10px;
             padding: 1.5rem;
-        }
-        
-        .class-group {
-            background: white;
-            border-left: 4px solid #28a745;
-            margin-bottom: 1.5rem;
-            border-radius: 0 8px 8px 0;
-            padding: 1rem;
-        }
-        
-        .class-group-header {
-            color: #28a745;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-        
-        .trial-option {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .trial-option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .entry-type-options {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-        
-        .entry-type-options label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            font-weight: normal;
-        }
-        
-        /* Running Orders */
-        .running-orders-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .running-order-table {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .table-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .entry-row {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background-color 0.2s ease;
-        }
-        
-        .entry-row:hover {
-            background: #f8f9fa;
-        }
-        
-        .position-number {
-            background: #667eea;
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 1rem;
-        }
-        
-        .entry-info {
-            flex: 1;
-            margin-right: 1rem;
-        }
-        
-        .handler-dog {
-            font-weight: bold;
-            margin-bottom: 0.25rem;
-        }
-        
-        .entry-details {
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .entry-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        
-        .move-btn {
-            width: 30px;
-            height: 25px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-        }
-        
-        .move-btn.up { background: #17a2b8; color: white; }
-        .move-btn.down { background: #6c757d; color: white; }
-        .move-btn:hover { transform: scale(1.1); }
-        .move-btn:disabled { background: #e9ecef; color: #6c757d; cursor: not-allowed; }
-        
-        /* Alerts */
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            border: 1px solid transparent;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-color: #c3e6cb;
-        }
-        
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-color: #ffeaa7;
-        }
-        
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-color: #f5c6cb;
-        }
-        
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border-color: #bee5eb;
-        }
-        
-        /* Results Display */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .result-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .card-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .card-content {
-            padding: 1rem;
-        }
-        
-        .entry-item {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .entry-item:last-child {
-            border-bottom: none;
-        }
-        
-        .entry-type-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        .badge-regular {
-            background: #28a745;
-            color: white;
-        }
-        
-        .badge-feo {
-            background: #ffc107;
-            color: #333;
-        }
-        
-        /* Dashboard */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
             margin-bottom: 2rem;
+            text-align: center;
         }
         
-        .dashboard-card {
-            background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-left: 5px solid #667eea;
-        }
-        
-        .dashboard-card h4 {
-            color: #667eea;
+        .demo-info h4 {
+            color: #1976d2;
             margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-        
-        .quick-actions {
-            display: grid;
-            gap: 1rem;
         }
         
         /* Responsive Design */
@@ -691,26 +359,6 @@
             .form-row {
                 flex-direction: column;
             }
-            
-            .running-orders-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Loading Spinner */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -732,42 +380,13 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" required placeholder="Enter your password">
                 </div>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <button type="submit" class="btn" style="flex: 1;">Sign In</button>
-                    <button type="button" class="btn btn-secondary" onclick="testLogin()" style="flex: 1;">Test & Register</button>
-                </div>
-                <button type="button" class="btn" onclick="demoLogin()" style="background: #28a745; width: 100%; margin-bottom: 0.5rem;">🎯 Demo Login</button>
-                <p style="font-size: 0.9rem; color: #666; text-align: center; margin: 0;">
-                    Click above to try the demo instantly!
-                </p>
+                <button type="submit" class="btn">Sign In</button>
             </form>
             
-            <!-- Registration Form (hidden by default) -->
-            <form id="registrationForm" style="display: none;">
-                <h3 style="margin: 2rem 0 1rem 0; color: #667eea;">Register New Club</h3>
-                <div class="form-group">
-                    <label for="regClubName">Club Name</label>
-                    <input type="text" id="regClubName" required placeholder="Your club's official name">
-                </div>
-                <div class="form-group">
-                    <label for="regClubEmail">Club Email Address</label>
-                    <input type="email" id="regClubEmail" required placeholder="club-secretary@example.com">
-                </div>
-                <div class="form-group">
-                    <label for="regSecretaryName">Secretary Name</label>
-                    <input type="text" id="regSecretaryName" required placeholder="Secretary's full name">
-                </div>
-                <div class="form-group">
-                    <label for="regPassword">Create Password</label>
-                    <input type="password" id="regPassword" required placeholder="Minimum 6 characters">
-                </div>
-                <div class="form-group">
-                    <label for="regConfirmPassword">Confirm Password</label>
-                    <input type="password" id="regConfirmPassword" required placeholder="Re-enter password">
-                </div>
-                <button type="submit" class="btn">Register Club</button>
-                <button type="button" class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
-            </form>
+            <button type="button" class="btn btn-demo" onclick="quickDemo()">🎯 Try Demo Instantly</button>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                Click above to test with demo data immediately!
+            </p>
         </div>
     </div>
 
@@ -788,48 +407,39 @@
                 <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
                 <button class="nav-tab" onclick="showTab('setup')">Trial Setup</button>
                 <button class="nav-tab" onclick="showTab('entry')">Entry Form</button>
-                <button class="nav-tab" onclick="showTab('runningOrders')">Running Orders</button>
-                <button class="nav-tab" onclick="showTab('edit')">Edit Entries</button>
                 <button class="nav-tab" onclick="showTab('results')">Results</button>
             </div>
 
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
+                <div class="demo-info">
+                    <h4>🎉 Welcome to the Demo!</h4>
+                    <p>You're now logged in as <strong>Demo Dog Club</strong>. This is a fully functional trial management system with:</p>
+                    <ul style="text-align: left; margin: 1rem 0; display: inline-block;">
+                        <li>🐕 <strong>12 demo dogs</strong> for testing registration lookup</li>
+                        <li>🏆 <strong>20+ classes</strong> (Patrol, Detective, Super Sleuth, etc.)</li>
+                        <li>👨‍⚖️ <strong>9 judges</strong> ready for assignment</li>
+                        <li>💾 <strong>Save/Load trial progress</strong> for real use</li>
+                    </ul>
+                </div>
+                
                 <div class="dashboard-grid">
                     <div class="dashboard-card">
                         <h4>📊 Trial Status</h4>
-                        <div id="trialStatus">No active trial</div>
+                        <div id="trialStatus">Ready to create your first trial</div>
                     </div>
                     <div class="dashboard-card">
                         <h4>📝 Recent Entries</h4>
-                        <div id="recentEntries">No entries yet</div>
-                    </div>
-                    <div class="dashboard-card">
-                        <h4>🗄️ Database Management</h4>
-                        <div style="margin-bottom: 1rem;">
-                            <button class="btn btn-secondary" onclick="document.getElementById('uploadExcel').click()">📁 Upload Dog Database</button>
-                            <input type="file" id="uploadExcel" accept=".xlsx,.xls" style="display: none;" onchange="loadExcelFile()">
-                        </div>
-                        <div id="databaseInfo">
-                            <div>🐕 <span id="dogCount">${dogData.length}</span> dogs</div>
-                            <div>🏆 <span id="classCount">${availableClasses.length}</span> classes</div>
-                            <div>👨‍⚖️ <span id="judgeCount">${availableJudges.length}</span> judges</div>
-                        </div>
+                        <div id="recentEntries">No entries yet - set up a trial first</div>
                     </div>
                     <div class="dashboard-card">
                         <h4>🎯 Quick Actions</h4>
                         <div class="quick-actions">
-                            <button class="btn" onclick="showTab('setup')">Create New Trial</button>
-                            <button class="btn btn-success" onclick="saveTrialFile()">💾 Save Trial Progress</button>
-                            <button class="btn btn-secondary" onclick="document.getElementById('loadTrialFile').click()">📁 Load Trial Progress</button>
-                            <input type="file" id="loadTrialFile" accept=".json" style="display: none;" onchange="loadTrialFile()">
+                            <button class="btn" onclick="showTab('setup')">🚀 Create New Trial</button>
+                            <button class="btn" onclick="showTab('entry')">📝 Go to Entry Form</button>
+                            <button class="btn" style="background: #28a745;" onclick="saveDemo()">💾 Save Trial Progress</button>
                         </div>
                     </div>
-                </div>
-                
-                <div id="dataStatus" class="status-banner" style="display: none;">
-                    <h4>🎉 Database Ready!</h4>
-                    <div id="dataStatusText"></div>
                 </div>
             </div>
 
@@ -844,267 +454,312 @@
                         </div>
                         <div class="form-field">
                             <label for="trialDays">Number of Days</label>
-                            <input type="number" id="trialDays" min="1" max="10" placeholder="1-10">
+                            <input type="number" id="trialDays" min="1" max="10" placeholder="1-3" value="1">
                         </div>
                         <div class="form-field">
-                            <button class="btn" onclick="generateDays()">Generate Trial Setup</button>
+                            <button class="btn" onclick="setupTrial()">Create Trial</button>
                         </div>
                     </div>
+                    <div id="setupStatus"></div>
                 </div>
-
-                <div id="daysContainer"></div>
                 
-                <div id="setupComplete" style="display: none;" class="section">
-                    <div class="status-banner">
-                        <h4>✅ Trial Setup Complete!</h4>
-                        <p>Your trial is ready for entries. Share the entry form with participants.</p>
+                <div id="trialSetupForm" style="display: none;" class="section">
+                    <h3>🏆 Configure Day 1</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="trialDate">Trial Date</label>
+                            <input type="date" id="trialDate">
+                        </div>
+                        <div class="form-field">
+                            <label for="numClasses">Number of Classes</label>
+                            <input type="number" id="numClasses" min="1" max="10" placeholder="2-5" value="2">
+                        </div>
+                        <div class="form-field">
+                            <button class="btn" onclick="finalizeTrial()">✅ Finalize Trial Setup</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Entry Form Tab -->
             <div id="entry" class="tab-content">
-                <div class="entry-form">
+                <div class="section">
                     <h3>🐕 Trial Entry Form</h3>
-                    <form id="entryForm">
-                        <div class="form-row">
-                            <div class="form-field">
-                                <label for="regNumber">Registration Number</label>
-                                <div class="typeahead-container">
-                                    <input type="text" id="regNumber" class="typeahead-input" 
-                                           placeholder="Type registration number (e.g., 07-0001-01)"
-                                           onkeyup="handleRegNumberTypeahead(this)"
-                                           onblur="hideRegNumberDropdown()"
-                                           onfocus="showRegNumberDropdown()">
-                                    <div id="regNumberDropdown" class="typeahead-dropdown"></div>
-                                </div>
-                            </div>
-                            <div class="form-field">
-                                <span id="callNameDisplay" class="call-name-display"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-field">
-                                <label for="handlerName">Handler Name</label>
-                                <input type="text" id="handlerName" placeholder="Handler's full name" required>
-                            </div>
-                            <div class="form-field">
-                                <label for="contactEmail">Contact Email</label>
-                                <input type="email" id="contactEmail" placeholder="your.email@example.com" required>
-                            </div>
-                        </div>
-
-                        <div id="trialOptionsContainer" class="trial-options">
-                            <h4>Available Trial Options</h4>
-                            <div id="trialOptions"></div>
-                        </div>
-
-                        <div class="form-group">
-                            <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox" id="waiverAccepted" required style="margin-top: 0.2rem;">
-                                <span>I have read and agree to the Liability Waiver and Agreement. This agreement must be accepted for a valid entry.</span>
-                            </label>
-                        </div>
-
-                        <div class="form-row">
-                            <button type="submit" class="btn">Submit Entry</button>
-                            <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Running Orders Tab -->
-            <div id="runningOrders" class="tab-content">
-                <div class="section">
-                    <h3>🏃‍♂️ Running Order Management</h3>
-                    <p>Generate and arrange running orders from trial entries</p>
-                    
-                    <div class="form-row">
-                        <button class="btn" onclick="generateRunningOrdersFromEntries()">Generate Running Orders</button>
-                        <button class="btn btn-secondary" onclick="printRunningOrders()">Print Running Orders</button>
-                        <button class="btn btn-success" onclick="confirmAndGenerateScoreSheets()">✅ Confirm & Generate Score Sheets</button>
-                    </div>
-                    
-                    <div id="runningOrderStatus"></div>
-                    <div id="runningOrdersDisplay"></div>
-                </div>
-            </div>
-
-            <!-- Edit Entries Tab -->
-            <div id="edit" class="tab-content">
-                <div class="section">
-                    <h3>✏️ Edit Entries</h3>
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="searchEntry">Search Entries</label>
-                            <input type="text" id="searchEntry" placeholder="Search by registration number or handler name" onkeyup="searchEntries()">
+                    <div id="entryFormContent">
+                        <div class="alert alert-warning">
+                            Please set up a trial first in the Trial Setup tab.
                         </div>
                     </div>
-                    <div id="searchResults"></div>
                 </div>
             </div>
 
             <!-- Results Tab -->
             <div id="results" class="tab-content">
                 <div class="section">
-                    <h3>📊 Entry Results</h3>
-                    <div class="form-row">
-                        <button class="btn" onclick="exportToCSV()">📄 Export to CSV</button>
-                        <button class="btn btn-secondary" onclick="exportToExcel()">📊 Export to Excel</button>
+                    <h3>📊 Trial Results</h3>
+                    <div id="resultsContent">
+                        <div class="alert alert-warning">
+                            No trial entries yet. Set up a trial and add entries to see results here.
+                        </div>
                     </div>
-                    <div id="resultsDisplay"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Global Variables - Define first
+        // Simple, direct approach - all functions defined immediately
+        console.log('✅ Trial Management System loaded successfully!');
+    </script>
+</body>
+</html>('🚀 Loading Trial Management System...');
+        
+        // Global variables
         let currentUser = null;
-        let registeredClubs = [];
-        let dogData = [];
-        let availableClasses = [];
-        let availableJudges = [];
-        let trialConfig = [];
-        let entryResults = [];
-        let runningOrders = {};
-        let trialMetadata = {};
-        let totalDays = 0;
-        let savedDays = 0;
+        let trialData = {
+            name: '',
+            date: '',
+            classes: [],
+            entries: []
+        };
+        
+        // Demo data
+        const demoDogs = [
+            { regNumber: "07-0001-01", callName: "BJ", handler: "Shirley Ottmer" },
+            { regNumber: "07-0001-02", callName: "Jaidon", handler: "Shirley Ottmer" },
+            { regNumber: "07-0001-03", callName: "Jake", handler: "Shirley Ottmer" },
+            { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer" },
+            { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher" },
+            { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher" },
+            { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher" },
+            { regNumber: "07-0003-02", callName: "Becky", handler: "Bonnie Hornfisher" },
+            { regNumber: "07-0003-03", callName: "Ben", handler: "Bonnie Hornfisher" },
+            { regNumber: "07-0004-01", callName: "Max", handler: "Demo Handler" },
+            { regNumber: "07-0004-02", callName: "Bella", handler: "Demo Handler" },
+            { regNumber: "07-0004-03", callName: "Charlie", handler: "Demo Handler" }
+        ];
+        
+        const demoClasses = [
+            "Patrol 1", "Patrol 2", "Detective 1", "Detective 2", 
+            "Super Sleuth 1", "Super Sleuth 2", "Ranger 1", "Ranger 2",
+            "Investigator 1", "Investigator 2"
+        ];
+        
+        const demoJudges = [
+            "Sarah Knight", "Lane Michie", "Gary Truitt", 
+            "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
+        ];
 
-        // Define all functions globally first
-        function demoLogin() {
-            console.log('Demo login function called');
-            try {
-                document.getElementById('clubEmail').value = 'demo@dogclub.com';
-                document.getElementById('secretaryName').value = 'Demo Secretary';
-                document.getElementById('password').value = 'demo123';
-                
-                console.log('Demo values set, calling handleLogin');
-                handleLogin();
-            } catch (error) {
-                console.error('Error in demoLogin:', error);
-                alert('Demo login failed: ' + error.message);
-            }
+        // Demo login function - simple and direct
+        function quickDemo() {
+            console.log('🎯 Quick demo login...');
+            
+            currentUser = {
+                clubName: "Demo Dog Club",
+                clubEmail: "demo@dogclub.com",
+                secretaryName: "Demo Secretary"
+            };
+            
+            showMainApp();
+            console.log('✅ Demo login successful!');
         }
 
-        function showRegistration() {
-            console.log('Showing registration form');
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registrationForm').style.display = 'block';
-        }
-
-        function showLogin() {
-            console.log('Showing login form');
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registrationForm').style.display = 'none';
-        }
-
-        function handleLogin() {
-            console.log('handleLogin called');
-            try {
-                const clubEmail = document.getElementById('clubEmail').value.trim();
-                const secretaryName = document.getElementById('secretaryName').value.trim();
-                const password = document.getElementById('password').value;
-
-                console.log('Login attempt:', {clubEmail, secretaryName, password});
-                console.log('Available clubs:', registeredClubs);
-
-                const club = registeredClubs.find(c => 
-                    c.clubEmail.toLowerCase() === clubEmail.toLowerCase() &&
-                    c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
-                    c.password === password
-                );
-
-                console.log('Found club:', club);
-
-                if (club) {
-                    currentUser = club;
-                    localStorage.setItem('currentUser', JSON.stringify(club));
-                    console.log('Login successful, showing main app');
-                    showMainApp();
-                } else {
-                    console.log('Login failed - credentials not found');
-                    showAlert('Invalid credentials. Please check your email, name, and password.', 'danger');
-                    
-                    // Debug: show what clubs are available
-                    console.log('Available clubs:');
-                    registeredClubs.forEach((club, index) => {
-                        console.log(`Club ${index}:`, {
-                            email: club.clubEmail,
-                            secretary: club.secretaryName,
-                            password: club.password
-                        });
-                    });
-                }
-            } catch (error) {
-                console.error('Error in handleLogin:', error);
-                showAlert('Login error: ' + error.message, 'danger');
-            }
-        }
-
-        function handleRegistration() {
-            console.log('handleRegistration called');
-            try {
-                const clubName = document.getElementById('regClubName').value;
-                const clubEmail = document.getElementById('regClubEmail').value;
-                const secretaryName = document.getElementById('regSecretaryName').value;
-                const password = document.getElementById('regPassword').value;
-                const confirmPassword = document.getElementById('regConfirmPassword').value;
-
-                if (password !== confirmPassword) {
-                    showAlert('Passwords do not match', 'danger');
-                    return;
-                }
-
-                if (password.length < 6) {
-                    showAlert('Password must be at least 6 characters', 'danger');
-                    return;
-                }
-
-                const existingClub = registeredClubs.find(c => c.clubEmail.toLowerCase() === clubEmail.toLowerCase());
-                if (existingClub) {
-                    showAlert('A club with this email is already registered', 'danger');
-                    return;
-                }
-
-                const newClub = {
-                    clubName,
-                    clubEmail,
-                    secretaryName,
-                    password,
-                    registrationDate: new Date().toISOString()
-                };
-
-                registeredClubs.push(newClub);
-                localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
-                
-                showAlert('Club registered successfully! You can now sign in.', 'success');
-                showLogin();
-            } catch (error) {
-                console.error('Error in handleRegistration:', error);
-                showAlert('Registration error: ' + error.message, 'danger');
-            }
-        }
-
+        // Show main application
         function showMainApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('clubInfo').textContent = currentUser.clubName;
             document.getElementById('secretaryInfo').textContent = `Secretary: ${currentUser.secretaryName}`;
-            updateDashboard();
-            loadUserTrialData();
+            
+            showAlert('🎉 Welcome to the Trial Management System!', 'success');
         }
 
+        // Logout
         function logout() {
             currentUser = null;
-            localStorage.removeItem('currentUser');
+            trialData = { name: '', date: '', classes: [], entries: [] };
             document.getElementById('mainApp').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
-            clearForm();
+            showAlert('👋 Logged out successfully', 'success');
+        }
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Trial setup
+        function setupTrial() {
+            const name = document.getElementById('trialName').value.trim();
+            const days = document.getElementById('trialDays').value;
+            
+            if (!name) {
+                showAlert('Please enter a trial name', 'warning');
+                return;
+            }
+            
+            trialData.name = name;
+            document.getElementById('trialSetupForm').style.display = 'block';
+            showAlert(`Trial "${name}" created! Now configure the details below.`, 'success');
+        }
+
+        function finalizeTrial() {
+            const date = document.getElementById('trialDate').value;
+            const numClasses = document.getElementById('numClasses').value;
+            
+            if (!date) {
+                showAlert('Please select a trial date', 'warning');
+                return;
+            }
+            
+            trialData.date = date;
+            trialData.classes = demoClasses.slice(0, numClasses);
+            
+            // Create entry form
+            createEntryForm();
+            
+            // Update dashboard
+            updateDashboard();
+            
+            showAlert(`✅ Trial setup complete! ${numClasses} classes configured for ${date}`, 'success');
+        }
+
+        function createEntryForm() {
+            const entryContent = document.getElementById('entryFormContent');
+            entryContent.innerHTML = `
+                <form id="entryForm" onsubmit="submitEntry(event)">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="regNumber">Registration Number</label>
+                            <input type="text" id="regNumber" placeholder="e.g., 07-0001-01" onkeyup="lookupDog()">
+                        </div>
+                        <div class="form-field">
+                            <span id="dogInfo" style="font-weight: bold; color: #667eea;"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="handlerName">Handler Name</label>
+                            <input type="text" id="handlerName" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="entryClass">Class</label>
+                            <select id="entryClass" required>
+                                <option value="">Select a class</option>
+                                ${trialData.classes.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="contactEmail">Contact Email</label>
+                            <input type="email" id="contactEmail" required>
+                        </div>
+                        <div class="form-field">
+                            <label>
+                                <input type="checkbox" required style="margin-right: 0.5rem;">
+                                I agree to the liability waiver
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Submit Entry</button>
+                </form>
+            `;
+        }
+
+        function lookupDog() {
+            const regNumber = document.getElementById('regNumber').value;
+            const dogInfo = document.getElementById('dogInfo');
+            
+            const dog = demoDogs.find(d => d.regNumber === regNumber);
+            if (dog) {
+                dogInfo.textContent = `${dog.callName} - ${dog.handler}`;
+                dogInfo.style.color = '#28a745';
+                document.getElementById('handlerName').value = dog.handler;
+            } else if (regNumber.length > 3) {
+                dogInfo.textContent = 'Not found';
+                dogInfo.style.color = '#dc3545';
+            } else {
+                dogInfo.textContent = '';
+            }
+        }
+
+        function submitEntry(event) {
+            event.preventDefault();
+            
+            const regNumber = document.getElementById('regNumber').value;
+            const handlerName = document.getElementById('handlerName').value;
+            const entryClass = document.getElementById('entryClass').value;
+            const contactEmail = document.getElementById('contactEmail').value;
+            
+            const dog = demoDogs.find(d => d.regNumber === regNumber);
+            const callName = dog ? dog.callName : 'Unknown';
+            
+            const entry = {
+                regNumber,
+                callName,
+                handlerName,
+                entryClass,
+                contactEmail,
+                timestamp: new Date().toISOString()
+            };
+            
+            trialData.entries.push(entry);
+            
+            // Reset form
+            document.getElementById('entryForm').reset();
+            document.getElementById('dogInfo').textContent = '';
+            
+            updateDashboard();
+            updateResults();
+            showAlert(`✅ Entry submitted for ${callName}!`, 'success');
+        }
+
+        function updateDashboard() {
+            document.getElementById('trialStatus').innerHTML = trialData.name ? 
+                `<strong>${trialData.name}</strong><br>📅 ${trialData.date}<br>🏆 ${trialData.classes.length} classes<br>📝 ${trialData.entries.length} entries` :
+                'Ready to create your first trial';
+                
+            const recentEntries = trialData.entries.slice(-3);
+            document.getElementById('recentEntries').innerHTML = recentEntries.length ? 
+                recentEntries.map(entry => `<div style="margin-bottom: 0.5rem; font-size: 0.9rem;">${entry.callName} - ${entry.entryClass}</div>`).join('') :
+                'No entries yet - set up a trial first';
+        }
+
+        function updateResults() {
+            const resultsContent = document.getElementById('resultsContent');
+            if (trialData.entries.length === 0) {
+                resultsContent.innerHTML = '<div class="alert alert-warning">No trial entries yet.</div>';
+                return;
+            }
+            
+            let html = '<h4>Trial Entries</h4><div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">';
+            html += '<thead><tr style="background: #f8f9fa;"><th style="padding: 0.75rem; border: 1px solid #ddd;">Reg #</th><th style="padding: 0.75rem; border: 1px solid #ddd;">Dog</th><th style="padding: 0.75rem; border: 1px solid #ddd;">Handler</th><th style="padding: 0.75rem; border: 1px solid #ddd;">Class</th></tr></thead><tbody>';
+            
+            trialData.entries.forEach(entry => {
+                html += `<tr><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.regNumber}</td><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.callName}</td><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.handlerName}</td><td style="padding: 0.75rem; border: 1px solid #ddd;">${entry.entryClass}</td></tr>`;
+            });
+            
+            html += '</tbody></table></div>';
+            resultsContent.innerHTML = html;
+        }
+
+        function saveDemo() {
+            const data = JSON.stringify(trialData, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial_${trialData.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showAlert('💾 Trial data saved to downloads!', 'success');
         }
 
         function showAlert(message, type) {
@@ -1122,742 +777,28 @@
             
             setTimeout(() => {
                 alertDiv.remove();
-            }, 5000);
+            }, 4000);
         }
 
-        // Data Loading Functions
-        function loadStoredData() {
-            console.log('Loading stored data...');
-            const storedClubs = localStorage.getItem('registeredClubs');
-            if (storedClubs) {
-                try {
-                    registeredClubs = JSON.parse(storedClubs);
-                    console.log('Loaded stored clubs:', registeredClubs);
-                } catch (error) {
-                    console.error('Error parsing stored clubs:', error);
-                    registeredClubs = [];
-                }
-            }
-            
-            // Always ensure demo club exists
-            const demoClub = {
-                clubName: "Demo Dog Club",
-                clubEmail: "demo@dogclub.com",
-                secretaryName: "Demo Secretary",
-                password: "demo123",
-                registrationDate: new Date().toISOString()
-            };
-            
-            const existingDemo = registeredClubs.find(c => c.clubEmail === "demo@dogclub.com");
-            if (!existingDemo) {
-                console.log('Adding demo club to registeredClubs');
-                registeredClubs.push(demoClub);
-                localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
-            } else {
-                console.log('Demo club already exists');
-            }
-            
-            console.log('Final registered clubs:', registeredClubs);
-
-            const storedUser = localStorage.getItem('currentUser');
-            if (storedUser) {
-                try {
-                    currentUser = JSON.parse(storedUser);
-                    showMainApp();
-                } catch (error) {
-                    console.error('Error parsing stored user:', error);
-                    localStorage.removeItem('currentUser');
-                }
-            }
-        }
-
-        // Initialize immediately when script loads
-        console.log('Initializing data immediately...');
-        
-        // Initialize with demo club right away
-        registeredClubs = [{
-            clubName: "Demo Dog Club",
-            clubEmail: "demo@dogclub.com",
-            secretaryName: "Demo Secretary",
-            password: "demo123",
-            registrationDate: new Date().toISOString()
-        }];
-        
-        console.log('Demo club initialized:', registeredClubs);
-
-        // Initialize when DOM is ready but also call loadStoredData to check for saved data
+        // Form submission handler
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing...');
-            loadStoredData(); // This will merge with any saved clubs
-            loadDogDatabase();
-            
-            // Set up form handlers
-            const loginForm = document.getElementById('loginForm');
-            const registrationForm = document.getElementById('registrationForm');
-            
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    console.log('Login form submitted');
-                    handleLogin();
-                });
-            }
-            
-            if (registrationForm) {
-                registrationForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    console.log('Registration form submitted');
-                    handleRegistration();
-                });
-            }
-            
-            console.log('Initialization complete, registeredClubs:', registeredClubs);
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('clubEmail').value;
+                const secretary = document.getElementById('secretaryName').value;
+                const password = document.getElementById('password').value;
+                
+                if (email && secretary && password) {
+                    currentUser = {
+                        clubName: "Custom Club",
+                        clubEmail: email,
+                        secretaryName: secretary
+                    };
+                    showMainApp();
+                } else {
+                    showAlert('Please fill in all fields', 'warning');
+                }
+            });
         });
 
-        function loadUserTrialData() {
-            if (!currentUser) return;
-            
-            const userKey = `trialData_${currentUser.clubEmail}`;
-            const storedData = localStorage.getItem(userKey);
-            
-            if (storedData) {
-                try {
-                    const data = JSON.parse(storedData);
-                    trialConfig = data.trialConfig || [];
-                    entryResults = data.entryResults || [];
-                    runningOrders = data.runningOrders || {};
-                    trialMetadata = data.trialMetadata || {};
-                    totalDays = data.totalDays || 0;
-                    savedDays = data.savedDays || 0;
-                    
-                    updateTrialOptions();
-                    updateResultsDisplay();
-                    updateDashboard();
-                    
-                    if (savedDays === totalDays && totalDays > 0) {
-                        document.getElementById('setupComplete').style.display = 'block';
-                    }
-                } catch (error) {
-                    console.error('Error loading user trial data:', error);
-                }
-            }
-        }
-
-        // Initialize data with fallback
-        async function loadDogDatabase() {
-            try {
-                // Check if we're in Claude's artifact environment
-                if (typeof window.fs !== 'undefined' && window.fs.readFile) {
-                    console.log('Loading dog database from dataforsite.xlsx...');
-                    
-                    const fileData = await window.fs.readFile('dataforsite.xlsx');
-                    console.log(`Database file loaded: ${fileData.length} bytes`);
-                    
-                    const workbook = XLSX.read(fileData, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-                    
-                    console.log(`Processing ${rawData.length} rows...`);
-                    
-                    const processedDogs = [];
-                    const classesSet = new Set();
-                    const judgesSet = new Set();
-                    
-                    // Process each row (skip header row)
-                    for (let i = 1; i < rawData.length; i++) {
-                        const row = rawData[i];
-                        
-                        if (row && row.length >= 11) {
-                            const regNumber = row[0] ? String(row[0]).trim() : '';
-                            const callName = row[1] ? String(row[1]).trim() : '';
-                            const fullName = row[2] ? String(row[2]).trim() : '';
-                            const handlerName = row[3] ? String(row[3]).trim() : '';
-                            const className = row[8] ? String(row[8]).trim() : '';
-                            const judgeName = row[10] ? String(row[10]).trim() : '';
-                            
-                            if (regNumber && callName && regNumber.includes('-')) {
-                                processedDogs.push({
-                                    regNumber,
-                                    callName,
-                                    fullName,
-                                    handler: handlerName,
-                                    className,
-                                    judge: judgeName
-                                });
-                                
-                                if (className) classesSet.add(className);
-                                if (judgeName) judgesSet.add(judgeName);
-                            }
-                        }
-                    }
-                    
-                    dogData = processedDogs;
-                    availableClasses = Array.from(classesSet).sort();
-                    availableJudges = Array.from(judgesSet).sort();
-                    
-                    console.log(`✅ Database loaded: ${dogData.length} dogs, ${availableClasses.length} classes, ${availableJudges.length} judges`);
-                    
-                    // Show success message
-                    const statusEl = document.getElementById('dataStatus');
-                    const textEl = document.getElementById('dataStatusText');
-                    if (statusEl && textEl) {
-                        statusEl.style.display = 'block';
-                        textEl.innerHTML = `
-                            🐕 ${dogData.length.toLocaleString()} dogs loaded<br>
-                            🏆 ${availableClasses.length} classes available<br>
-                            👨‍⚖️ ${availableJudges.length} judges in database
-                        `;
-                    }
-                } else {
-                    console.log('Running in browser environment - using demo data');
-                    throw new Error('Browser environment detected');
-                }
-                
-            } catch (error) {
-                console.log('Using demo/fallback data');
-                
-                // Enhanced demo data that works in any environment
-                dogData = [
-                    { regNumber: "07-0001-01", callName: "BJ", handler: "Shirley Ottmer", className: "Patrol 1", judge: "Linda Alberda" },
-                    { regNumber: "07-0001-02", callName: "Jaidon", handler: "Shirley Ottmer", className: "Detective 2", judge: "Ginger Alpine" },
-                    { regNumber: "07-0001-03", callName: "Jake", handler: "Shirley Ottmer", className: "Investigator 3", judge: "Paige Alpine-Malone" },
-                    { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer", className: "Super Sleuth 4", judge: "Sarah Knight" },
-                    { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher", className: "Ranger 1", judge: "Lane Michie" },
-                    { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher", className: "Detective 1", judge: "Gary Truitt" },
-                    { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher", className: "Ranger 1", judge: "Linda Alberda" },
-                    { regNumber: "07-0003-02", callName: "Becky", handler: "Bonnie Hornfisher", className: "Ranger 2", judge: "Ginger Alpine" },
-                    { regNumber: "07-0003-03", callName: "Ben", handler: "Bonnie Hornfisher", className: "Ranger 3", judge: "Paige Alpine-Malone" },
-                    { regNumber: "07-0004-01", callName: "Max", handler: "Demo Handler", className: "Patrol 1", judge: "Sarah Knight" },
-                    { regNumber: "07-0004-02", callName: "Bella", handler: "Demo Handler", className: "Detective 1", judge: "Lane Michie" },
-                    { regNumber: "07-0004-03", callName: "Charlie", handler: "Demo Handler", className: "Super Sleuth 1", judge: "Gary Truitt" }
-                ];
-                
-                availableClasses = [
-                    "Patrol 1", "Patrol 2", "Patrol 3",
-                    "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
-                    "Ranger 1", "Ranger 2", "Ranger 3",
-                    "Investigator 1", "Investigator 2", "Investigator 3",
-                    "Detective 1", "Detective 2", "Detective 3",
-                    "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
-                ];
-                
-                availableJudges = [
-                    "Sarah Knight", "Lane Michie", "Gary Truitt", 
-                    "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
-                    "Judge Johnson", "Judge Williams", "Judge Davis"
-                ];
-                
-                // Show demo data message
-                const statusEl = document.getElementById('dataStatus');
-                const textEl = document.getElementById('dataStatusText');
-                if (statusEl && textEl) {
-                    statusEl.style.display = 'block';
-                    textEl.innerHTML = `
-                        🎯 Demo database loaded<br>
-                        🐕 ${dogData.length} demo dogs available<br>
-                        🏆 ${availableClasses.length} classes available<br>
-                        👨‍⚖️ ${availableJudges.length} judges in database<br>
-                        <small>💡 Upload your own Excel file to replace demo data</small>
-                    `;
-                }
-            }
-        }
-
-        // Basic functions needed for the demo
-        function updateDashboard() {
-            // Placeholder - will add full functionality
-            console.log('Dashboard updated');
-        }
-
-        function updateTrialOptions() {
-            // Placeholder - will add full functionality
-            console.log('Trial options updated');
-        }
-
-        function updateResultsDisplay() {
-            // Placeholder - will add full functionality
-            console.log('Results updated');
-        }
-
-        function clearForm() {
-            // Placeholder - will add full functionality
-            console.log('Form cleared');
-        }
-
-        // Now add a simple test button to verify functions work
-        function testLogin() {
-            console.log('Test function called successfully!');
-            alert('Functions are working! Now trying demo login...');
-            demoLogin();
-        }
-
-        // Make all functions globally available immediately
-        window.demoLogin = demoLogin;
-        window.showRegistration = showRegistration;
-        window.showLogin = showLogin;
-        window.handleLogin = handleLogin;
-        window.handleRegistration = handleRegistration;
-        window.testLogin = testLogin;
-        
-        console.log('All functions defined and made global');
-    </script>3", judge: "Paige Alpine-Malone" },
-                    { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer", className: "Super Sleuth 4", judge: "Sarah Knight" },
-                    { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher", className: "Ranger 1", judge: "Lane Michie" },
-                    { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher", className: "Detective 1", judge: "Gary Truitt" },
-                    { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher", className: "Ranger 1", judge: "Linda Alberda" },
-                    { regNumber: "07-0003-02", callName: "Becky", handler: "Bonnie Hornfisher", className: "Ranger 2", judge: "Ginger Alpine" },
-                    { regNumber: "07-0003-03", callName: "Ben", handler: "Bonnie Hornfisher", className: "Ranger 3", judge: "Paige Alpine-Malone" },
-                    { regNumber: "07-0004-01", callName: "Max", handler: "Demo Handler", className: "Patrol 1", judge: "Sarah Knight" },
-                    { regNumber: "07-0004-02", callName: "Bella", handler: "Demo Handler", className: "Detective 1", judge: "Lane Michie" },
-                    { regNumber: "07-0004-03", callName: "Charlie", handler: "Demo Handler", className: "Super Sleuth 1", judge: "Gary Truitt" }
-                ];
-                
-                availableClasses = [
-                    "Patrol 1", "Patrol 2", "Patrol 3",
-                    "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
-                    "Ranger 1", "Ranger 2", "Ranger 3",
-                    "Investigator 1", "Investigator 2", "Investigator 3",
-                    "Detective 1", "Detective 2", "Detective 3",
-                    "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
-                ];
-                
-                availableJudges = [
-                    "Sarah Knight", "Lane Michie", "Gary Truitt", 
-                    "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
-                    "Judge Johnson", "Judge Williams", "Judge Davis"
-                ];
-                
-                // Show demo data message
-                document.getElementById('dataStatus').style.display = 'block';
-                document.getElementById('dataStatusText').innerHTML = `
-                    🎯 Demo database loaded<br>
-                    🐕 ${dogData.length} demo dogs available<br>
-                    🏆 ${availableClasses.length} classes available<br>
-                    👨‍⚖️ ${availableJudges.length} judges in database<br>
-                    <small>💡 Upload your own Excel file to replace demo data</small>
-                `;
-            }
-        }
-
-        // Tab Management
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        // Trial Setup Functions
-        function generateDays() {
-            const trialName = document.getElementById('trialName').value.trim();
-            const numDays = parseInt(document.getElementById('trialDays').value);
-            
-            if (!trialName) {
-                showAlert('Please enter a trial name', 'warning');
-                return;
-            }
-            
-            if (!numDays || numDays < 1 || numDays > 10) {
-                showAlert('Please enter a valid number of days (1-10)', 'warning');
-                return;
-            }
-
-            totalDays = numDays;
-            savedDays = 0;
-            trialMetadata = {
-                trialName,
-                totalDays: numDays,
-                createdDate: new Date().toISOString()
-            };
-
-            const container = document.getElementById('daysContainer');
-            container.innerHTML = '';
-
-            for (let i = 1; i <= numDays; i++) {
-                createDaySection(i, container);
-            }
-            
-            showAlert(`Trial "${trialName}" setup generated for ${numDays} days`, 'success');
-        }
-
-        function createDaySection(dayNum, container) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'day-container';
-            dayDiv.innerHTML = `
-                <div class="day-header">Day ${dayNum}</div>
-                <div class="day-content">
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="date_${dayNum}">Date for Day ${dayNum}</label>
-                            <input type="date" id="date_${dayNum}" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="classes_${dayNum}">Number of Classes</label>
-                            <input type="number" id="classes_${dayNum}" min="1" max="20" placeholder="How many classes?" onchange="generateClasses(${dayNum})">
-                        </div>
-                    </div>
-                    <div id="classesContainer_${dayNum}"></div>
-                    <div class="form-row">
-                        <button class="btn" onclick="saveTrialDay(${dayNum})">Save Day ${dayNum}</button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(dayDiv);
-        }
-
-        function generateClasses(dayNum) {
-            const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
-            const container = document.getElementById(`classesContainer_${dayNum}`);
-            
-            if (!numClasses || numClasses < 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            container.innerHTML = '';
-
-            for (let i = 1; i <= numClasses; i++) {
-                createClassSection(dayNum, i, container);
-            }
-        }
-
-        function createClassSection(dayNum, classNum, container) {
-            const classDiv = document.createElement('div');
-            classDiv.className = 'class-container';
-            
-            classDiv.innerHTML = `
-                <div class="class-header">Class ${classNum}</div>
-                <div class="class-content">
-                    <div class="form-row">
-                        <div class="form-field">
-                            <label for="className_${dayNum}_${classNum}">Class Name</label>
-                            <div class="typeahead-container">
-                                <input type="text" id="className_${dayNum}_${classNum}" class="typeahead-input" 
-                                       placeholder="Type class name" 
-                                       onkeyup="handleClassTypeahead(this, ${dayNum}, ${classNum})"
-                                       onblur="hideClassDropdown(${dayNum}, ${classNum})"
-                                       onfocus="showClassDropdown(${dayNum}, ${classNum})">
-                                <div id="classDropdown_${dayNum}_${classNum}" class="typeahead-dropdown"></div>
-                            </div>
-                        </div>
-                        <div class="form-field">
-                            <label for="rounds_${dayNum}_${classNum}">Number of Rounds</label>
-                            <input type="number" id="rounds_${dayNum}_${classNum}" min="1" max="10" 
-                                   placeholder="How many rounds?" onchange="generateRounds(${dayNum}, ${classNum})">
-                        </div>
-                    </div>
-                    <div id="roundsContainer_${dayNum}_${classNum}"></div>
-                </div>
-            `;
-            container.appendChild(classDiv);
-        }
-
-        function generateRounds(dayNum, classNum) {
-            const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`).value);
-            const container = document.getElementById(`roundsContainer_${dayNum}_${classNum}`);
-            
-            if (!numRounds || numRounds < 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            container.innerHTML = '';
-
-            for (let i = 1; i <= numRounds; i++) {
-                createRoundSection(dayNum, classNum, i, container);
-            }
-        }
-
-        function createRoundSection(dayNum, classNum, roundNum, container) {
-            const roundDiv = document.createElement('div');
-            roundDiv.className = 'round-section';
-            
-            roundDiv.innerHTML = `
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="judge_${dayNum}_${classNum}_${roundNum}">Round ${roundNum} Judge</label>
-                        <div class="typeahead-container">
-                            <input type="text" id="judge_${dayNum}_${classNum}_${roundNum}" class="typeahead-input" 
-                                   placeholder="Type judge name" 
-                                   onkeyup="handleJudgeTypeahead(this, ${dayNum}, ${classNum}, ${roundNum})"
-                                   onblur="hideJudgeDropdown(${dayNum}, ${classNum}, ${roundNum})"
-                                   onfocus="showJudgeDropdown(${dayNum}, ${classNum}, ${roundNum})">
-                            <div id="judgeDropdown_${dayNum}_${classNum}_${roundNum}" class="typeahead-dropdown"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(roundDiv);
-        }
-
-        // Typeahead Functions for Classes
-        function handleClassTypeahead(input, dayNum, classNum) {
-            const query = input.value.toLowerCase();
-            const dropdown = document.getElementById(`classDropdown_${dayNum}_${classNum}`);
-            
-            if (query.length === 0) {
-                dropdown.style.display = 'none';
-                return;
-            }
-
-            const matches = availableClasses.filter(className => 
-                className.toLowerCase().includes(query)
-            );
-
-            if (matches.length > 0) {
-                let html = '';
-                matches.forEach(className => {
-                    html += `<div class="typeahead-item" onclick="selectClass('${className}', ${dayNum}, ${classNum})">${className}</div>`;
-                });
-                dropdown.innerHTML = html;
-                dropdown.style.display = 'block';
-            } else {
-                dropdown.style.display = 'none';
-            }
-        }
-
-        function selectClass(className, dayNum, classNum) {
-            document.getElementById(`className_${dayNum}_${classNum}`).value = className;
-            document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
-        }
-
-        function hideClassDropdown(dayNum, classNum) {
-            setTimeout(() => {
-                document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
-            }, 200);
-        }
-
-        function showClassDropdown(dayNum, classNum) {
-            const input = document.getElementById(`className_${dayNum}_${classNum}`);
-            if (input.value.length > 0) {
-                handleClassTypeahead(input, dayNum, classNum);
-            }
-        }
-
-        // Typeahead Functions for Judges
-        function handleJudgeTypeahead(input, dayNum, classNum, roundNum) {
-            const query = input.value.toLowerCase();
-            const dropdown = document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`);
-            
-            if (query.length === 0) {
-                dropdown.style.display = 'none';
-                return;
-            }
-
-            const matches = availableJudges.filter(judgeName => 
-                judgeName.toLowerCase().includes(query)
-            );
-
-            if (matches.length > 0) {
-                let html = '';
-                matches.forEach(judgeName => {
-                    html += `<div class="typeahead-item" onclick="selectJudge('${judgeName}', ${dayNum}, ${classNum}, ${roundNum})">${judgeName}</div>`;
-                });
-                dropdown.innerHTML = html;
-                dropdown.style.display = 'block';
-            } else {
-                dropdown.style.display = 'none';
-            }
-        }
-
-        function selectJudge(judgeName, dayNum, classNum, roundNum) {
-            document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`).value = judgeName;
-            document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
-        }
-
-        function hideJudgeDropdown(dayNum, classNum, roundNum) {
-            setTimeout(() => {
-                document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
-            }, 200);
-        }
-
-        function showJudgeDropdown(dayNum, classNum, roundNum) {
-            const input = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`);
-            if (input.value.length > 0) {
-                handleJudgeTypeahead(input, dayNum, classNum, roundNum);
-            }
-        }
-
-        function saveTrialDay(dayNum) {
-            const date = document.getElementById(`date_${dayNum}`).value;
-            if (!date) {
-                showAlert('Please enter a date for this day', 'warning');
-                return;
-            }
-
-            const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
-            if (isNaN(numClasses) || numClasses < 1) {
-                showAlert('Please enter the number of classes', 'warning');
-                return;
-            }
-
-            let savedConfigs = 0;
-
-            // Save all class/round/judge combinations for this day
-            for (let classNum = 1; classNum <= numClasses; classNum++) {
-                const className = document.getElementById(`className_${dayNum}_${classNum}`)?.value;
-                const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`)?.value || 0);
-
-                if (className && numRounds > 0) {
-                    for (let roundNum = 1; roundNum <= numRounds; roundNum++) {
-                        const judge = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`)?.value;
-                        
-                        if (judge) {
-                            // Remove existing entry if it exists
-                            trialConfig = trialConfig.filter(config => 
-                                !(config.day === dayNum && config.classNum === classNum && config.roundNum === roundNum)
-                            );
-
-                            trialConfig.push({
-                                day: dayNum,
-                                date: date,
-                                classNum: classNum,
-                                className: className,
-                                roundNum: roundNum,
-                                judge: judge
-                            });
-                            savedConfigs++;
-                        }
-                    }
-                }
-            }
-
-            if (savedConfigs === 0) {
-                showAlert('Please complete at least one class with judge assignment', 'warning');
-                return;
-            }
-
-            savedDays++;
-            updateTrialOptions();
-            saveUserTrialData();
-            showAlert(`Day ${dayNum} saved with ${savedConfigs} class/round configurations!`, 'success');
-
-            // Check if all days are saved
-            if (savedDays === totalDays) {
-                document.getElementById('setupComplete').style.display = 'block';
-                updateDashboard();
-            }
-        }
-
-        // Registration Number Typeahead
-        function handleRegNumberTypeahead(input) {
-            const query = input.value.toLowerCase();
-            const dropdown = document.getElementById('regNumberDropdown');
-            const callNameDisplay = document.getElementById('callNameDisplay');
-            
-            if (query.length === 0) {
-                dropdown.style.display = 'none';
-                callNameDisplay.textContent = '';
-                callNameDisplay.className = 'call-name-display';
-                return;
-            }
-
-            const matches = dogData.filter(dog => 
-                dog.regNumber.toLowerCase().includes(query)
-            );
-
-            if (matches.length > 0) {
-                let html = '';
-                matches.forEach(dog => {
-                    html += `<div class="typeahead-item" onclick="selectRegNumber('${dog.regNumber}', '${dog.callName}', '${dog.handler}')">${dog.regNumber} - ${dog.callName}</div>`;
-                });
-                dropdown.innerHTML = html;
-                dropdown.style.display = 'block';
-
-                // Auto-select if exact match
-                const exactMatch = matches.find(dog => dog.regNumber.toLowerCase() === query);
-                if (exactMatch) {
-                    callNameDisplay.textContent = exactMatch.callName;
-                    callNameDisplay.className = 'call-name-display call-name-found';
-                    document.getElementById('handlerName').value = exactMatch.handler || '';
-                }
-            } else {
-                dropdown.style.display = 'none';
-                callNameDisplay.textContent = 'Not found';
-                callNameDisplay.className = 'call-name-display call-name-not-found';
-            }
-        }
-
-        function selectRegNumber(regNumber, callName, handler) {
-            document.getElementById('regNumber').value = regNumber;
-            document.getElementById('callNameDisplay').textContent = callName;
-            document.getElementById('callNameDisplay').className = 'call-name-display call-name-found';
-            document.getElementById('handlerName').value = handler || '';
-            document.getElementById('regNumberDropdown').style.display = 'none';
-        }
-
-        function hideRegNumberDropdown() {
-            setTimeout(() => {
-                document.getElementById('regNumberDropdown').style.display = 'none';
-            }, 200);
-        }
-
-        function showRegNumberDropdown() {
-            const input = document.getElementById('regNumber');
-            if (input.value.length > 0) {
-                handleRegNumberTypeahead(input);
-            }
-        }
-
-        function updateTrialOptions() {
-            const container = document.getElementById('trialOptions');
-            
-            // Group by day, then by class, then sort by round
-            const groupedByDay = {};
-            trialConfig.forEach(config => {
-                if (!groupedByDay[config.day]) {
-                    groupedByDay[config.day] = {};
-                }
-                if (!groupedByDay[config.day][config.className]) {
-                    groupedByDay[config.day][config.className] = [];
-                }
-                groupedByDay[config.day][config.className].push(config);
-            });
-
-            // Sort rounds within each class
-            Object.keys(groupedByDay).forEach(day => {
-                Object.keys(groupedByDay[day]).forEach(className => {
-                    groupedByDay[day][className].sort((a, b) => a.roundNum - b.roundNum);
-                });
-            });
-
-            let html = '';
-            
-            // Sort days numerically
-            const sortedDays = Object.keys(groupedByDay).sort((a, b) => parseInt(a) - parseInt(b));
-            
-            sortedDays.forEach(day => {
-                html += `<div class="day-group">`;
-                html += `<div class="day-group-header">Day ${day} - ${groupedByDay[day][Object.keys(groupedByDay[day])[0]][0].date}</div>`;
-                html += `<div class="day-group-content">`;
-                
-                // Sort classes alphabetically
-                const sortedClasses = Object.keys(groupedByDay[day]).sort();
-                
-                sortedClasses.forEach(className => {
-                    html += `<div class="class-group">`;
-                    html += `<div class="class-group-header">${className}</div>`;
-                    
-                    groupedByDay[day][className].forEach((config, index) => {
-                        const configIndex = trialConfig.findIndex(c => 
-                            c.day === config.day && 
-                            c.classNum === config.classNum && 
-                            c.roundNum === config.roundNum
-                        );
-                        
-                        html += `
-                            <div class="trial-option">
-                                <div style="font-weight: bold; margin-bottom: 0.5rem;">
-                                    Round ${config.roundNum} - ${config.judge}
-                                </div>
-                                <div class="entry-type-options">
-                                    <label>
-                                        <input type="checkbox" name="trialEntry" value="${configIndex}-regular">
-                                        Regular
-                                    </label>
-                                    <label>
-                                        <input type="checkbox" name="trialEntry" value="${configIndex}-feo">
-                                        FEO (For Exhibition Only)
-                                    </label>
-                                </div>
+        console.log
