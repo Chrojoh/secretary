@@ -1,0 +1,157 @@
+# .github/workflows/convert-excel-data.yml
+name: Convert Excel Data to JSON
+
+on:
+  push:
+    paths:
+      - 'dataforsite.xlsx'
+      - 'data/*.xlsx'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  convert-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: |
+        npm init -y
+        npm install xlsx papaparse
+    
+    - name: Convert XLSX to JSON
+      run: |
+        node -e "
+        const XLSX = require('xlsx');
+        const fs = require('fs');
+        const path = require('path');
+        
+        console.log('Starting Excel to JSON conversion...');
+        
+        // Create data directory if it doesn't exist
+        if (!fs.existsSync('data')) {
+          fs.mkdirSync('data');
+        }
+        
+        // Find Excel files
+        const excelFiles = ['dataforsite.xlsx'];
+        const additionalFiles = fs.existsSync('data') ? 
+          fs.readdirSync('data').filter(file => file.endsWith('.xlsx')) : [];
+        
+        excelFiles.forEach(filename => {
+          if (fs.existsSync(filename)) {
+            console.log(\`Processing \${filename}...\`);
+            
+            try {
+              const workbook = XLSX.readFile(filename);
+              const result = {
+                lastUpdated: new Date().toISOString(),
+                filename: filename,
+                sheets: {}
+              };
+              
+              workbook.SheetNames.forEach(sheetName => {
+                console.log(\`  Converting sheet: \${sheetName}\`);
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+                  header: 1, 
+                  defval: null,
+                  raw: false 
+                });
+                
+                // Clean up the data
+                const cleanData = jsonData.filter(row => 
+                  row && row.some(cell => cell !== null && cell !== undefined && cell !== '')
+                );
+                
+                if (cleanData.length > 0) {
+                  const headers = cleanData[0];
+                  const rows = cleanData.slice(1);
+                  
+                  result.sheets[sheetName] = {
+                    headers: headers,
+                    data: rows,
+                    rowCount: rows.length
+                  };
+                  
+                  console.log(\`    \${rows.length} data rows processed\`);
+                }
+              });
+              
+              // Write JSON file
+              const outputFile = \`data/\${path.parse(filename).name}.json\`;
+              fs.writeFileSync(outputFile, JSON.stringify(result, null, 2));
+              console.log(\`✓ Created \${outputFile}\`);
+              
+              // Create a simplified records file for easier access
+              if (result.sheets.Sheet1 && result.sheets.Sheet1.data.length > 0) {
+                const records = result.sheets.Sheet1.data.map(row => {
+                  if (!row[0]) return null; // Skip empty rows
+                  
+                  return {
+                    id: row[0] || '',
+                    callName: row[1] || '',
+                    fullName: row[2] || '',
+                    handlerFullName: row[3] || '',
+                    handlerFirstName: row[5] || '',
+                    handlerLastName: row[6] || '',
+                    className: row[8] || '',
+                    judgeName: row[10] || ''
+                  };
+                }).filter(record => record && record.id);
+                
+                const recordsFile = 'data/records.json';
+                fs.writeFileSync(recordsFile, JSON.stringify({
+                  lastUpdated: new Date().toISOString(),
+                  totalRecords: records.length,
+                  records: records
+                }, null, 2));
+                console.log(\`✓ Created \${recordsFile} with \${records.length} records\`);
+              }
+              
+            } catch (error) {
+              console.error(\`Error processing \${filename}:\`, error);
+              process.exit(1);
+            }
+          } else {
+            console.log(\`File \${filename} not found, skipping...\`);
+          }
+        });
+        
+        console.log('✓ Excel to JSON conversion completed successfully');
+        "
+    
+    - name: Commit updated JSON files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/*.json
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Auto-update JSON data from Excel files [skip ci]"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Create deployment summary
+      run: |
+        echo "## Data Conversion Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- Conversion completed at: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- Files processed:" >> $GITHUB_STEP_SUMMARY
+        if [ -f "data/dataforsite.json" ]; then
+          RECORD_COUNT=$(node -e "const data = require('./data/records.json'); console.log(data.totalRecords);")
+          echo "  - dataforsite.xlsx → data/dataforsite.json" >> $GITHUB_STEP_SUMMARY
+          echo "  - Total records: $RECORD_COUNT" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "- JSON files available at: \`data/*.json\`" >> $GITHUB_STEP_SUMMARY
