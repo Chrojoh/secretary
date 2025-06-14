@@ -434,15 +434,15 @@
             <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Club Name:</label>
+                    <label for="loginClubName" class="label">Club Name:</label>
                     <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
                 </div>
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Secretary Name:</label>
+                    <label for="loginSecretaryName" class="label">Secretary Name:</label>
                     <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
                 </div>
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Password:</label>
+                    <label for="loginPassword" class="label">Password:</label>
                     <input type="password" id="loginPassword" placeholder="Enter password" required style="width: 100%; margin-bottom: 20px;">
                 </div>
                 <div class="form-group" style="justify-content: center;">
@@ -459,23 +459,23 @@
             <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
             <form onsubmit="handleRegister(event)">
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Club Name:</label>
+                    <label for="registerClubName" class="label">Club Name:</label>
                     <input type="text" id="registerClubName" placeholder="Enter club name" required style="width: 100%; margin-bottom: 15px;">
                 </div>
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Secretary Name:</label>
+                    <label for="registerSecretaryName" class="label">Secretary Name:</label>
                     <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" required style="width: 100%; margin-bottom: 15px;">
                 </div>
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Email:</label>
+                    <label for="registerEmail" class="label">Email:</label>
                     <input type="email" id="registerEmail" placeholder="Enter email address" required style="width: 100%; margin-bottom: 15px;">
                 </div>
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Password:</label>
+                    <label for="registerPassword" class="label">Password:</label>
                     <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" required minlength="6" style="width: 100%; margin-bottom: 15px;">
                 </div>
                 <div class="form-group" style="flex-direction: column; align-items: stretch;">
-                    <label class="label">Confirm Password:</label>
+                    <label for="registerConfirmPassword" class="label">Confirm Password:</label>
                     <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required style="width: 100%; margin-bottom: 20px;">
                 </div>
                 <div class="form-group" style="justify-content: center;">
@@ -545,7 +545,8 @@
                     </div>
                 </div>
             </div>
-                        <!-- Trial Setup Tab -->
+
+            <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
                 <div class="data-upload">
                     <h3>📁 File Management</h3>
@@ -560,12 +561,12 @@
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
                         <h4 style="color: #28a745; margin-top: 0;">💾 Save/Load Complete Trial</h4>
                         <div class="form-group">
-                            <span class="label">Trial Name:</span>
+                            <label for="trialSaveName" class="label">Trial Name:</label>
                             <input type="text" id="trialSaveName" placeholder="e.g., Spring Championship 2024" style="width: 300px;">
                             <button onclick="saveCompleteTrialFile()" style="background: #28a745;">💾 Save Trial File</button>
                         </div>
                         <div class="form-group">
-                            <span class="label">Load Saved Trial:</span>
+                            <label for="trialLoadFile" class="label">Load Saved Trial:</label>
                             <input type="file" id="trialLoadFile" accept=".json" onchange="loadCompleteTrialFile()">
                         </div>
                         <div id="saveLoadStatus"></div>
@@ -575,7 +576,7 @@
                     <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
                         <h4 style="color: #856404; margin-top: 0;">🐕 Dog Database</h4>
                         <div class="form-group">
-                            <label class="label">Upload Excel Data:</label>
+                            <label for="excelFile" class="label">Upload Excel Data:</label>
                             <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
                         </div>
                         <div id="dataStatus"></div>
@@ -599,7 +600,7 @@
 
                 <div class="initial-question">
                     <div class="form-group">
-                        <span class="label">How many days in trial?</span>
+                        <label for="trialDays" class="label">How many days in trial?</label>
                         <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number">
                         <button onclick="generateDays()">Generate Days</button>
                     </div>
@@ -615,9 +616,9 @@
             <div id="entry" class="tab-content">
                 <div class="initial-question">
                     <h3>Trial Entry Form</h3>
-                    <form id="entryForm">
+                    <form id="entryForm" onsubmit="handleEntrySubmit(event)">
                         <div class="form-group">
-                            <span class="label">Registration Number:</span>
+                            <label for="regNumber" class="label">Registration Number:</label>
                             <div class="typeahead-container">
                                 <input type="text" id="regNumber" placeholder="Type registration number" onkeyup="handleRegNumberTypeahead(this)" style="width: 250px;">
                                 <div id="regNumberDropdown" class="typeahead-dropdown"></div>
@@ -626,12 +627,12 @@
                         </div>
 
                         <div class="form-group">
-                            <span class="label">Handler Name:</span>
+                            <label for="handlerName" class="label">Handler Name:</label>
                             <input type="text" id="handlerName" placeholder="Handler name" required style="width: 250px;">
                         </div>
 
                         <div class="form-group">
-                            <span class="label">Contact Email:</span>
+                            <label for="contactEmail" class="label">Contact Email:</label>
                             <input type="email" id="contactEmail" placeholder="your.email@example.com" required style="width: 250px;">
                         </div>
 
@@ -654,7 +655,8 @@
                     </form>
                 </div>
             </div>
-                        <!-- Running Orders Tab -->
+
+            <!-- Running Orders Tab -->
             <div id="runningOrders" class="tab-content">
                 <div class="initial-question">
                     <h3>🏃‍♂️ Running Order Management</h3>
@@ -673,7 +675,7 @@
                 <div class="initial-question">
                     <h3>Edit Entry</h3>
                     <div class="form-group">
-                        <span class="label">Search:</span>
+                        <label for="searchEntry" class="label">Search:</label>
                         <input type="text" id="searchEntry" placeholder="Registration number or handler name" onkeyup="searchEntries()" style="width: 300px;">
                     </div>
                     <div id="searchResults"></div>
@@ -945,7 +947,13 @@
             document.getElementById('previewContent').innerHTML = html;
             previewDiv.style.display = 'block';
         }
+
         // Save/Load Trial Functions
+        function generateTrialName() {
+            const date = new Date();
+            return `Trial_${date.getFullYear()}_${String(date.getMonth() + 1).padStart(2, '0')}_${String(date.getDate()).padStart(2, '0')}`;
+        }
+
         function saveCompleteTrialFile() {
             const trialName = document.getElementById('trialSaveName').value.trim();
             if (!trialName) {
@@ -1015,6 +1023,12 @@
             setTimeout(() => statusDiv.innerHTML = '', 5000);
         }
 
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('dataStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 3000);
+        }
+
         // Trial Setup Functions
         function generateDays() {
             const numDays = parseInt(document.getElementById('trialDays').value);
@@ -1039,12 +1053,12 @@
             dayDiv.innerHTML = `
                 <div class="day-header">Day ${dayNum}</div>
                 <div class="form-group">
-                    <span class="label">Date:</span>
+                    <label for="date_${dayNum}" class="label">Date:</label>
                     <input type="date" id="date_${dayNum}">
                 </div>
                 <div class="classes-section">
                     <div class="form-group">
-                        <span class="label">How many classes?</span>
+                        <label for="classes_${dayNum}" class="label">How many classes?</label>
                         <input type="number" id="classes_${dayNum}" min="1" max="20" onchange="generateClasses(${dayNum})">
                     </div>
                     <div id="classesContainer_${dayNum}"></div>
@@ -1077,7 +1091,7 @@
             classDiv.innerHTML = `
                 <div class="class-header">Class ${classNum}</div>
                 <div class="form-group">
-                    <span class="label">Class Name:</span>
+                    <label for="className_${dayNum}_${classNum}" class="label">Class Name:</label>
                     <div class="typeahead-container">
                         <input type="text" id="className_${dayNum}_${classNum}" placeholder="Type class name" 
                                onkeyup="handleClassTypeahead(this, ${dayNum}, ${classNum})" style="width: 250px;">
@@ -1085,7 +1099,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <span class="label">Rounds:</span>
+                    <label for="rounds_${dayNum}_${classNum}" class="label">Rounds:</label>
                     <input type="number" id="rounds_${dayNum}_${classNum}" min="1" max="10" onchange="generateRounds(${dayNum}, ${classNum})">
                 </div>
                 <div id="roundsContainer_${dayNum}_${classNum}"></div>
@@ -1113,7 +1127,7 @@
             roundDiv.className = 'rounds-section';
             roundDiv.innerHTML = `
                 <div class="form-group">
-                    <span class="label">Round ${roundNum} Judge:</span>
+                    <label for="judge_${dayNum}_${classNum}_${roundNum}" class="label">Round ${roundNum} Judge:</label>
                     <div class="typeahead-container">
                         <input type="text" id="judge_${dayNum}_${classNum}_${roundNum}" placeholder="Judge name"
                                onkeyup="handleJudgeTypeahead(this, ${dayNum}, ${classNum}, ${roundNum})" style="width: 250px;">
@@ -1217,6 +1231,7 @@
         function saveTrialData() {
             showStatusMessage("Trial configuration saved!", "success");
         }
+
         // Registration Number Typeahead  
         function handleRegNumberTypeahead(input) {
             const query = input.value.toLowerCase();
@@ -1301,10 +1316,95 @@
         }
 
         // Entry Form Functions
+        function handleEntrySubmit(event) {
+            event.preventDefault();
+            
+            const regNumber = document.getElementById('regNumber').value;
+            const handlerName = document.getElementById('handlerName').value;
+            const contactEmail = document.getElementById('contactEmail').value;
+            const callName = document.getElementById('callName').textContent;
+            
+            if (!regNumber || !handlerName || !contactEmail) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const selectedEntries = [];
+            document.querySelectorAll('input[name="trialEntry"]:checked').forEach(checkbox => {
+                const [configIndex, entryType] = checkbox.value.split('-');
+                const config = trialConfig[parseInt(configIndex)];
+                
+                if (config) {
+                    selectedEntries.push({
+                        regNumber,
+                        callName: callName || 'Unknown',
+                        handler: handlerName,
+                        contactEmail,
+                        date: config.date,
+                        judge: config.judge,
+                        className: config.className,
+                        round: config.roundNum,
+                        entryType,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            });
+            
+            if (selectedEntries.length === 0) {
+                alert('Please select at least one trial entry');
+                return;
+            }
+            
+            entryResults.push(...selectedEntries);
+            updateResultsDisplay();
+            updateDashboard();
+            clearForm();
+            showStatusMessage(`✅ Entry submitted! ${selectedEntries.length} entries added.`, 'success');
+        }
+
         function clearForm() {
             document.getElementById('entryForm').reset();
             document.getElementById('callName').textContent = '';
             document.querySelectorAll('input[name="trialEntry"]').forEach(cb => cb.checked = false);
+        }
+
+        // Dashboard Functions
+        function updateDashboard() {
+            const activeTrialsDiv = document.getElementById('activeTrials');
+            const recentEntriesDiv = document.getElementById('recentEntries');
+            
+            if (trialConfig.length > 0) {
+                const uniqueDates = [...new Set(trialConfig.map(c => c.date))];
+                activeTrialsDiv.innerHTML = uniqueDates.map(date => `<div>📅 ${date}</div>`).join('');
+            } else {
+                activeTrialsDiv.innerHTML = 'No active trials';
+            }
+            
+            if (entryResults.length > 0) {
+                const recent = entryResults.slice(-3);
+                recentEntriesDiv.innerHTML = recent.map(entry => 
+                    `<div>🐕 ${entry.handler} - ${entry.callName}</div>`
+                ).join('');
+            } else {
+                recentEntriesDiv.innerHTML = 'No recent entries';
+            }
+        }
+
+        function exportAllData() {
+            const allData = {
+                dogData, availableClasses, availableJudges, trialConfig, entryResults, runningOrders,
+                exportDate: new Date().toISOString()
+            };
+            
+            const jsonString = JSON.stringify(allData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         // Running Orders Functions
@@ -1453,6 +1553,7 @@
                 container.innerHTML = '<p>No matching entries found.</p>';
                 return;
             }
+            
             let html = '<h4>Search Results:</h4>';
             matches.forEach((entry, index) => {
                 html += `
@@ -1542,9 +1643,35 @@
                     entry.regNumber,
                     entry.callName,
                     entry.handler,
-                    entry<!DOCTYPE html>
-<html lang="en">
-             // Initialize application
+                    entry.contactEmail,
+                    entry.date,
+                    entry.judge,
+                    entry.className,
+                    entry.round,
+                    entry.entryType,
+                    entry.timestamp
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial_entries_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Hide dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.typeahead-container')) {
+                document.querySelectorAll('.typeahead-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+
+        // Initialize application
         window.onload = function() {
             console.log('🚀 Trial Management System initializing...');
             initializeData();
