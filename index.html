@@ -478,8 +478,15 @@
                     <form id="entryForm">
                         <div class="form-group">
                             <span class="label">Registration Number:</span>
-                            <input type="text" id="regNumber" placeholder="Enter registration number" required>
-                            <div id="callName" style="margin-left: 10px; font-weight: bold; color: #666;"></div>
+                            <div class="typeahead-container">
+                                <input type="text" id="regNumber" class="typeahead-input" 
+                                       placeholder="Type registration number" 
+                                       onkeyup="handleRegNumberTypeahead(this)" 
+                                       onblur="hideRegNumberDropdown()" 
+                                       onfocus="showRegNumberDropdown()">
+                                <div id="regNumberDropdown" class="typeahead-dropdown"></div>
+                            </div>
+                            <span id="callName" style="font-weight: bold; color: #667eea;"></span>
                         </div>
 
                         <div class="form-group">
@@ -757,112 +764,266 @@
             // Rounds are generated dynamically when class name is entered
         }
 
-        // Typeahead/Autocomplete Functions
-        function handleTypeahead(input, options) {
+        // Typeahead functionality for classes
+        function handleClassTypeahead(input, dayNum, classNum) {
             const query = input.value.toLowerCase();
-            const dropdown = document.getElementById('dropdown-' + input.id);
+            const dropdown = document.getElementById(`classDropdown_${dayNum}_${classNum}`);
             
             if (query.length === 0) {
                 dropdown.style.display = 'none';
                 return;
             }
 
-            const filtered = options.filter(option => 
-                option.toLowerCase().includes(query)
+            const matches = availableClasses.filter(className => 
+                className.toLowerCase().includes(query)
             );
 
-            if (filtered.length === 0) {
-                dropdown.style.display = 'none';
-                return;
-            }
-
-            let html = '';
-            filtered.forEach(option => {
-                // Highlight matching text
-                const highlightedOption = option.replace(
-                    new RegExp(query, 'gi'), 
-                    match => `<strong>${match}</strong>`
-                );
-                html += `<div class="typeahead-item" onclick="selectTypeaheadOption('${input.id}', '${option}')">${highlightedOption}</div>`;
-            });
-
-            dropdown.innerHTML = html;
-            dropdown.style.display = 'block';
-        }
-
-        function showTypeahead(input, options) {
-            const dropdown = document.getElementById('dropdown-' + input.id);
-            if (input.value.length === 0) {
-                // Show all options when focused with empty input
+            if (matches.length > 0) {
                 let html = '';
-                options.forEach(option => {
-                    html += `<div class="typeahead-item" onclick="selectTypeaheadOption('${input.id}', '${option}')">${option}</div>`;
+                matches.forEach(className => {
+                    html += `<div class="typeahead-item" onclick="selectClass('${className}', ${dayNum}, ${classNum})">${className}</div>`;
                 });
                 dropdown.innerHTML = html;
                 dropdown.style.display = 'block';
             } else {
-                handleTypeahead(input, options);
+                dropdown.style.display = 'none';
             }
         }
 
-        function hideTypeahead(input) {
+        function selectClass(className, dayNum, classNum) {
+            document.getElementById(`className_${dayNum}_${classNum}`).value = className;
+            document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
+            checkClassComplete(dayNum, classNum);
+        }
+
+        function hideClassDropdown(dayNum, classNum) {
             setTimeout(() => {
-                const dropdown = document.getElementById('dropdown-' + input.id);
+                document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
+            }, 200);
+        }
+
+        function showClassDropdown(dayNum, classNum) {
+            const input = document.getElementById(`className_${dayNum}_${classNum}`);
+            handleClassTypeahead(input, dayNum, classNum);
+        }
+
+        // Typeahead functionality for judges
+        function handleJudgeTypeahead(input, dayNum, classNum, roundNum) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`);
+            
+            if (query.length === 0) {
                 dropdown.style.display = 'none';
-            }, 200); // Delay to allow click on dropdown items
+                return;
+            }
+
+            const matches = availableJudges.filter(judgeName => 
+                judgeName.toLowerCase().includes(query)
+            );
+
+            if (matches.length > 0) {
+                let html = '';
+                matches.forEach(judgeName => {
+                    html += `<div class="typeahead-item" onclick="selectJudge('${judgeName}', ${dayNum}, ${classNum}, ${roundNum})">${judgeName}</div>`;
+                });
+                dropdown.innerHTML = html;
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+
+        function selectJudge(judgeName, dayNum, classNum, roundNum) {
+            document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`).value = judgeName;
+            document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
+        }
+
+        function hideJudgeDropdown(dayNum, classNum, roundNum) {
+            setTimeout(() => {
+                document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
+            }, 200);
+        }
+
+        function showJudgeDropdown(dayNum, classNum, roundNum) {
+            const input = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`);
+            handleJudgeTypeahead(input, dayNum, classNum, roundNum);
+        }
+
+        function generateClassesForDay(day) {
+            const classCount = parseInt(document.getElementById(`classCount${day}`).value);
+            const container = document.getElementById(`classesContainer${day}`);
+            const saveBtn = document.getElementById(`saveBtn${day}`);
+            
+            if (!classCount || classCount < 1) {
+                container.innerHTML = '';
+                saveBtn.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            for (let c = 1; c <= classCount; c++) {
+                html += `
+                    <div class="class-container" id="classContainer${day}-${c}">
+                        <div class="class-header">Class ${c}</div>
+                        <div class="class-content">
+                            <div class="form-group">
+                                <span class="label">Class Name:</span>
+                                <div class="typeahead-container">
+                                    <input type="text" class="typeahead-input" id="className_${day}_${c}" 
+                                           placeholder="Type class name" 
+                                           onkeyup="handleClassTypeahead(this, ${day}, ${c})"
+                                           onblur="hideClassDropdown(${day}, ${c})"
+                                           onfocus="showClassDropdown(${day}, ${c})"
+                                           onchange="checkClassComplete(${day}, ${c})" required>
+                                    <div id="classDropdown_${day}_${c}" class="typeahead-dropdown"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="rounds-question" id="roundsQuestion${day}-${c}" style="display: none;">
+                                <div class="form-group">
+                                    <strong>How many rounds?</strong>
+                                    <input type="number" id="roundCount${day}-${c}" min="1" max="5" placeholder="Number" 
+                                           onchange="generateRoundsForClass(${day}, ${c})" style="width: 80px; margin-left: 10px;">
+                                </div>
+                            </div>
+                            
+                            <div id="roundsContainer${day}-${c}"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+            saveBtn.style.display = 'block';
+        }
+
+        function generateRoundsForClass(day, classIndex) {
+            const roundCount = parseInt(document.getElementById(`roundCount${day}-${classIndex}`).value);
+            const container = document.getElementById(`roundsContainer${day}-${classIndex}`);
+            
+            if (!roundCount || roundCount < 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let r = 1; r <= roundCount; r++) {
+                html += `
+                    <div class="round-config">
+                        <div class="form-group">
+                            <span class="label">Round ${r} - Judge:</span>
+                            <div class="typeahead-container">
+                                <input type="text" class="typeahead-input" id="judge_${day}_${classIndex}_${r}" 
+                                       placeholder="Type judge name" 
+                                       onkeyup="handleJudgeTypeahead(this, ${day}, ${classIndex}, ${r})"
+                                       onblur="hideJudgeDropdown(${day}, ${classIndex}, ${r})"
+                                       onfocus="showJudgeDropdown(${day}, ${classIndex}, ${r})" required>
+                                <div id="judgeDropdown_${day}_${classIndex}_${r}" class="typeahead-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // Existing typeahead functions from artifact above
+        function handleTypeahead(input, options) {
+            // This function is now handled by specific functions above
+        }
+
+        function showTypeahead(input, options) {
+            // This function is now handled by specific functions above
+        }
+
+        function hideTypeahead(input) {
+            // This function is now handled by specific functions above
         }
 
         function selectTypeaheadOption(inputId, value) {
-            const input = document.getElementById(inputId);
-            input.value = value;
-            
-            const dropdown = document.getElementById('dropdown-' + inputId);
-            dropdown.style.display = 'none';
-            
-            // Trigger change event
-            const event = new Event('change');
-            input.dispatchEvent(event);
+            // This function is now handled by specific functions above
         }
 
-        // Enhanced Registration Number Typeahead
+        // Enhanced Registration Number Typeahead  
         function setupRegNumberTypeahead() {
             const regNumberInput = document.getElementById('regNumber');
             if (!regNumberInput) return;
 
             regNumberInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                const callNameDiv = document.getElementById('callName');
-                
-                if (query.length > 0) {
-                    // Find exact match
-                    const exactMatch = dogData.find(dog => dog.regNumber.toLowerCase() === query);
-                    if (exactMatch) {
-                        callNameDiv.textContent = exactMatch.callName;
-                        callNameDiv.style.color = '#28a745';
-                        
-                        // Auto-fill handler name if available
-                        const handlerInput = document.getElementById('handlerName');
-                        if (handlerInput && exactMatch.handler) {
-                            handlerInput.value = exactMatch.handler;
-                        }
-                    } else {
-                        // Show partial matches
-                        const partialMatches = dogData.filter(dog => 
-                            dog.regNumber.toLowerCase().includes(query)
-                        );
-                        
-                        if (partialMatches.length > 0) {
-                            callNameDiv.textContent = `${partialMatches.length} matches found`;
-                            callNameDiv.style.color = '#ffc107';
-                        } else {
-                            callNameDiv.textContent = 'Not found';
-                            callNameDiv.style.color = '#dc3545';
-                        }
+                handleRegNumberTypeahead(this);
+            });
+        }
+
+        function handleRegNumberTypeahead(input) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById('regNumberDropdown');
+            const callNameDiv = document.getElementById('callName');
+            
+            if (query.length === 0) {
+                dropdown.style.display = 'none';
+                callNameDiv.textContent = '';
+                return;
+            }
+
+            const matches = dogData.filter(dog => 
+                dog.regNumber.toLowerCase().includes(query)
+            );
+
+            if (matches.length > 0) {
+                let html = '';
+                matches.forEach(dog => {
+                    html += `<div class="typeahead-item" onclick="selectRegNumber('${dog.regNumber}', '${dog.callName}')">${dog.regNumber} - ${dog.callName}</div>`;
+                });
+                dropdown.innerHTML = html;
+                dropdown.style.display = 'block';
+
+                // Auto-select if exact match
+                const exactMatch = matches.find(dog => dog.regNumber.toLowerCase() === query);
+                if (exactMatch) {
+                    callNameDiv.textContent = exactMatch.callName;
+                    callNameDiv.style.color = '#28a745';
+                    
+                    // Auto-fill handler name if available
+                    const handlerInput = document.getElementById('handlerName');
+                    if (handlerInput && exactMatch.handler) {
+                        handlerInput.value = exactMatch.handler;
                     }
                 } else {
-                    callNameDiv.textContent = '';
+                    callNameDiv.textContent = `${matches.length} matches found`;
+                    callNameDiv.style.color = '#ffc107';
                 }
-            });
+            } else {
+                dropdown.style.display = 'none';
+                callNameDiv.textContent = 'Not found';
+                callNameDiv.style.color = '#dc3545';
+            }
+        }
+
+        function selectRegNumber(regNumber, callName) {
+            document.getElementById('regNumber').value = regNumber;
+            document.getElementById('callName').textContent = callName;
+            document.getElementById('callName').style.color = '#28a745';
+            document.getElementById('regNumberDropdown').style.display = 'none';
+            
+            // Auto-fill handler name if available
+            const dog = dogData.find(d => d.regNumber === regNumber);
+            const handlerInput = document.getElementById('handlerName');
+            if (handlerInput && dog && dog.handler) {
+                handlerInput.value = dog.handler;
+            }
+        }
+
+        function hideRegNumberDropdown() {
+            setTimeout(() => {
+                document.getElementById('regNumberDropdown').style.display = 'none';
+            }, 200);
+        }
+
+        function showRegNumberDropdown() {
+            const input = document.getElementById('regNumber');
+            if (input.value.length > 0) {
+                handleRegNumberTypeahead(input);
+            }
         }
 
         function saveDay(day) {
