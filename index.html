@@ -751,22 +751,161 @@
             const classCount = container.children.length + 1;
             
             const newClassDiv = document.createElement('div');
-            newClassDiv.className = 'form-group';
+            newClassDiv.className = 'class-config';
+            newClassDiv.id = `classConfig${day}-${classCount}`;
             newClassDiv.innerHTML = `
-                <span class="label">Class:</span>
-                <select id="class${day}-${classCount}" required>
-                    <option value="">Select Class</option>
-                    ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                </select>
-                <span class="label">Judge:</span>
-                <select id="judge${day}-${classCount}" required>
-                    <option value="">Select Judge</option>
-                    ${availableJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
-                </select>
-                <span class="label">Rounds:</span>
-                <input type="number" id="rounds${day}-${classCount}" min="1" max="5" value="2" style="width: 60px;">
+                <div class="form-group">
+                    <span class="label">Class:</span>
+                    <div class="typeahead-container">
+                        <input type="text" class="typeahead-input" id="class${day}-${classCount}" placeholder="Type to search classes..." 
+                               oninput="handleTypeahead(this, availableClasses)" 
+                               onblur="hideTypeahead(this)" 
+                               onfocus="showTypeahead(this, availableClasses)"
+                               onchange="updateRoundInputs(${day}, ${classCount})" required>
+                        <div class="typeahead-dropdown" id="dropdown-class${day}-${classCount}"></div>
+                    </div>
+                    <span class="label">Number of Rounds:</span>
+                    <input type="number" id="rounds${day}-${classCount}" min="1" max="5" value="2" style="width: 60px;" onchange="updateRoundInputs(${day}, ${classCount})">
+                </div>
+                <div id="roundsContainer${day}-${classCount}" class="rounds-container"></div>
             `;
             container.appendChild(newClassDiv);
+        }
+
+        function updateRoundInputs(day, classIndex) {
+            const className = document.getElementById(`class${day}-${classIndex}`).value;
+            const roundsCount = parseInt(document.getElementById(`rounds${day}-${classIndex}`).value) || 2;
+            const container = document.getElementById(`roundsContainer${day}-${classIndex}`);
+            
+            if (!className) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let round = 1; round <= roundsCount; round++) {
+                html += `
+                    <div class="form-group" style="margin-left: 20px; background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                        <span class="label">Round ${round} Judge:</span>
+                        <div class="typeahead-container">
+                            <input type="text" class="typeahead-input" id="judge${day}-${classIndex}-${round}" placeholder="Type to search judges..." 
+                                   oninput="handleTypeahead(this, availableJudges)" 
+                                   onblur="hideTypeahead(this)" 
+                                   onfocus="showTypeahead(this, availableJudges)" required>
+                            <div class="typeahead-dropdown" id="dropdown-judge${day}-${classIndex}-${round}"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // Typeahead/Autocomplete Functions
+        function handleTypeahead(input, options) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById('dropdown-' + input.id);
+            
+            if (query.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const filtered = options.filter(option => 
+                option.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(option => {
+                // Highlight matching text
+                const highlightedOption = option.replace(
+                    new RegExp(query, 'gi'), 
+                    match => `<strong>${match}</strong>`
+                );
+                html += `<div class="typeahead-item" onclick="selectTypeaheadOption('${input.id}', '${option}')">${highlightedOption}</div>`;
+            });
+
+            dropdown.innerHTML = html;
+            dropdown.style.display = 'block';
+        }
+
+        function showTypeahead(input, options) {
+            const dropdown = document.getElementById('dropdown-' + input.id);
+            if (input.value.length === 0) {
+                // Show all options when focused with empty input
+                let html = '';
+                options.forEach(option => {
+                    html += `<div class="typeahead-item" onclick="selectTypeaheadOption('${input.id}', '${option}')">${option}</div>`;
+                });
+                dropdown.innerHTML = html;
+                dropdown.style.display = 'block';
+            } else {
+                handleTypeahead(input, options);
+            }
+        }
+
+        function hideTypeahead(input) {
+            setTimeout(() => {
+                const dropdown = document.getElementById('dropdown-' + input.id);
+                dropdown.style.display = 'none';
+            }, 200); // Delay to allow click on dropdown items
+        }
+
+        function selectTypeaheadOption(inputId, value) {
+            const input = document.getElementById(inputId);
+            input.value = value;
+            
+            const dropdown = document.getElementById('dropdown-' + inputId);
+            dropdown.style.display = 'none';
+            
+            // Trigger change event
+            const event = new Event('change');
+            input.dispatchEvent(event);
+        }
+
+        // Enhanced Registration Number Typeahead
+        function setupRegNumberTypeahead() {
+            const regNumberInput = document.getElementById('regNumber');
+            if (!regNumberInput) return;
+
+            regNumberInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const callNameDiv = document.getElementById('callName');
+                
+                if (query.length > 0) {
+                    // Find exact match
+                    const exactMatch = dogData.find(dog => dog.regNumber.toLowerCase() === query);
+                    if (exactMatch) {
+                        callNameDiv.textContent = exactMatch.callName;
+                        callNameDiv.style.color = '#28a745';
+                        
+                        // Auto-fill handler name if available
+                        const handlerInput = document.getElementById('handlerName');
+                        if (handlerInput && exactMatch.handler) {
+                            handlerInput.value = exactMatch.handler;
+                        }
+                    } else {
+                        // Show partial matches
+                        const partialMatches = dogData.filter(dog => 
+                            dog.regNumber.toLowerCase().includes(query)
+                        );
+                        
+                        if (partialMatches.length > 0) {
+                            callNameDiv.textContent = `${partialMatches.length} matches found`;
+                            callNameDiv.style.color = '#ffc107';
+                        } else {
+                            callNameDiv.textContent = 'Not found';
+                            callNameDiv.style.color = '#dc3545';
+                        }
+                    }
+                } else {
+                    callNameDiv.textContent = '';
+                }
+            });
         }
 
         function saveDay(day) {
@@ -777,31 +916,45 @@
             }
 
             const container = document.getElementById(`classContainer${day}`);
-            const classes = container.children;
+            const classConfigs = container.children;
             let dayConfig = [];
 
-            for (let i = 0; i < classes.length; i++) {
+            for (let i = 0; i < classConfigs.length; i++) {
                 const classIndex = i + 1;
                 const className = document.getElementById(`class${day}-${classIndex}`).value;
-                const judge = document.getElementById(`judge${day}-${classIndex}`).value;
                 const rounds = parseInt(document.getElementById(`rounds${day}-${classIndex}`).value) || 2;
 
-                if (className && judge) {
-                    for (let r = 1; r <= rounds; r++) {
-                        dayConfig.push({
-                            day: day,
-                            date: date,
-                            className: className,
-                            judge: judge,
-                            round: `Round ${r}`,
-                            roundNum: r
-                        });
+                if (!className) continue;
+
+                // Check each round has a judge assigned
+                let allRoundsValid = true;
+                for (let r = 1; r <= rounds; r++) {
+                    const judgeElement = document.getElementById(`judge${day}-${classIndex}-${r}`);
+                    if (!judgeElement || !judgeElement.value) {
+                        alert(`Please assign a judge for ${className} Round ${r} on Day ${day}`);
+                        allRoundsValid = false;
+                        break;
                     }
+                }
+
+                if (!allRoundsValid) return;
+
+                // Add each round as a separate config
+                for (let r = 1; r <= rounds; r++) {
+                    const judge = document.getElementById(`judge${day}-${classIndex}-${r}`).value;
+                    dayConfig.push({
+                        day: day,
+                        date: date,
+                        className: className,
+                        judge: judge,
+                        round: `Round ${r}`,
+                        roundNum: r
+                    });
                 }
             }
 
             if (dayConfig.length === 0) {
-                alert('Please configure at least one class for Day ' + day);
+                alert('Please configure at least one class with judges for Day ' + day);
                 return;
             }
 
@@ -813,7 +966,7 @@
             savedDays++;
             updateTrialSelections();
             updateDashboard();
-            showStatusMessage(`Day ${day} saved successfully!`, 'success');
+            showStatusMessage(`Day ${day} saved successfully with ${dayConfig.length} round(s)!`, 'success');
 
             if (savedDays === totalDays) {
                 showStatusMessage('All trial days configured! You can now accept entries.', 'success');
@@ -1302,6 +1455,7 @@
         window.onload = function() {
             initializeData();
             updateTrialSelections();
+            setupRegNumberTypeahead();
         };
     </script>
 </body>
