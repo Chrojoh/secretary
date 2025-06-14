@@ -1023,13 +1023,40 @@
 
         // Define all functions globally first
         function demoLogin() {
+            console.log('=== DEMO LOGIN DEBUG ===');
             console.log('Demo login function called');
+            console.log('Current registeredClubs:', registeredClubs);
+            console.log('registeredClubs length:', registeredClubs.length);
+            
             try {
+                // Fill the form
                 document.getElementById('clubEmail').value = 'demo@dogclub.com';
                 document.getElementById('secretaryName').value = 'Demo Secretary';
                 document.getElementById('password').value = 'demo123';
                 
-                console.log('Demo values set, calling handleLogin');
+                console.log('Form values set:');
+                console.log('- Email:', document.getElementById('clubEmail').value);
+                console.log('- Secretary:', document.getElementById('secretaryName').value);
+                console.log('- Password:', document.getElementById('password').value);
+                
+                // Check if demo club exists
+                const demoClub = registeredClubs.find(c => c.clubEmail === 'demo@dogclub.com');
+                console.log('Demo club found:', demoClub);
+                
+                if (!demoClub) {
+                    console.log('CREATING DEMO CLUB NOW');
+                    const newDemoClub = {
+                        clubName: "Demo Dog Club",
+                        clubEmail: "demo@dogclub.com",
+                        secretaryName: "Demo Secretary",
+                        password: "demo123",
+                        registrationDate: new Date().toISOString()
+                    };
+                    registeredClubs.push(newDemoClub);
+                    console.log('Demo club created and added');
+                }
+                
+                console.log('About to call handleLogin...');
                 handleLogin();
             } catch (error) {
                 console.error('Error in demoLogin:', error);
@@ -1050,14 +1077,45 @@
         }
 
         function handleLogin() {
+            console.log('=== HANDLE LOGIN DEBUG ===');
             console.log('handleLogin called');
             try {
                 const clubEmail = document.getElementById('clubEmail').value.trim();
                 const secretaryName = document.getElementById('secretaryName').value.trim();
                 const password = document.getElementById('password').value;
 
-                console.log('Login attempt:', {clubEmail, secretaryName, password});
-                console.log('Available clubs:', registeredClubs);
+                console.log('Login attempt with:');
+                console.log('- clubEmail:', `"${clubEmail}"`);
+                console.log('- secretaryName:', `"${secretaryName}"`);
+                console.log('- password:', `"${password}"`);
+                console.log('- registeredClubs array:', registeredClubs);
+
+                if (registeredClubs.length === 0) {
+                    console.log('ERROR: registeredClubs is empty! Creating demo club now...');
+                    const demoClub = {
+                        clubName: "Demo Dog Club",
+                        clubEmail: "demo@dogclub.com",
+                        secretaryName: "Demo Secretary",
+                        password: "demo123",
+                        registrationDate: new Date().toISOString()
+                    };
+                    registeredClubs.push(demoClub);
+                    console.log('Demo club created:', demoClub);
+                }
+
+                // Show each club for debugging
+                registeredClubs.forEach((club, index) => {
+                    console.log(`Club ${index}:`, {
+                        email: `"${club.clubEmail}"`,
+                        secretary: `"${club.secretaryName}"`,
+                        password: `"${club.password}"`
+                    });
+                    
+                    console.log(`Comparison for club ${index}:`);
+                    console.log(`- Email match: "${club.clubEmail.toLowerCase()}" === "${clubEmail.toLowerCase()}" = ${club.clubEmail.toLowerCase() === clubEmail.toLowerCase()}`);
+                    console.log(`- Secretary match: "${club.secretaryName.toLowerCase()}" === "${secretaryName.toLowerCase()}" = ${club.secretaryName.toLowerCase() === secretaryName.toLowerCase()}`);
+                    console.log(`- Password match: "${club.password}" === "${password}" = ${club.password === password}`);
+                });
 
                 const club = registeredClubs.find(c => 
                     c.clubEmail.toLowerCase() === clubEmail.toLowerCase() &&
@@ -1065,26 +1123,16 @@
                     c.password === password
                 );
 
-                console.log('Found club:', club);
+                console.log('Found club result:', club);
 
                 if (club) {
                     currentUser = club;
                     localStorage.setItem('currentUser', JSON.stringify(club));
-                    console.log('Login successful, showing main app');
+                    console.log('✅ Login successful, showing main app');
                     showMainApp();
                 } else {
-                    console.log('Login failed - credentials not found');
-                    showAlert('Invalid credentials. Please check your email, name, and password.', 'danger');
-                    
-                    // Debug: show what clubs are available
-                    console.log('Available clubs:');
-                    registeredClubs.forEach((club, index) => {
-                        console.log(`Club ${index}:`, {
-                            email: club.clubEmail,
-                            secretary: club.secretaryName,
-                            password: club.password
-                        });
-                    });
+                    console.log('❌ Login failed - no matching club found');
+                    showAlert('Login failed. Check credentials or try creating demo club again.', 'danger');
                 }
             } catch (error) {
                 console.error('Error in handleLogin:', error);
@@ -1218,18 +1266,40 @@
         }
 
         // Initialize immediately when script loads
+        console.log('=== IMMEDIATE INITIALIZATION ===');
         console.log('Initializing data immediately...');
         
-        // Initialize with demo club right away
-        registeredClubs = [{
-            clubName: "Demo Dog Club",
-            clubEmail: "demo@dogclub.com",
-            secretaryName: "Demo Secretary",
-            password: "demo123",
-            registrationDate: new Date().toISOString()
-        }];
+        // Force create demo club right away - multiple times to ensure it exists
+        function ensureDemoClub() {
+            const demoClub = {
+                clubName: "Demo Dog Club",
+                clubEmail: "demo@dogclub.com",
+                secretaryName: "Demo Secretary",
+                password: "demo123",
+                registrationDate: new Date().toISOString()
+            };
+            
+            // Clear and recreate to avoid any issues
+            registeredClubs = [demoClub];
+            console.log('✅ Demo club forcibly created:', registeredClubs);
+            return demoClub;
+        }
         
-        console.log('Demo club initialized:', registeredClubs);
+        // Create demo club immediately
+        ensureDemoClub();
+        
+        // Also save to localStorage immediately
+        localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
+        console.log('Demo club saved to localStorage');
+
+        // Test function that recreates demo club
+        function testLogin() {
+            console.log('=== TEST LOGIN FUNCTION ===');
+            console.log('Test function called - recreating demo club...');
+            ensureDemoClub();
+            alert('Demo club recreated! Now trying demo login...');
+            demoLogin();
+        }
 
         // Initialize when DOM is ready but also call loadStoredData to check for saved data
         document.addEventListener('DOMContentLoaded', function() {
