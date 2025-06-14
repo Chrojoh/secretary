@@ -621,43 +621,65 @@
             <div id="entry" class="tab-content">
                 <div class="initial-question">
                     <h3>Trial Entry Form</h3>
-                    <form id="entryForm" onsubmit="handleEntrySubmit(event)">
-                        <div class="form-group">
-                            <label for="regNumber" class="label">Registration Number:</label>
-                            <div class="typeahead-container">
-                                <input type="text" id="regNumber" placeholder="Type registration number" onkeyup="handleRegNumberTypeahead(this)" style="width: 250px;">
-                                <div id="regNumberDropdown" class="typeahead-dropdown"></div>
+                    
+                    <!-- Liability Waiver - Show First -->
+                    <div id="waiverSection" style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-bottom: 15px;">📋 Liability Waiver and Agreement</h4>
+                        <div style="max-height: 300px; overflow-y: auto; padding: 15px; background: white; border-radius: 5px; margin-bottom: 15px; font-size: 14px; line-height: 1.5;">
+                            <p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
+                            <p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers. I understand that my participation and my dog's participation in this trial is entirely voluntary.</p>
+                            
+                            <p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials, including but not limited to: collision with obstacles or other dogs, falls, sprains, broken bones, and other injuries to both human participants and dogs.</p>
+                            
+                            <p><strong>RELEASE AND HOLD HARMLESS:</strong> In consideration for being permitted to participate in this agility trial, I hereby release, waive, discharge and covenant not to sue the trial-giving club, the trial site, the trial committee, judges, and all their agents, representatives, successors and assigns from liability from any and all claims resulting from injuries, damages or loss which may be sustained by me or my dog while participating in this trial.</p>
+                            
+                            <p><strong>DOG HEALTH AND VACCINATION:</strong> I certify that my dog is healthy, current on vaccinations, and physically capable of participating in dog agility. I agree that my dog will be under my control at all times.</p>
+                            
+                            <p><strong>RULES AND REGULATIONS:</strong> I agree to abide by all trial rules and regulations and understand that failure to do so may result in dismissal from the trial without refund.</p>
+                            
+                            <p><strong>PHOTO/VIDEO RELEASE:</strong> I grant permission for photographs and/or video recordings of me and my dog taken during this trial to be used for promotional purposes.</p>
+                        </div>
+                        
+                        <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
+                            <input type="checkbox" id="waiverAccepted" required onchange="toggleEntryForm()">
+                            <span>I have read, understood, and agree to all terms of this Liability Waiver and Agreement. I understand that I am giving up substantial rights by signing this agreement.</span>
+                        </label>
+                    </div>
+
+                    <!-- Entry Form - Initially Hidden -->
+                    <div id="entryFormSection" style="display: none;">
+                        <form id="entryForm" onsubmit="handleEntrySubmit(event)">
+                            <div class="form-group">
+                                <label for="regNumber" class="label">Registration Number:</label>
+                                <div class="typeahead-container">
+                                    <input type="text" id="regNumber" placeholder="Type registration number" onkeyup="handleRegNumberTypeahead(this)" style="width: 250px;">
+                                    <div id="regNumberDropdown" class="typeahead-dropdown"></div>
+                                </div>
+                                <span id="callName" style="font-weight: bold; color: #667eea;"></span>
                             </div>
-                            <span id="callName" style="font-weight: bold; color: #667eea;"></span>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="handlerName" class="label">Handler Name:</label>
-                            <input type="text" id="handlerName" placeholder="Handler name" required style="width: 250px;">
-                        </div>
+                            <div class="form-group">
+                                <label for="handlerName" class="label">Handler Name:</label>
+                                <input type="text" id="handlerName" placeholder="Handler name (editable)" required style="width: 250px;">
+                                <small style="color: #666; margin-left: 10px;">Auto-filled from database, you can edit if needed</small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="contactEmail" class="label">Contact Email:</label>
-                            <input type="email" id="contactEmail" placeholder="your.email@example.com" required style="width: 250px;">
-                        </div>
+                            <div class="form-group">
+                                <label for="contactEmail" class="label">Contact Email:</label>
+                                <input type="email" id="contactEmail" placeholder="your.email@example.com" required style="width: 250px;">
+                            </div>
 
-                        <div id="trialOptionsContainer">
-                            <h4>Available Trial Options</h4>
-                            <div id="trialOptions"></div>
-                        </div>
+                            <div id="trialOptionsContainer">
+                                <h4>Available Trial Options</h4>
+                                <div id="trialOptions"></div>
+                            </div>
 
-                        <div class="form-group">
-                            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
-                                <input type="checkbox" id="waiverAccepted" required>
-                                <span>I have read and agree to the Liability Waiver and Agreement.</span>
-                            </label>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit">Submit Entry</button>
-                            <button type="button" onclick="clearForm()">Clear Form</button>
-                        </div>
-                    </form>
+                            <div class="form-group">
+                                <button type="submit">Submit Entry</button>
+                                <button type="button" onclick="clearForm()">Clear Form</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -829,7 +851,7 @@
                 
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(new Uint8Array(arrayBuffer));
-                const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+                const dataSheet = workbook.Sheets['Sheet1'] || workbook.Sheets[workbook.SheetNames[0]];
                 const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
                 
                 if (jsonData.length > 1) {
@@ -841,36 +863,29 @@
                     
                     jsonData.slice(1).forEach((row, index) => {
                         if (row && row.length >= 2) {
-                            const regNumber = row[0] ? String(row[0]).trim() : '';
-                            const callName = row[1] ? String(row[1]).trim() : '';
+                            const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A
+                            const callName = row[1] ? String(row[1]).trim() : '';  // Column B
+                            const handlerName = row[2] ? String(row[2]).trim() : ''; // Column C
+                            const className = row[8] ? String(row[8]).trim() : ''; // Column I (index 8)
+                            const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K (index 10)
                             
                             // Dog data
                             if (regNumber && callName && regNumber.includes('-') && !uniqueDogs.has(regNumber)) {
                                 uniqueDogs.set(regNumber, {
                                     regNumber: regNumber,
                                     callName: callName,
-                                    handler: ''
+                                    handler: handlerName
                                 });
                             }
                             
-                            // Try multiple columns for classes and judges
-                            for (let i = 2; i < row.length; i++) {
-                                const cellValue = row[i] ? String(row[i]).trim() : '';
-                                if (cellValue && cellValue.length > 2) {
-                                    // Check if it looks like a class name
-                                    if (cellValue.includes('Patrol') || cellValue.includes('Detective') || 
-                                        cellValue.includes('Ranger') || cellValue.includes('Dasher') ||
-                                        cellValue.includes('Obedience') || cellValue.includes('Starter') ||
-                                        cellValue.includes('Advanced') || cellValue.includes('Pro') ||
-                                        cellValue.includes('Zoom') || cellValue.includes('Games') ||
-                                        /\d/.test(cellValue)) {
-                                        classesFromData.add(cellValue);
-                                    }
-                                    // Check if it looks like a judge name (has space and capital letters)
-                                    else if (cellValue.includes(' ') && /^[A-Z][a-z]+ [A-Z]/.test(cellValue)) {
-                                        judgesFromData.add(cellValue);
-                                    }
-                                }
+                            // Class data from Column I
+                            if (className && className.length > 2) {
+                                classesFromData.add(className);
+                            }
+                            
+                            // Judge data from Column K
+                            if (judgeName && judgeName.length > 3) {
+                                judgesFromData.add(judgeName);
                             }
                         }
                     });
@@ -883,7 +898,7 @@
                         
                         updateDataStatusDisplay();
                         statusDiv.className = 'data-loading-status success';
-                        statusDiv.innerHTML = `<h4>✅ Database loaded!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded</p>`;
+                        statusDiv.innerHTML = `<h4>✅ Database auto-loaded!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded</p>`;
                         setTimeout(() => statusDiv.style.display = 'none', 5000);
                         
                         console.log('Judges found:', availableJudges);
@@ -906,7 +921,7 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+                    const dataSheet = workbook.Sheets['Sheet1'] || workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
                     
                     console.log('Manual Excel load - structure preview:', jsonData.slice(0, 3));
@@ -918,32 +933,29 @@
                         
                         jsonData.slice(1).forEach(row => {
                             if (row && row.length >= 2) {
-                                const regNumber = row[0] ? String(row[0]).trim() : '';
-                                const callName = row[1] ? String(row[1]).trim() : '';
+                                const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A
+                                const callName = row[1] ? String(row[1]).trim() : '';  // Column B
+                                const handlerName = row[2] ? String(row[2]).trim() : ''; // Column C
+                                const className = row[8] ? String(row[8]).trim() : ''; // Column I
+                                const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K
                                 
                                 // Dog data
                                 if (regNumber && callName && !uniqueDogs.has(regNumber)) {
-                                    uniqueDogs.set(regNumber, { regNumber, callName, handler: '' });
+                                    uniqueDogs.set(regNumber, { 
+                                        regNumber, 
+                                        callName, 
+                                        handler: handlerName 
+                                    });
                                 }
                                 
-                                // Scan all columns for classes and judges
-                                for (let i = 2; i < row.length; i++) {
-                                    const cellValue = row[i] ? String(row[i]).trim() : '';
-                                    if (cellValue && cellValue.length > 2) {
-                                        // Check if it looks like a class name
-                                        if (cellValue.includes('Patrol') || cellValue.includes('Detective') || 
-                                            cellValue.includes('Ranger') || cellValue.includes('Dasher') ||
-                                            cellValue.includes('Obedience') || cellValue.includes('Starter') ||
-                                            cellValue.includes('Advanced') || cellValue.includes('Pro') ||
-                                            cellValue.includes('Zoom') || cellValue.includes('Games') ||
-                                            /\d/.test(cellValue)) {
-                                            classesFromData.add(cellValue);
-                                        }
-                                        // Check if it looks like a judge name (has space and capital letters)
-                                        else if (cellValue.includes(' ') && /^[A-Z][a-z]+ [A-Z]/.test(cellValue)) {
-                                            judgesFromData.add(cellValue);
-                                        }
-                                    }
+                                // Class data from Column I
+                                if (className && className.length > 2) {
+                                    classesFromData.add(className);
+                                }
+                                
+                                // Judge data from Column K
+                                if (judgeName && judgeName.length > 3) {
+                                    judgesFromData.add(judgeName);
                                 }
                             }
                         });
@@ -1311,11 +1323,61 @@
                 return;
             }
             
+            // Generate entry form link
+            const baseUrl = window.location.origin + window.location.pathname;
+            const entryLink = `${baseUrl}?direct=entry&trial=${encodeURIComponent(generateTrialName())}`;
+            
             showStatusMessage("🎉 Complete trial configuration saved successfully!", "success");
+            
+            // Show entry form link
+            const linkSection = document.createElement('div');
+            linkSection.style.cssText = 'margin-top: 20px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;';
+            linkSection.innerHTML = `
+                <h4 style="color: #1976d2; margin-bottom: 15px;">🔗 Entry Form Link Generated</h4>
+                <p style="margin-bottom: 10px;">Share this link with participants to access the entry form directly:</p>
+                <div style="background: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-family: monospace; word-break: break-all;">
+                    ${entryLink}
+                </div>
+                <button onclick="copyEntryLink('${entryLink}')" style="background: #2196f3; margin-right: 10px;">📋 Copy Link</button>
+                <button onclick="openEntryForm('${entryLink}')" style="background: #4caf50;">🚀 Open Entry Form</button>
+            `;
+            
+            document.getElementById('saveTrialSection').appendChild(linkSection);
             
             // Auto-generate a trial name if none exists
             if (!document.getElementById('trialSaveName').value) {
                 document.getElementById('trialSaveName').value = generateTrialName();
+            }
+        }
+
+        function copyEntryLink(link) {
+            navigator.clipboard.writeText(link).then(() => {
+                showStatusMessage('✅ Entry form link copied to clipboard!', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showStatusMessage('✅ Entry form link copied!', 'success');
+            });
+        }
+
+        function openEntryForm(link) {
+            window.open(link, '_blank');
+        }
+
+        function toggleEntryForm() {
+            const waiverAccepted = document.getElementById('waiverAccepted').checked;
+            const entryFormSection = document.getElementById('entryFormSection');
+            
+            if (waiverAccepted) {
+                entryFormSection.style.display = 'block';
+                entryFormSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                entryFormSection.style.display = 'none';
             }
         }
 
@@ -1360,6 +1422,12 @@
             document.getElementById('callName').textContent = callName;
             document.getElementById('callName').style.color = '#28a745';
             document.getElementById('regNumberDropdown').style.display = 'none';
+            
+            // Auto-fill handler name if available
+            const dog = dogData.find(d => d.regNumber === regNumber);
+            if (dog && dog.handler) {
+                document.getElementById('handlerName').value = dog.handler;
+            }
         }
 
         // Trial Options Display
@@ -1458,6 +1526,22 @@
             document.getElementById('entryForm').reset();
             document.getElementById('callName').textContent = '';
             document.querySelectorAll('input[name="trialEntry"]').forEach(cb => cb.checked = false);
+            document.getElementById('waiverAccepted').checked = false;
+            document.getElementById('entryFormSection').style.display = 'none';
+        }
+
+        // Check for direct entry form access
+        function checkDirectEntry() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('direct') === 'entry') {
+                // Skip login for direct entry access
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('clubInfo').textContent = 'Public Entry Form';
+                document.getElementById('secretaryInfo').textContent = '';
+                showTab('entry');
+                updateTrialOptions();
+            }
         }
 
         // Dashboard Functions
@@ -1769,6 +1853,7 @@
             initializeData();
             updateTrialOptions();
             updateDataStatusDisplay();
+            checkDirectEntry();
             
             // Try to auto-load dataforsite.xlsx after a short delay
             setTimeout(() => {
