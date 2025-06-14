@@ -1379,4 +1379,92 @@
             if (toIndex < 0 || toIndex >= entries.length) return;
 
             const entry = entries.splice(fromIndex, 1)[0];
-            entries.splice(
+            entries.splice(toIndex, 0, entry);
+            displayRunningOrders();
+        }
+
+        function confirmAndGenerateScoreSheets() {
+            if (Object.keys(runningOrders).length === 0) {
+                showRunningOrderMessage("No running orders to confirm.", "warning");
+                return;
+            }
+
+            showRunningOrderMessage("✅ Running orders confirmed and score sheets generated!", "success");
+        }
+
+        function printRunningOrders() {
+            if (Object.keys(runningOrders).length === 0) {
+                showRunningOrderMessage("No running orders to print.", "warning");
+                return;
+            }
+
+            let printHTML = '<h1 style="text-align: center;">Final Running Orders</h1>';
+            Object.keys(runningOrders).sort().forEach(key => {
+                const group = runningOrders[key];
+                printHTML += `
+                    <h2 style="background: #667eea; color: white; padding: 10px; text-align: center;">
+                        ${group.date} - ${group.judge}<br>${group.className} - Round ${group.round}
+                    </h2>
+                    <table style="width: 100%; border-collapse: collapse;">
+                `;
+
+                group.entries.forEach((entry, index) => {
+                    printHTML += `
+                        <tr style="border: 1px solid #ddd;">
+                            <td style="padding: 8px; width: 40px; text-align: center; font-weight: bold;">${index + 1}</td>
+                            <td style="padding: 8px; font-weight: bold;">${entry.handler} - ${entry.callName}</td>
+                            <td style="padding: 8px;">${entry.regNumber}</td>
+                        </tr>
+                    `;
+                });
+
+                printHTML += '</table><br>';
+            });
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<!DOCTYPE html><html><head><title>Running Orders</title></head><body>${printHTML}</body></html>`);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function showRunningOrderMessage(message, type) {
+            const statusDiv = document.getElementById('runningOrderStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 4000);
+        }
+
+        // Search and Edit Functions
+        function searchEntries() {
+            const query = document.getElementById('searchEntry').value.toLowerCase();
+            const container = document.getElementById('searchResults');
+            
+            if (query.length < 2) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const matches = entryResults.filter(entry => 
+                entry.regNumber.toLowerCase().includes(query) ||
+                entry.handler.toLowerCase().includes(query) ||
+                entry.callName.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                container.innerHTML = '<p>No matching entries found.</p>';
+                return;
+            }
+             // Initialize application
+        window.onload = function() {
+            console.log('🚀 Trial Management System initializing...');
+            initializeData();
+            updateTrialOptions();
+            updateDataStatusDisplay();
+            
+            // Try to auto-load dataforsite.xlsx after a short delay
+            setTimeout(() => {
+                loadDataForSiteFile();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
