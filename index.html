@@ -805,21 +805,35 @@
         let currentUser = null;
         let registeredClubs = [];
 
-        // Initialize with demo data
+        // Initialize with demo data + auto-load real data
         function initializeData() {
+            // Start with demo data
             dogData = [
-                { regNumber: "12345", callName: "Buddy" },
-                { regNumber: "67890", callName: "Luna" },
-                { regNumber: "11111", callName: "Max" },
-                { regNumber: "22222", callName: "Bella" },
-                { regNumber: "33333", callName: "Charlie" },
-                { regNumber: "44444", callName: "Daisy" },
-                { regNumber: "55555", callName: "Rocky" },
-                { regNumber: "66666", callName: "Molly" }
+                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
+                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
+                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
+                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
+                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
+                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
+                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
+                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
             ];
             
-            availableClasses = ["Patrol 1", "Super Sleuth 4", "Ranger 3", "Investigator 3", "Detective", "Dasher 4", "Dasher 5"];
-            availableJudges = ["Sarah Knight", "Lane Michie", "Gary Truitt", "Judge Johnson", "Judge Williams"];
+            // Demo classes and judges that work for the system
+            availableClasses = [
+                "Patrol 1", "Patrol 2", "Patrol 3",
+                "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
+                "Ranger 1", "Ranger 2", "Ranger 3",
+                "Investigator 1", "Investigator 2", "Investigator 3",
+                "Detective 1", "Detective 2", "Detective 3",
+                "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
+            ];
+            
+            availableJudges = [
+                "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
+                "Judge Johnson", "Judge Williams", "Judge Davis"
+            ];
 
             registeredClubs = [
                 {
@@ -2040,104 +2054,84 @@
             }
         };
 
-        // Auto-load the dataforsite.xlsx file
+        // Auto-load the dataforsite.xlsx file  
         async function loadDataForSiteFile() {
             try {
                 console.log('Attempting to auto-load dataforsite.xlsx...');
                 
-                // Check if XLSX library is available
-                if (typeof XLSX === 'undefined') {
-                    console.log('XLSX library not ready yet, will retry...');
-                    return;
-                }
-                
-                // Try to read the dataforsite.xlsx file
+                // Try to read the dataforsite.xlsx file using SheetJS (available in repl)
                 const fileData = await window.fs.readFile('dataforsite.xlsx');
                 console.log('dataforsite.xlsx file loaded, size:', fileData.length, 'bytes');
                 
+                // Try using the built-in SheetJS library
+                if (typeof XLSX === 'undefined') {
+                    // Import SheetJS library
+                    const { default: XLSX } = await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
+                    window.XLSX = XLSX;
+                }
+                
                 // Parse the workbook
-                const workbook = XLSX.read(fileData, { 
-                    type: 'array',
-                    cellDates: true,
-                    cellStyles: true 
-                });
+                const workbook = XLSX.read(fileData, { type: 'array' });
                 console.log('Workbook sheets:', workbook.SheetNames);
                 
                 // Get the first sheet
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
                 
-                // Process as array data (no headers)
+                // Process as array data (no headers) - your file structure is special
                 const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
                 console.log('Raw data rows:', rawData.length);
                 
-                if (rawData.length > 0) {
+                if (rawData.length > 1000) { // Make sure we have substantial data
                     const processedDogs = [];
-                    const extractedClasses = new Set();
-                    const extractedJudges = new Set();
+                    let processedCount = 0;
                     
-                    // Process each row
+                    // Process each row - your structure: [RegNumber, CallName, FullName, Handler, FirstName, LastName, ???, ???]
                     rawData.forEach((row, index) => {
-                        if (row && row.length >= 7) {
+                        if (row && Array.isArray(row) && row.length >= 4 && index < 5000) { // Limit to first 5000 for performance
                             const regNumber = row[0] ? String(row[0]).trim() : '';
                             const callName = row[1] ? String(row[1]).trim() : '';
                             const fullName = row[2] ? String(row[2]).trim() : '';
-                            const fullHandler = row[3] ? String(row[3]).trim() : '';
-                            const firstName = row[4] ? String(row[4]).trim() : '';
-                            const lastName = row[5] ? String(row[5]).trim() : '';
-                            const className = row[6] ? String(row[6]).trim() : '';
-                            const judge = row[7] ? String(row[7]).trim() : '';
+                            const handler = row[3] ? String(row[3]).trim() : '';
 
-                            // Only add valid dog records
-                            if (regNumber && callName && regNumber !== '07-0001-01') { // Skip header-like rows
+                            // Only add valid dog records - filter out obvious headers or invalid data
+                            if (regNumber && callName && 
+                                regNumber.length > 5 && // Registration numbers should be longer
+                                callName.length > 1 && 
+                                !regNumber.includes('07-0001-01') && // Skip the header row
+                                regNumber.includes('-')) { // Should have hyphens in reg numbers
+                                
                                 processedDogs.push({
                                     regNumber: regNumber,
                                     callName: callName,
                                     fullName: fullName,
-                                    handler: fullHandler || `${firstName} ${lastName}`.trim(),
-                                    firstName: firstName,
-                                    lastName: lastName
+                                    handler: handler
                                 });
-                            }
-
-                            // Collect classes and judges (skip obvious headers)
-                            if (className && className !== 'Patrol 1' && className !== 'Class' && className.trim().length > 0) {
-                                extractedClasses.add(className);
-                            }
-                            if (judge && judge !== 'Judges' && judge !== 'Judge' && judge.trim().length > 0) {
-                                extractedJudges.add(judge);
+                                processedCount++;
                             }
                         }
                     });
 
-                    // Update global data
-                    if (processedDogs.length > 0) {
+                    // Update global data if we got good results
+                    if (processedDogs.length > 100) { // Only update if we got substantial data
                         dogData = processedDogs;
-                        console.log('Loaded', dogData.length, 'dogs from dataforsite.xlsx');
+                        console.log('✅ Successfully loaded', dogData.length, 'dogs from dataforsite.xlsx');
+                        
+                        // Update displays
+                        updateDataStatusDisplay();
+                        
+                        showStatusMessage(`🎉 Auto-loaded dataforsite.xlsx!<br>🐕 ${dogData.length} dogs loaded<br>📊 Ready for trial setup`, 'success');
+                    } else {
+                        console.log('❌ Not enough valid data found, keeping demo data');
                     }
-                    
-                    if (extractedClasses.size > 0) {
-                        availableClasses = Array.from(extractedClasses).sort();
-                        console.log('Loaded', availableClasses.length, 'classes:', availableClasses);
-                    }
-                    
-                    if (extractedJudges.size > 0) {
-                        availableJudges = Array.from(extractedJudges).sort();
-                        console.log('Loaded', availableJudges.length, 'judges:', availableJudges.slice(0, 5));
-                    }
-
-                    // Update displays
-                    updateDataStatusDisplay();
-                    
-                    showStatusMessage(`🎉 Auto-loaded dataforsite.xlsx!<br>🐕 ${dogData.length} dogs<br>🏆 ${availableClasses.length} classes<br>👨‍⚖️ ${availableJudges.length} judges`, 'success');
                     
                 } else {
-                    console.log('No data found in dataforsite.xlsx');
+                    console.log('❌ File seems too small, keeping demo data');
                 }
                 
             } catch (error) {
-                console.log('Could not auto-load dataforsite.xlsx:', error.message);
-                // This is normal if the file isn't in the project, so no error message to user
+                console.log('ℹ️ Could not auto-load dataforsite.xlsx (this is normal if file not available):', error.message);
+                // This is expected if the file isn't available, so don't show error to user
             }
         }
     </script>
