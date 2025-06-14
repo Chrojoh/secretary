@@ -740,3 +740,1684 @@
                 secretaryName: "Demo Secretary",
                 email: "demo@example.com",
                 password: "demo123"
+                    }];
+        }
+
+        // Login Functions
+        function showLoginTab(tab) {
+            document.querySelectorAll('#loginSection .tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#loginSection .nav-tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(tab + 'Form').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const clubName = document.getElementById('loginClubName').value;
+            const secretaryName = document.getElementById('loginSecretaryName').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const club = registeredClubs.find(c => 
+                c.clubName.toLowerCase() === clubName.toLowerCase() &&
+                c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
+                c.password === password
+            );
+
+            if (club) {
+                currentUser = club;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('clubInfo').textContent = club.clubName;
+                document.getElementById('secretaryInfo').textContent = `Secretary: ${club.secretaryName}`;
+                updateDashboard();
+                updateTrialOptions();
+            } else {
+                alert('Invalid credentials. Try Demo Dog Club / Demo Secretary / demo123');
+            }
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const clubName = document.getElementById('registerClubName').value;
+            const secretaryName = document.getElementById('registerSecretaryName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            const newClub = { clubName, secretaryName, email, password };
+            registeredClubs.push(newClub);
+            alert('Club registered successfully! You can now sign in.');
+            showLoginTab('login');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        }
+
+        // Tab Management
+        function showTab(tabName, event) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // Data Loading Functions
+        async function loadDataForSiteFile() {
+            const statusDiv = document.getElementById('autoLoadStatus');
+            try {
+                statusDiv.innerHTML = '<h4>🔄 Loading dataforsite.xlsx...</h4>';
+                
+                const response = await fetch('dataforsite.xlsx', { cache: 'no-cache' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(new Uint8Array(arrayBuffer));
+                const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
+                
+                if (jsonData.length > 1) {
+                    const uniqueDogs = new Map();
+                    jsonData.slice(1).forEach(row => {
+                        if (row && row.length >= 2) {
+                            const regNumber = row[0] ? String(row[0]).trim() : '';
+                            const callName = row[1] ? String(row[1]).trim() : '';
+                            
+                            if (regNumber && callName && regNumber.includes('-') && !uniqueDogs.has(regNumber)) {
+                                uniqueDogs.set(regNumber, {
+                                    regNumber: regNumber,
+                                    callName: callName,
+                                    handler: ''
+                                });
+                            }
+                        }
+                    });
+
+                    if (uniqueDogs.size > 50) {
+                        dogData = Array.from(uniqueDogs.values());
+                        
+                        // Extract classes and judges
+                        const classesFromData = new Set();
+                        const judgesFromData = new Set();
+                        jsonData.slice(1).forEach(row => {
+                            if (row && row.length >= 6) {
+                                const level = row[3] ? String(row[3]).trim() : '';
+                                const judge = row[5] ? String(row[5]).trim() : '';
+                                if (level && level.length > 2) classesFromData.add(level);
+                                if (judge && judge.length > 3) judgesFromData.add(judge);
+                            }
+                        });
+                        
+                        if (classesFromData.size > 5) availableClasses = [...classesFromData].sort();
+                        if (judgesFromData.size > 3) availableJudges = [...judgesFromData].sort();
+                        
+                        updateDataStatusDisplay();
+                        statusDiv.className = 'data-loading-status success';
+                        statusDiv.innerHTML = `<h4>✅ Database loaded!</h4><p>🐕 ${dogData.length} dogs loaded from dataforsite.xlsx</p>`;
+                        setTimeout(() => statusDiv.style.display = 'none', 5000);
+                    }
+                }
+            } catch (error) {
+                statusDiv.className = 'data-loading-status error';
+                statusDiv.innerHTML = `<h4>⚠️ Auto-load failed</h4><p>Could not load dataforsite.xlsx. Using demo data.</p>`;
+                setTimeout(() => statusDiv.style.display = 'none', 8000);
+            }
+        }
+
+        function loadExcelData() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const dataSheet = workbook.Sheets['Data'] || workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
+                    
+                    if (jsonData.length > 1) {
+                        const uniqueDogs = new Map();
+                        jsonData.slice(1).forEach(row => {
+                            if (row && row.length >= 2) {
+                                const regNumber = row[0] ? String(row[0]).trim() : '';
+                                const callName = row[1] ? String(row[1]).trim() : '';
+                                if (regNumber && callName && !uniqueDogs.has(regNumber)) {
+                                    uniqueDogs.set(regNumber, { regNumber, callName, handler: '' });
+                                }
+                            }
+                        });
+
+                        if (uniqueDogs.size > 10) {
+                            dogData = Array.from(uniqueDogs.values());
+                            updateDataStatusDisplay();
+                            showStatusMessage(`✅ Excel loaded! ${dogData.length} dogs imported`, 'success');
+                        }
+                    }
+                } catch (error) {
+                    showStatusMessage(`❌ Error reading Excel file: ${error.message}`, 'danger');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Data Status Functions
+        function updateDataStatusDisplay() {
+            document.getElementById('dogCount').textContent = dogData.length;
+            document.getElementById('classCount').textContent = availableClasses.length;
+            document.getElementById('judgeCount').textContent = availableJudges.length;
+            document.getElementById('dogCountStatus').textContent = dogData.length;
+            document.getElementById('classCountStatus').textContent = availableClasses.length;
+            document.getElementById('judgeCountStatus').textContent = availableJudges.length;
+            document.getElementById('dataSource').textContent = dogData.length > 8 ? 'Loaded from Excel' : 'Demo data';
+        }
+
+        function showDataPreview() {
+            const previewDiv = document.getElementById('dataPreview');
+            if (previewDiv.style.display !== 'none') {
+                previewDiv.style.display = 'none';
+                return;
+            }
+            
+            let html = '<h4>Search Results:</h4>';
+            matches.forEach((entry, index) => {
+                html += `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f9f9f9;">
+                        <div style="font-weight: bold;">${entry.handler} - ${entry.callName}</div>
+                        <div style="color: #666; font-size: 14px;">${entry.regNumber} | ${entry.date} | ${entry.className} Round ${entry.round}</div>
+                        <div style="color: #666; font-size: 12px;">Judge: ${entry.judge} | Email: ${entry.contactEmail}</div>
+                        <button onclick="deleteEntry(${entryResults.indexOf(entry)})" style="margin-top: 10px; background: #dc3545;">Delete Entry</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function deleteEntry(index) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                entryResults.splice(index, 1);
+                updateResultsDisplay();
+                updateDashboard();
+                searchEntries();
+                showStatusMessage('Entry deleted successfully!', 'success');
+            }
+        }
+
+        // Results and Export Functions
+        function updateResultsDisplay() {
+            const container = document.getElementById('resultsDisplay');
+            
+            if (entryResults.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">No entries yet.</p>';
+                return;
+            }
+
+            const groupedResults = {};
+            entryResults.forEach(entry => {
+                const key = `${entry.date}-${entry.judge}-${entry.className}-${entry.round}`;
+                if (!groupedResults[key]) {
+                    groupedResults[key] = {
+                        date: entry.date, judge: entry.judge, className: entry.className, round: entry.round, entries: []
+                    };
+                }
+                groupedResults[key].entries.push(entry);
+            });
+
+            let html = '<div style="display: grid; gap: 20px;">';
+            Object.values(groupedResults).forEach(group => {
+                html += `
+                    <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                        <div style="background: #667eea; color: white; padding: 10px; text-align: center; font-weight: bold;">
+                            ${group.date} - ${group.judge}<br>${group.className} - Round ${group.round}
+                        </div>
+                        <div style="padding: 10px;">
+                `;
+                
+                group.entries.forEach((entry, index) => {
+                    html += `
+                        <div style="padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+                            <span><strong>${entry.handler}</strong> - ${entry.callName}</span>
+                            <span style="color: #666;">${entry.regNumber}</span>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function exportToCSV() {
+            if (entryResults.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Registration Number', 'Call Name', 'Handler', 'Email', 'Date', 'Judge', 'Class', 'Round', 'Entry Type', 'Timestamp'];
+            const csvContent = [
+                headers.join(','),
+                ...entryResults.map(entry => [
+                    entry.regNumber, entry.callName, entry.handler, entry.contactEmail,
+                    entry.date, entry.judge, entry.className, entry.round,
+                    entry.entryType || 'regular', entry.timestamp
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAllData() {
+            if (entryResults.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            exportToCSV();
+        }
+
+        // Dashboard Functions
+        function updateDashboard() {
+            let activeTrialsHtml = 'No active trials';
+            if (trialConfig.length > 0) {
+                const uniqueDates = [...new Set(trialConfig.map(t => t.date))];
+                activeTrialsHtml = `<strong>Current Trial</strong><br>${uniqueDates.length} trial days configured`;
+            }
+            document.getElementById('activeTrials').innerHTML = activeTrialsHtml;
+
+            let recentEntriesHtml = 'No recent entries';
+            if (entryResults.length > 0) {
+                const recentEntries = entryResults.slice(-3);
+                recentEntriesHtml = `<strong>${entryResults.length}</strong> total entries<br>` + 
+                    recentEntries.map(entry => 
+                        `<div style="margin-bottom: 8px; font-size: 12px;">${entry.callName} - ${entry.className}</div>`
+                    ).join('');
+            }
+            document.getElementById('recentEntries').innerHTML = recentEntriesHtml;
+        }
+
+        function generateTrialName() {
+            const today = new Date();
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[today.getMonth()];
+            const year = today.getFullYear();
+            const clubShort = currentUser ? currentUser.clubName.split(' ')[0] : 'Club';
+            return `${clubShort} ${month} ${year} Trial`;
+        }
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('dataStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 3000);
+        }
+
+        // Event Handlers and Initialization
+        window.onload = function() {
+            console.log('🚀 Trial Management System starting...');
+            
+            initializeData();
+            updateTrialOptions();
+            updateDataStatusDisplay();
+            
+            // Set up entry form submission
+            const entryForm = document.getElementById('entryForm');
+            if (entryForm) {
+                entryForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const regNumber = document.getElementById('regNumber').value;
+                    const callName = document.getElementById('callName').textContent;
+                    const handler = document.getElementById('handlerName').value;
+                    const contactEmail = document.getElementById('contactEmail').value;
+                    const waiverAccepted = document.getElementById('waiverAccepted').checked;
+                    
+                    if (!regNumber || !handler || callName === 'Not found' || callName === '') {
+                        alert('Please complete all required fields and ensure registration number is valid');
+                        return;
+                    }
+
+                    if (!waiverAccepted) {
+                        alert('You must accept the waiver to submit an entry.');
+                        return;
+                    }
+
+                    const selectedEntries = [];
+                    document.querySelectorAll('input[name="trialEntry"]:checked').forEach(checkbox => {
+                        const [configIndex, entryType] = checkbox.value.split('-');
+                        const config = trialConfig[parseInt(configIndex)];
+                        selectedEntries.push({ ...config, entryType: entryType });
+                    });
+
+                    if (selectedEntries.length === 0) {
+                        alert('Please select at least one trial entry');
+                        return;
+                    }
+
+                    selectedEntries.forEach(entry => {
+                        entryResults.push({
+                            regNumber: regNumber,
+                            callName: callName,
+                            handler: handler,
+                            contactEmail: contactEmail,
+                            date: entry.date,
+                            className: entry.className,
+                            round: entry.roundNum,
+                            judge: entry.judge,
+                            entryType: entry.entryType,
+                            waiverAccepted: waiverAccepted,
+                            timestamp: new Date().toISOString()
+                        });
+                    });
+
+                    updateResultsDisplay();
+                    updateDashboard();
+                    showStatusMessage(`${selectedEntries.length} entries submitted successfully!`, 'success');
+                    clearForm();
+                });
+            }
+            
+            // Auto-load dataforsite.xlsx after delay
+            setTimeout(() => {
+                console.log('🔄 Starting auto-load process...');
+                loadDataForSiteFile();
+            }, 1000);
+            
+            console.log('✅ Trial Management System initialized');
+        };
+
+        // Hide dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.typeahead-container')) {
+                document.querySelectorAll('.typeahead-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    </script>
+</body>
+</html> html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">';
+            html += '<div><h6>🐕 Dogs:</h6>';
+            dogData.slice(0, 5).forEach(dog => html += `<div>${dog.regNumber} - ${dog.callName}</div>`);
+            if (dogData.length > 5) html += `<div>...and ${dogData.length - 5} more</div>`;
+            html += '</div>';
+            
+            html += '<div><h6>🏆 Classes:</h6>';
+            availableClasses.slice(0, 5).forEach(cls => html += `<div>${cls}</div>`);
+            html += '</div>';
+            
+            html += '<div><h6>👨‍⚖️ Judges:</h6>';
+            availableJudges.slice(0, 5).forEach(judge => html += `<div>${judge}</div>`);
+            html += '</div></div>';
+            
+            document.getElementById('previewContent').innerHTML = html;
+            previewDiv.style.display = 'block';
+        }
+
+        // Save/Load Trial Functions
+        function saveCompleteTrialFile() {
+            const trialName = document.getElementById('trialSaveName').value.trim();
+            if (!trialName) {
+                alert('Please enter a trial name');
+                return;
+            }
+
+            const completeTrialData = {
+                fileInfo: {
+                    version: "1.0",
+                    trialName: trialName,
+                    savedDate: new Date().toISOString()
+                },
+                dogData, availableClasses, availableJudges, trialConfig, entryResults, runningOrders
+            };
+
+            const jsonString = JSON.stringify(completeTrialData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trial_${trialName.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showSaveLoadMessage(`✅ Trial "${trialName}" saved successfully!`, 'success');
+            document.getElementById('trialSaveName').value = '';
+        }
+
+        function loadCompleteTrialFile() {
+            const file = document.getElementById('trialLoadFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.fileInfo) throw new Error('Invalid trial file');
+
+                    if (confirm(`Load Trial: "${data.fileInfo.trialName}"?`)) {
+                        dogData = data.dogData || [];
+                        availableClasses = data.availableClasses || [];
+                        availableJudges = data.availableJudges || [];
+                        trialConfig = data.trialConfig || [];
+                        entryResults = data.entryResults || [];
+                        runningOrders = data.runningOrders || {};
+                        
+                        updateTrialOptions();
+                        updateResultsDisplay();
+                        updateDashboard();
+                        updateDataStatusDisplay();
+                        
+                        showSaveLoadMessage(`✅ Trial "${data.fileInfo.trialName}" loaded!`, 'success');
+                        document.getElementById('trialLoadFile').value = '';
+                    }
+                } catch (error) {
+                    showSaveLoadMessage(`❌ Error loading trial: ${error.message}`, 'danger');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showSaveLoadMessage(message, type) {
+            const statusDiv = document.getElementById('saveLoadStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 5000);
+        }
+
+        // Trial Setup Functions
+        function generateDays() {
+            const numDays = parseInt(document.getElementById('trialDays').value);
+            if (!numDays || numDays < 1) {
+                alert('Please enter a valid number of days');
+                return;
+            }
+
+            totalDays = numDays;
+            savedDays = 0;
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= numDays; i++) {
+                createDaySection(i, container);
+            }
+        }
+
+        function createDaySection(dayNum, container) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day-container';
+            dayDiv.innerHTML = `
+                <div class="day-header">Day ${dayNum}</div>
+                <div class="form-group">
+                    <span class="label">Date:</span>
+                    <input type="date" id="date_${dayNum}">
+                </div>
+                <div class="classes-section">
+                    <div class="form-group">
+                        <span class="label">How many classes?</span>
+                        <input type="number" id="classes_${dayNum}" min="1" max="20" onchange="generateClasses(${dayNum})">
+                    </div>
+                    <div id="classesContainer_${dayNum}"></div>
+                </div>
+                <div class="form-group">
+                    <button onclick="saveTrialDay(${dayNum})">Save Day ${dayNum}</button>
+                </div>
+            `;
+            container.appendChild(dayDiv);
+        }
+
+        function generateClasses(dayNum) {
+            const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
+            const container = document.getElementById(`classesContainer_${dayNum}`);
+            
+            if (!numClasses || numClasses < 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = '';
+            for (let i = 1; i <= numClasses; i++) {
+                createClassSection(dayNum, i, container);
+            }
+        }
+
+        function createClassSection(dayNum, classNum, container) {
+            const classDiv = document.createElement('div');
+            classDiv.className = 'class-container';
+            classDiv.innerHTML = `
+                <div class="class-header">Class ${classNum}</div>
+                <div class="form-group">
+                    <span class="label">Class Name:</span>
+                    <div class="typeahead-container">
+                        <input type="text" id="className_${dayNum}_${classNum}" placeholder="Type class name" 
+                               onkeyup="handleClassTypeahead(this, ${dayNum}, ${classNum})" style="width: 250px;">
+                        <div id="classDropdown_${dayNum}_${classNum}" class="typeahead-dropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <span class="label">Rounds:</span>
+                    <input type="number" id="rounds_${dayNum}_${classNum}" min="1" max="10" onchange="generateRounds(${dayNum}, ${classNum})">
+                </div>
+                <div id="roundsContainer_${dayNum}_${classNum}"></div>
+            `;
+            container.appendChild(classDiv);
+        }
+
+        function generateRounds(dayNum, classNum) {
+            const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`).value);
+            const container = document.getElementById(`roundsContainer_${dayNum}_${classNum}`);
+            
+            if (!numRounds || numRounds < 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = '';
+            for (let i = 1; i <= numRounds; i++) {
+                createRoundSection(dayNum, classNum, i, container);
+            }
+        }
+
+        function createRoundSection(dayNum, classNum, roundNum, container) {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'rounds-section';
+            roundDiv.innerHTML = `
+                <div class="form-group">
+                    <span class="label">Round ${roundNum} Judge:</span>
+                    <div class="typeahead-container">
+                        <input type="text" id="judge_${dayNum}_${classNum}_${roundNum}" placeholder="Judge name"
+                               onkeyup="handleJudgeTypeahead(this, ${dayNum}, ${classNum}, ${roundNum})" style="width: 250px;">
+                        <div id="judgeDropdown_${dayNum}_${classNum}_${roundNum}" class="typeahead-dropdown"></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(roundDiv);
+        }
+
+        // Typeahead Functions
+        function handleClassTypeahead(input, dayNum, classNum) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById(`classDropdown_${dayNum}_${classNum}`);
+            
+            if (query.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const matches = availableClasses.filter(cls => cls.toLowerCase().includes(query));
+            if (matches.length > 0) {
+                dropdown.innerHTML = matches.map(cls => 
+                    `<div class="typeahead-item" onclick="selectClass('${cls}', ${dayNum}, ${classNum})">${cls}</div>`
+                ).join('');
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+
+        function selectClass(className, dayNum, classNum) {
+            document.getElementById(`className_${dayNum}_${classNum}`).value = className;
+            document.getElementById(`classDropdown_${dayNum}_${classNum}`).style.display = 'none';
+        }
+
+        function handleJudgeTypeahead(input, dayNum, classNum, roundNum) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`);
+            
+            if (query.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const matches = availableJudges.filter(judge => judge.toLowerCase().includes(query));
+            if (matches.length > 0) {
+                dropdown.innerHTML = matches.map(judge => 
+                    `<div class="typeahead-item" onclick="selectJudge('${judge}', ${dayNum}, ${classNum}, ${roundNum})">${judge}</div>`
+                ).join('');
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+
+        function selectJudge(judgeName, dayNum, classNum, roundNum) {
+            document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`).value = judgeName;
+            document.getElementById(`judgeDropdown_${dayNum}_${classNum}_${roundNum}`).style.display = 'none';
+        }
+
+        function saveTrialDay(dayNum) {
+            const date = document.getElementById(`date_${dayNum}`).value;
+            if (!date) {
+                alert('Please enter a date');
+                return;
+            }
+
+            const numClasses = parseInt(document.getElementById(`classes_${dayNum}`).value);
+            if (!numClasses) {
+                alert('Please enter number of classes');
+                return;
+            }
+
+            for (let classNum = 1; classNum <= numClasses; classNum++) {
+                const className = document.getElementById(`className_${dayNum}_${classNum}`)?.value;
+                const numRounds = parseInt(document.getElementById(`rounds_${dayNum}_${classNum}`)?.value || 0);
+
+                if (className && numRounds > 0) {
+                    for (let roundNum = 1; roundNum <= numRounds; roundNum++) {
+                        const judge = document.getElementById(`judge_${dayNum}_${classNum}_${roundNum}`)?.value;
+                        
+                        if (judge) {
+                            trialConfig = trialConfig.filter(config => 
+                                !(config.day === dayNum && config.classNum === classNum && config.roundNum === roundNum)
+                            );
+
+                            trialConfig.push({
+                                day: dayNum, date, classNum, className, roundNum, judge
+                            });
+                        }
+                    }
+                }
+            }
+
+            savedDays++;
+            updateTrialOptions();
+            showStatusMessage(`Day ${dayNum} saved!`, 'success');
+        }
+
+        function saveTrialData() {
+            showStatusMessage("Trial configuration saved!", "success");
+        }
+
+        // Registration Number Typeahead  
+        function handleRegNumberTypeahead(input) {
+            const query = input.value.toLowerCase();
+            const dropdown = document.getElementById('regNumberDropdown');
+            const callNameDiv = document.getElementById('callName');
+            
+            if (query.length === 0) {
+                dropdown.style.display = 'none';
+                callNameDiv.textContent = '';
+                return;
+            }
+
+            const matches = dogData.filter(dog => dog.regNumber.toLowerCase().includes(query));
+            if (matches.length > 0) {
+                dropdown.innerHTML = matches.map(dog => 
+                    `<div class="typeahead-item" onclick="selectRegNumber('${dog.regNumber}', '${dog.callName}')">${dog.regNumber} - ${dog.callName}</div>`
+                ).join('');
+                dropdown.style.display = 'block';
+
+                const exactMatch = matches.find(dog => dog.regNumber.toLowerCase() === query);
+                if (exactMatch) {
+                    callNameDiv.textContent = exactMatch.callName;
+                    callNameDiv.style.color = '#28a745';
+                }
+            } else {
+                dropdown.style.display = 'none';
+                callNameDiv.textContent = 'Not found';
+                callNameDiv.style.color = '#dc3545';
+            }
+        }
+
+        function selectRegNumber(regNumber, callName) {
+            document.getElementById('regNumber').value = regNumber;
+            document.getElementById('callName').textContent = callName;
+            document.getElementById('callName').style.color = '#28a745';
+            document.getElementById('regNumberDropdown').style.display = 'none';
+        }
+
+        // Trial Options Display
+        function updateTrialOptions() {
+            const container = document.getElementById('trialOptions');
+            const groupedByDay = {};
+            
+            trialConfig.forEach(config => {
+                if (!groupedByDay[config.day]) groupedByDay[config.day] = {};
+                if (!groupedByDay[config.day][config.className]) groupedByDay[config.day][config.className] = [];
+                groupedByDay[config.day][config.className].push(config);
+            });
+
+            let html = '';
+            Object.keys(groupedByDay).sort((a, b) => parseInt(a) - parseInt(b)).forEach(day => {
+                html += `<div class="day-group">`;
+                html += `<div class="day-group-header">Day ${day} - ${groupedByDay[day][Object.keys(groupedByDay[day])[0]][0].date}</div>`;
+                
+                Object.keys(groupedByDay[day]).sort().forEach(className => {
+                    html += `<div class="class-group">`;
+                    html += `<div class="class-group-header">${className}</div>`;
+                    
+                    groupedByDay[day][className].forEach(config => {
+                        const configIndex = trialConfig.findIndex(c => 
+                            c.day === config.day && c.classNum === config.classNum && c.roundNum === config.roundNum
+                        );
+                        
+                        html += `
+                            <div class="trial-option">
+                                <div style="font-weight: bold; margin-bottom: 8px;">
+                                    Round ${config.roundNum} - ${config.judge}
+                                </div>
+                                <div class="entry-type-options">
+                                    <label><input type="checkbox" name="trialEntry" value="${configIndex}-regular"> Regular</label>
+                                    <label><input type="checkbox" name="trialEntry" value="${configIndex}-feo"> FEO</label>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Entry Form Functions
+        function clearForm() {
+            document.getElementById('entryForm').reset();
+            document.getElementById('callName').textContent = '';
+            document.querySelectorAll('input[name="trialEntry"]').forEach(cb => cb.checked = false);
+        }
+
+        // Running Orders Functions
+        function generateRunningOrdersFromEntries() {
+            if (entryResults.length === 0) {
+                showRunningOrderMessage("No entries found. Please add trial entries first.", "warning");
+                return;
+            }
+
+            runningOrders = {};
+            entryResults.forEach(entry => {
+                const key = `${entry.date}|${entry.judge}|${entry.className}|${entry.round}`;
+                if (!runningOrders[key]) {
+                    runningOrders[key] = {
+                        date: entry.date, judge: entry.judge, className: entry.className, round: entry.round, entries: []
+                    };
+                }
+                runningOrders[key].entries.push({...entry});
+            });
+
+            displayRunningOrders();
+            showRunningOrderMessage("Running orders generated!", "success");
+        }
+
+        function displayRunningOrders() {
+            const container = document.getElementById('runningOrdersDisplay');
+            
+            if (Object.keys(runningOrders).length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px;"><h3>No running orders to display</h3></div>';
+                return;
+            }
+
+            let html = '<div class="running-order-grid">';
+            Object.keys(runningOrders).sort().forEach(key => {
+                const group = runningOrders[key];
+                html += `
+                    <div class="running-order-table">
+                        <div class="table-header">
+                            ${group.date}<br><strong>${group.judge}</strong><br>${group.className} - Round ${group.round}
+                        </div>
+                        <div>
+                `;
+
+                group.entries.forEach((entry, index) => {
+                    html += `
+                        <div class="entry-row">
+                            <div class="position-number">${index + 1}</div>
+                            <div class="entry-info">
+                                <div class="handler-dog">${entry.handler} - ${entry.callName}</div>
+                                <div class="entry-details">${entry.regNumber}</div>
+                            </div>
+                            <div class="entry-controls">
+                                <button class="move-btn" onclick="moveEntry('${key}', ${index}, 'up')" ${index === 0 ? 'disabled' : ''}>↑</button>
+                                <button class="move-btn" onclick="moveEntry('${key}', ${index}, 'down')" ${index === group.entries.length - 1 ? 'disabled' : ''}>↓</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function moveEntry(groupKey, fromIndex, direction) {
+            const group = runningOrders[groupKey];
+            const entries = group.entries;
+            let toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
+
+            if (toIndex < 0 || toIndex >= entries.length) return;
+
+            const entry = entries.splice(fromIndex, 1)[0];
+            entries.splice(toIndex, 0, entry);
+            displayRunningOrders();
+        }
+
+        function confirmAndGenerateScoreSheets() {
+            if (Object.keys(runningOrders).length === 0) {
+                showRunningOrderMessage("No running orders to confirm.", "warning");
+                return;
+            }
+
+            showRunningOrderMessage("✅ Running orders confirmed and score sheets generated!", "success");
+        }
+
+        function printRunningOrders() {
+            if (Object.keys(runningOrders).length === 0) {
+                showRunningOrderMessage("No running orders to print.", "warning");
+                return;
+            }
+
+            let printHTML = '<h1 style="text-align: center;">Final Running Orders</h1>';
+            Object.keys(runningOrders).sort().forEach(key => {
+                const group = runningOrders[key];
+                printHTML += `
+                    <h2 style="background: #667eea; color: white; padding: 10px; text-align: center;">
+                        ${group.date} - ${group.judge}<br>${group.className} - Round ${group.round}
+                    </h2>
+                    <table style="width: 100%; border-collapse: collapse;">
+                `;
+
+                group.entries.forEach((entry, index) => {
+                    printHTML += `
+                        <tr style="border: 1px solid #ddd;">
+                            <td style="padding: 8px; width: 40px; text-align: center; font-weight: bold;">${index + 1}</td>
+                            <td style="padding: 8px; font-weight: bold;">${entry.handler} - ${entry.callName}</td>
+                            <td style="padding: 8px;">${entry.regNumber}</td>
+                        </tr>
+                    `;
+                });
+
+                printHTML += '</table><br>';
+            });
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<!DOCTYPE html><html><head><title>Running Orders</title></head><body>${printHTML}</body></html>`);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function showRunningOrderMessage(message, type) {
+            const statusDiv = document.getElementById('runningOrderStatus');
+            statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 4000);
+        }
+
+        // Search and Edit Functions
+        function searchEntries() {
+            const query = document.getElementById('searchEntry').value.toLowerCase();
+            const container = document.getElementById('searchResults');
+            
+            if (query.length < 2) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const matches = entryResults.filter(entry => 
+                entry.regNumber.toLowerCase().includes(query) ||
+                entry.handler.toLowerCase().includes(query) ||
+                entry.callName.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                container.innerHTML = '<p>No matching entries found.</p>';
+                return;
+            }
+
+            let<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .header h1 {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: 15px 25px;
+            background: #f0f0f0;
+            border: 2px solid #d0d0d0;
+            cursor: pointer;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+        
+        .nav-tab:hover {
+            background: #e8e8e8;
+            color: #333;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .typeahead-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .typeahead-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .typeahead-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .typeahead-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+        }
+        
+        .data-loading-status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .data-loading-status.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .data-loading-status.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .initial-question {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .day-container {
+            border: 2px solid #2c5aa0;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .day-header {
+            background: #2c5aa0;
+            color: white;
+            padding: 10px 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 6px 6px 0 0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .classes-section {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .class-container {
+            border: 1px solid #28a745;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f8fff8;
+        }
+        
+        .class-header {
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 4px 4px 0 0;
+            font-weight: bold;
+        }
+        
+        .rounds-section {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 3px solid #007bff;
+        }
+        
+        .day-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .day-group-header {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2c5aa0;
+        }
+        
+        .class-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .class-group-header {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        
+        .trial-option {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .trial-option:hover {
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+        
+        .entry-type-options {
+            display: flex;
+            gap: 15px;
+            margin-left: 20px;
+        }
+        
+        .running-order-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .running-order-table {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .entry-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            min-height: 45px;
+        }
+        
+        .entry-row:hover {
+            background: #f8f9fa;
+        }
+        
+        .position-number {
+            min-width: 35px;
+            text-align: center;
+            font-weight: bold;
+            background: #f0f0f0;
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .entry-info {
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .handler-dog {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .entry-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .entry-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .move-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 25px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .move-btn:hover {
+            background: #495057;
+        }
+        
+        .move-btn:disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .running-order-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Section -->
+    <div id="loginSection" class="header" style="display: block;">
+        <h1>Trial Management System</h1>
+        <p>Multi-Club Trial Management Platform</p>
+        
+        <div class="nav-tabs" style="margin-bottom: 20px;">
+            <button class="nav-tab active" onclick="showLoginTab('login')">Sign In</button>
+            <button class="nav-tab" onclick="showLoginTab('register')">Register Club</button>
+        </div>
+        
+        <!-- Sign In Form -->
+        <div id="loginForm" class="tab-content active">
+            <h3 style="text-align: center; margin-bottom: 25px;">Secretary Sign In</h3>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Club Name:</label>
+                    <input type="text" id="loginClubName" placeholder="Enter your club name" required style="width: 100%; margin-bottom: 15px;">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Secretary Name:</label>
+                    <input type="text" id="loginSecretaryName" placeholder="Enter your name" required style="width: 100%; margin-bottom: 15px;">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Password:</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password" required style="width: 100%; margin-bottom: 20px;">
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <button type="submit">Sign In</button>
+                </div>
+            </form>
+            <div style="text-align: center; margin-top: 20px; color: #666;">
+                <p><strong>Demo:</strong> Club: "Demo Dog Club" | Secretary: "Demo Secretary" | Password: "demo123"</p>
+            </div>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="registerForm" class="tab-content">
+            <h3 style="text-align: center; margin-bottom: 25px;">Register New Club</h3>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Club Name:</label>
+                    <input type="text" id="registerClubName" placeholder="Enter club name" required style="width: 100%; margin-bottom: 15px;">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Secretary Name:</label>
+                    <input type="text" id="registerSecretaryName" placeholder="Enter secretary name" required style="width: 100%; margin-bottom: 15px;">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Email:</label>
+                    <input type="email" id="registerEmail" placeholder="Enter email address" required style="width: 100%; margin-bottom: 15px;">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Password:</label>
+                    <input type="password" id="registerPassword" placeholder="Create password (min 6 characters)" required minlength="6" style="width: 100%; margin-bottom: 15px;">
+                </div>
+                <div class="form-group" style="flex-direction: column; align-items: stretch;">
+                    <label class="label">Confirm Password:</label>
+                    <input type="password" id="registerConfirmPassword" placeholder="Confirm password" required style="width: 100%; margin-bottom: 20px;">
+                </div>
+                <div class="form-group" style="justify-content: center;">
+                    <button type="submit">Register Club</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" style="display: none;">
+        <div class="container">
+            <div class="header">
+                <h1>Trial Management System</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p>Track judges across multiple days, classes, and rounds</p>
+                    <div style="text-align: right;">
+                        <div style="color: #667eea; font-weight: bold;" id="clubInfo"></div>
+                        <div style="font-size: 14px; color: #666;" id="secretaryInfo"></div>
+                        <button onclick="logout()" style="margin-top: 10px; padding: 8px 15px; font-size: 12px;">Sign Out</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('dashboard', event)">Dashboard</button>
+                <button class="nav-tab" onclick="showTab('setup', event)">Trial Setup</button>
+                <button class="nav-tab" onclick="showTab('entry', event)">Entry Form</button>
+                <button class="nav-tab" onclick="showTab('runningOrders', event)">Running Orders</button>
+                <button class="nav-tab" onclick="showTab('edit', event)">Edit Entry</button>
+                <button class="nav-tab" onclick="showTab('results', event)">Results</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="initial-question">
+                    <h3>Club Dashboard</h3>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <h4>Active Trials</h4>
+                            <div id="activeTrials">No active trials</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Recent Entries</h4>
+                            <div id="recentEntries">No recent entries</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Quick Actions</h4>
+                            <div>
+                                <button onclick="showTab('setup', event)" style="width: 100%; margin-bottom: 10px;">Create New Trial</button>
+                                <button onclick="showTab('runningOrders', event)" style="width: 100%; margin-bottom: 10px;">Manage Running Orders</button>
+                                <button onclick="document.getElementById('trialSaveName').value = generateTrialName(); showTab('setup', event);" style="width: 100%; margin-bottom: 10px; background: #28a745;">💾 Save Trial File</button>
+                                <button onclick="exportAllData()" style="width: 100%;">Export All Data</button>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4>Database Status</h4>
+                            <div id="databaseStatus">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                                    <div>🐕 <span id="dogCount">8</span> dogs</div>
+                                    <div>🏆 <span id="classCount">7</span> classes</div>
+                                    <div>👨‍⚖️ <span id="judgeCount">5</span> judges</div>
+                                    <div id="dataSource">Demo data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trial Setup Tab -->
+            <div id="setup" class="tab-content">
+                <div class="data-upload">
+                    <h3>📁 File Management</h3>
+                    
+                    <!-- Auto-loading status -->
+                    <div id="autoLoadStatus" class="data-loading-status">
+                        <h4>🔄 Auto-loading dog database...</h4>
+                        <p>Attempting to load dataforsite.xlsx automatically...</p>
+                    </div>
+                    
+                    <!-- Save/Load Trial Files -->
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                        <h4 style="color: #28a745; margin-top: 0;">💾 Save/Load Complete Trial</h4>
+                        <div class="form-group">
+                            <span class="label">Trial Name:</span>
+                            <input type="text" id="trialSaveName" placeholder="e.g., Spring Championship 2024" style="width: 300px;">
+                            <button onclick="saveCompleteTrialFile()" style="background: #28a745;">💾 Save Trial File</button>
+                        </div>
+                        <div class="form-group">
+                            <span class="label">Load Saved Trial:</span>
+                            <input type="file" id="trialLoadFile" accept=".json" onchange="loadCompleteTrialFile()">
+                        </div>
+                        <div id="saveLoadStatus"></div>
+                    </div>
+
+                    <!-- Dog Database Upload -->
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-top: 0;">🐕 Dog Database</h4>
+                        <div class="form-group">
+                            <label class="label">Upload Excel Data:</label>
+                            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
+                        </div>
+                        <div id="dataStatus"></div>
+                        
+                        <div id="currentDataStatus" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>📊 Current Database:</strong>
+                            <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 14px;">
+                                <div>🐕 <span id="dogCountStatus">8</span> dogs</div>
+                                <div>🏆 <span id="classCountStatus">7</span> classes</div>
+                                <div>👨‍⚖️ <span id="judgeCountStatus">5</span> judges</div>
+                            </div>
+                            <button onclick="showDataPreview()" style="margin-top: 10px; padding: 5px 15px; font-size: 12px; background: #17a2b8;">👁️ Preview Data</button>
+                        </div>
+                        
+                        <div id="dataPreview" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 5px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto;">
+                            <h5>Data Preview:</h5>
+                            <div id="previewContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="initial-question">
+                    <div class="form-group">
+                        <span class="label">How many days in trial?</span>
+                        <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number">
+                        <button onclick="generateDays()">Generate Days</button>
+                    </div>
+                    <div class="form-group">
+                        <button onclick="saveTrialData()">Save Trial</button>
+                    </div>
+                </div>
+
+                <div id="daysContainer"></div>
+            </div>
+
+            <!-- Entry Form Tab -->
+            <div id="entry" class="tab-content">
+                <div class="initial-question">
+                    <h3>Trial Entry Form</h3>
+                    <form id="entryForm">
+                        <div class="form-group">
+                            <span class="label">Registration Number:</span>
+                            <div class="typeahead-container">
+                                <input type="text" id="regNumber" placeholder="Type registration number" onkeyup="handleRegNumberTypeahead(this)" style="width: 250px;">
+                                <div id="regNumberDropdown" class="typeahead-dropdown"></div>
+                            </div>
+                            <span id="callName" style="font-weight: bold; color: #667eea;"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <span class="label">Handler Name:</span>
+                            <input type="text" id="handlerName" placeholder="Handler name" required style="width: 250px;">
+                        </div>
+
+                        <div class="form-group">
+                            <span class="label">Contact Email:</span>
+                            <input type="email" id="contactEmail" placeholder="your.email@example.com" required style="width: 250px;">
+                        </div>
+
+                        <div id="trialOptionsContainer">
+                            <h4>Available Trial Options</h4>
+                            <div id="trialOptions"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
+                                <input type="checkbox" id="waiverAccepted" required>
+                                <span>I have read and agree to the Liability Waiver and Agreement.</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit">Submit Entry</button>
+                            <button type="button" onclick="clearForm()">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Running Orders Tab -->
+            <div id="runningOrders" class="tab-content">
+                <div class="initial-question">
+                    <h3>🏃‍♂️ Running Order Management</h3>
+                    <div class="form-group">
+                        <button onclick="generateRunningOrdersFromEntries()">Generate Running Orders</button>
+                        <button onclick="printRunningOrders()">Print Running Orders</button>
+                        <button onclick="confirmAndGenerateScoreSheets()" style="background: #FF6B6B;">✓ Confirm & Generate Score Sheets</button>
+                    </div>
+                    <div id="runningOrderStatus"></div>
+                    <div id="runningOrdersDisplay"></div>
+                </div>
+            </div>
+
+            <!-- Edit Entry Tab -->
+            <div id="edit" class="tab-content">
+                <div class="initial-question">
+                    <h3>Edit Entry</h3>
+                    <div class="form-group">
+                        <span class="label">Search:</span>
+                        <input type="text" id="searchEntry" placeholder="Registration number or handler name" onkeyup="searchEntries()" style="width: 300px;">
+                    </div>
+                    <div id="searchResults"></div>
+                </div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="results" class="tab-content">
+                <div class="initial-question">
+                    <h3>Entry Results</h3>
+                    <button onclick="exportToCSV()">Export to CSV</button>
+                    <div id="resultsDisplay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Global Variables
+        let dogData = [];
+        let availableClasses = [];
+        let availableJudges = [];
+        let trialConfig = [];
+        let entryResults = [];
+        let runningOrders = {};
+        let trialMetadata = {};
+        let totalDays = 0;
+        let savedDays = 0;
+        let currentUser = null;
+        let registeredClubs = [];
+
+        // Initialize Data
+        function initializeData() {
+            dogData = [
+                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
+                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
+                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
+                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
+                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
+                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
+                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
+                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
+            ];
+            
+            availableClasses = [
+                "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4",
+                "Ranger 1", "Ranger 2", "Ranger 3",
+                "Dasher 3", "Dasher 4", "Dasher 5",
+                "Obedience 1", "Obedience 2", "Obedience 3",
+                "Starter", "Advanced", "Pro", "ARF",
+                "Zoom 1", "Zoom 2", "Games 1", "Games 2"
+            ];
+            
+            availableJudges = [
+                "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
+            ];
+
+            registeredClubs = [{
+                clubName: "Demo Dog Club",
+                secretaryName: "Demo Secretary",
+                email: "demo@example.com",
+                password: "demo123"
