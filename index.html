@@ -734,9 +734,9 @@
                 </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                     <button type="submit" class="btn" style="flex: 1;">Sign In</button>
-                    <button type="button" class="btn btn-secondary" onclick="showRegistration()" style="flex: 1;">Register New Club</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.showRegistration ? window.showRegistration() : console.error('showRegistration not found')" style="flex: 1;">Register New Club</button>
                 </div>
-                <button type="button" class="btn" onclick="console.log('Demo button clicked!'); demoLogin();" style="background: #28a745; width: 100%; margin-bottom: 0.5rem;">🎯 Demo Login</button>
+                <button type="button" class="btn" onclick="console.log('Demo button clicked'); if(window.demoLogin) { window.demoLogin(); } else { console.error('demoLogin not found'); }" style="background: #28a745; width: 100%; margin-bottom: 0.5rem;">🎯 Demo Login</button>
                 <p style="font-size: 0.9rem; color: #666; text-align: center; margin: 0;">
                     Click above to try the demo instantly!
                 </p>
@@ -976,119 +976,164 @@
         let savedDays = 0;
 
         // Initialize Application
-        window.onload = function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
             loadStoredData();
             loadDogDatabase();
-        };
+            initializeForms();
+            
+            // Test if functions are available
+            console.log('Functions available:', {
+                showRegistration: typeof showRegistration,
+                demoLogin: typeof demoLogin,
+                handleLogin: typeof handleLogin
+            });
+        });
+
+        // Make sure all functions are available globally
+        window.showRegistration = showRegistration;
+        window.showLogin = showLogin;
+        window.demoLogin = demoLogin;
+        window.handleLogin = handleLogin;
+        window.handleRegistration = handleRegistration;
+        window.logout = logout;
+        window.showTab = showTab;
 
         // Authentication Functions
         function showRegistration() {
+            console.log('Showing registration form');
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('registrationForm').style.display = 'block';
         }
 
         function showLogin() {
+            console.log('Showing login form');
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('registrationForm').style.display = 'none';
         }
 
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleLogin();
-        });
-
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleRegistration();
-        });
-
-        function demoLogin() {
-            console.log('Demo login clicked');
-            document.getElementById('clubEmail').value = 'demo@dogclub.com';
-            document.getElementById('secretaryName').value = 'Demo Secretary';
-            document.getElementById('password').value = 'demo123';
+        // Initialize form event listeners
+        function initializeForms() {
+            const loginForm = document.getElementById('loginForm');
+            const registrationForm = document.getElementById('registrationForm');
             
-            // Add a small delay to ensure values are set
-            setTimeout(() => {
-                handleLogin();
-            }, 100);
-        }
-
-        function handleLogin() {
-            const clubEmail = document.getElementById('clubEmail').value.trim();
-            const secretaryName = document.getElementById('secretaryName').value.trim();
-            const password = document.getElementById('password').value;
-
-            console.log('Login attempt:', {clubEmail, secretaryName, password});
-            console.log('Available clubs:', registeredClubs);
-
-            const club = registeredClubs.find(c => 
-                c.clubEmail.toLowerCase() === clubEmail.toLowerCase() &&
-                c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
-                c.password === password
-            );
-
-            console.log('Found club:', club);
-
-            if (club) {
-                currentUser = club;
-                localStorage.setItem('currentUser', JSON.stringify(club));
-                console.log('Login successful, showing main app');
-                showMainApp();
-            } else {
-                console.log('Login failed - credentials not found');
-                showAlert('Invalid credentials. Please check your email, name, and password.', 'danger');
-                // Show available demo credentials for debugging
-                console.log('Demo credentials: demo@dogclub.com / Demo Secretary / demo123');
-                
-                // Debug: show what clubs are available
-                console.log('Available clubs:');
-                registeredClubs.forEach((club, index) => {
-                    console.log(`Club ${index}:`, {
-                        email: club.clubEmail,
-                        secretary: club.secretaryName,
-                        password: club.password
-                    });
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Login form submitted');
+                    handleLogin();
+                });
+            }
+            
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Registration form submitted');
+                    handleRegistration();
                 });
             }
         }
 
+        function demoLogin() {
+            console.log('Demo login function called');
+            try {
+                document.getElementById('clubEmail').value = 'demo@dogclub.com';
+                document.getElementById('secretaryName').value = 'Demo Secretary';
+                document.getElementById('password').value = 'demo123';
+                
+                console.log('Demo values set, calling handleLogin');
+                handleLogin();
+            } catch (error) {
+                console.error('Error in demoLogin:', error);
+                alert('Demo login failed: ' + error.message);
+            }
+        }
+
+        function handleLogin() {
+            console.log('handleLogin called');
+            try {
+                const clubEmail = document.getElementById('clubEmail').value.trim();
+                const secretaryName = document.getElementById('secretaryName').value.trim();
+                const password = document.getElementById('password').value;
+
+                console.log('Login attempt:', {clubEmail, secretaryName, password});
+                console.log('Available clubs:', registeredClubs);
+
+                const club = registeredClubs.find(c => 
+                    c.clubEmail.toLowerCase() === clubEmail.toLowerCase() &&
+                    c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
+                    c.password === password
+                );
+
+                console.log('Found club:', club);
+
+                if (club) {
+                    currentUser = club;
+                    localStorage.setItem('currentUser', JSON.stringify(club));
+                    console.log('Login successful, showing main app');
+                    showMainApp();
+                } else {
+                    console.log('Login failed - credentials not found');
+                    showAlert('Invalid credentials. Please check your email, name, and password.', 'danger');
+                    
+                    // Debug: show what clubs are available
+                    console.log('Available clubs:');
+                    registeredClubs.forEach((club, index) => {
+                        console.log(`Club ${index}:`, {
+                            email: club.clubEmail,
+                            secretary: club.secretaryName,
+                            password: club.password
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error in handleLogin:', error);
+                showAlert('Login error: ' + error.message, 'danger');
+            }
+        }
+
         function handleRegistration() {
-            const clubName = document.getElementById('regClubName').value;
-            const clubEmail = document.getElementById('regClubEmail').value;
-            const secretaryName = document.getElementById('regSecretaryName').value;
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            console.log('handleRegistration called');
+            try {
+                const clubName = document.getElementById('regClubName').value;
+                const clubEmail = document.getElementById('regClubEmail').value;
+                const secretaryName = document.getElementById('regSecretaryName').value;
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('regConfirmPassword').value;
 
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match', 'danger');
-                return;
+                if (password !== confirmPassword) {
+                    showAlert('Passwords do not match', 'danger');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showAlert('Password must be at least 6 characters', 'danger');
+                    return;
+                }
+
+                const existingClub = registeredClubs.find(c => c.clubEmail.toLowerCase() === clubEmail.toLowerCase());
+                if (existingClub) {
+                    showAlert('A club with this email is already registered', 'danger');
+                    return;
+                }
+
+                const newClub = {
+                    clubName,
+                    clubEmail,
+                    secretaryName,
+                    password,
+                    registrationDate: new Date().toISOString()
+                };
+
+                registeredClubs.push(newClub);
+                localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
+                
+                showAlert('Club registered successfully! You can now sign in.', 'success');
+                showLogin();
+            } catch (error) {
+                console.error('Error in handleRegistration:', error);
+                showAlert('Registration error: ' + error.message, 'danger');
             }
-
-            if (password.length < 6) {
-                showAlert('Password must be at least 6 characters', 'danger');
-                return;
-            }
-
-            const existingClub = registeredClubs.find(c => c.clubEmail.toLowerCase() === clubEmail.toLowerCase());
-            if (existingClub) {
-                showAlert('A club with this email is already registered', 'danger');
-                return;
-            }
-
-            const newClub = {
-                clubName,
-                clubEmail,
-                secretaryName,
-                password,
-                registrationDate: new Date().toISOString()
-            };
-
-            registeredClubs.push(newClub);
-            localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
-            
-            showAlert('Club registered successfully! You can now sign in.', 'success');
-            showLogin();
         }
 
         function showMainApp() {
