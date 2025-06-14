@@ -169,6 +169,62 @@
             border-radius: 8px;
             margin-bottom: 20px;
         }
+        
+        .day-container {
+            border: 2px solid #2c5aa0;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .day-header {
+            background: #2c5aa0;
+            color: white;
+            padding: 10px 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 6px 6px 0 0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .classes-section {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .class-container {
+            border: 1px solid #28a745;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f8fff8;
+        }
+        
+        .class-header {
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 4px 4px 0 0;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -420,20 +476,21 @@
                                 dayDiv.className = 'day-container';
                                 dayDiv.style.cssText = 'border: 2px solid #2c5aa0; margin: 20px 0; padding: 20px; border-radius: 8px; background: #f8f9fa;';
                                 dayDiv.innerHTML = `
-                                    <div style=\"background: #2c5aa0; color: white; padding: 10px 15px; margin: -20px -20px 20px -20px; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 18px;\">Day ` + i + `</div>
-                                    <div class=\"form-group\">
-                                        <label class=\"label\">Date:</label>
-                                        <input type=\"date\" id=\"date_` + i + `\" style=\"margin-bottom: 15px;\">
+                                    <div style="background: #2c5aa0; color: white; padding: 10px 15px; margin: -20px -20px 20px -20px; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 18px;">Day ` + i + `</div>
+                                    <div class="form-group">
+                                        <label class="label">Date:</label>
+                                        <input type="date" id="date_` + i + `" style="margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                     </div>
-                                    <div style=\"background: #fff3cd; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;\">
-                                        <div class=\"form-group\">
-                                            <label class=\"label\">How many classes?</label>
-                                            <input type=\"number\" id=\"classes_` + i + `\" min=\"1\" max=\"20\" placeholder=\"Number of classes\" style=\"width: 150px;\">
+                                    <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                                        <div class="form-group">
+                                            <label class="label">How many classes?</label>
+                                            <input type="number" id="classes_` + i + `" min="1" max="20" placeholder="Number of classes" style="width: 150px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" onchange="generateClasses(` + i + `)">
                                         </div>
-                                        <div id=\"classesContainer_` + i + `\"></div>
+                                        <div id="classesContainer_` + i + `"></div>
                                     </div>
-                                    <div class=\"form-group\">
-                                        <button onclick=\"alert('Day ` + i + ` saved successfully!')\" style=\"background: #28a745;\">Save Day ` + i + `</button>
+                                    <div class="form-group">
+                                        <button onclick="saveDay(` + i + `)" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Save Day ` + i + `</button>
+                                        <span id="dayStatus_` + i + `" style="margin-left: 15px; font-weight: bold;"></span>
                                     </div>
                                 `;
                                 container.appendChild(dayDiv);
@@ -449,7 +506,29 @@
                 <div id="saveTrialSection" style="display: none; margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; text-align: center;">
                     <h4 style="color: #2e7d32; margin-bottom: 15px;">🎯 Complete Trial Setup</h4>
                     <p style="margin-bottom: 20px; color: #1b5e20;">All days configured! Ready to save your complete trial setup.</p>
-                    <button onclick="alert('Trial setup saved successfully!')" style="background: #2e7d32; font-size: 16px; padding: 15px 30px;">
+                    <button onclick="
+                        var trialName = prompt('Enter a name for this trial:', 'Trial_' + new Date().getFullYear());
+                        if (trialName) {
+                            alert('Trial setup saved successfully!\\n\\nTrial Name: ' + trialName + '\\nDays: ' + totalDays + '\\nClasses configured: ' + savedDays + '\\n\\nYou can now use the Entry Form to accept entries.');
+                            
+                            // Generate entry form link
+                            var currentUrl = window.location.href;
+                            var entryLink = currentUrl + '?direct=entry&trial=' + encodeURIComponent(trialName);
+                            
+                            var shareLink = confirm('Trial saved! Would you like to copy the entry form link to share with participants?');
+                            if (shareLink) {
+                                if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(entryLink).then(function() {
+                                        alert('Entry form link copied to clipboard!');
+                                    }).catch(function() {
+                                        prompt('Copy this entry form link:', entryLink);
+                                    });
+                                } else {
+                                    prompt('Copy this entry form link:', entryLink);
+                                }
+                            }
+                        }
+                    " style="background: #2e7d32; color: white; border: none; font-size: 16px; padding: 15px 30px; border-radius: 5px; cursor: pointer;">
                         💾 Save Complete Trial
                     </button>
                 </div>
@@ -599,6 +678,93 @@
     </div>
 
     <script>
+        // Global variables for GitHub compatibility
+        var trialDays = [];
+        var savedDays = 0;
+        var totalDays = 0;
+        
+        // Functions for trial setup - GitHub compatible
+        function generateClasses(dayNum) {
+            var numClasses = parseInt(document.getElementById('classes_' + dayNum).value);
+            var container = document.getElementById('classesContainer_' + dayNum);
+            
+            if (!numClasses || numClasses < 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = '';
+            for (var i = 1; i <= numClasses; i++) {
+                var classDiv = document.createElement('div');
+                classDiv.style.cssText = 'border: 1px solid #28a745; margin: 15px 0; padding: 15px; border-radius: 6px; background: #f8fff8;';
+                classDiv.innerHTML = '<div style="background: #28a745; color: white; padding: 8px 12px; margin: -15px -15px 15px -15px; border-radius: 4px 4px 0 0; font-weight: bold;">Class ' + i + '</div>' +
+                    '<div class="form-group">' +
+                    '<label class="label">Class Name:</label>' +
+                    '<input type="text" id="className_' + dayNum + '_' + i + '" placeholder="Enter class name" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">' +
+                    '<label class="label">Judge:</label>' +
+                    '<input type="text" id="judge_' + dayNum + '_' + i + '" placeholder="Judge name" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">' +
+                    '</div>';
+                container.appendChild(classDiv);
+            }
+        }
+        
+        function saveDay(dayNum) {
+            var date = document.getElementById('date_' + dayNum).value;
+            if (!date) {
+                alert('Please enter a date for Day ' + dayNum);
+                return;
+            }
+            
+            var numClasses = parseInt(document.getElementById('classes_' + dayNum).value);
+            if (!numClasses) {
+                alert('Please enter number of classes for Day ' + dayNum);
+                return;
+            }
+            
+            // Validate all classes have names and judges
+            var allValid = true;
+            for (var i = 1; i <= numClasses; i++) {
+                var className = document.getElementById('className_' + dayNum + '_' + i);
+                var judgeName = document.getElementById('judge_' + dayNum + '_' + i);
+                
+                if (!className || !className.value.trim() || !judgeName || !judgeName.value.trim()) {
+                    allValid = false;
+                    break;
+                }
+            }
+            
+            if (!allValid) {
+                alert('Please fill in all class names and judges for Day ' + dayNum);
+                return;
+            }
+            
+            // Save day data
+            trialDays[dayNum] = {
+                date: date,
+                numClasses: numClasses,
+                classes: []
+            };
+            
+            for (var i = 1; i <= numClasses; i++) {
+                trialDays[dayNum].classes.push({
+                    name: document.getElementById('className_' + dayNum + '_' + i).value,
+                    judge: document.getElementById('judge_' + dayNum + '_' + i).value
+                });
+            }
+            
+            // Update UI
+            document.getElementById('dayStatus_' + dayNum).innerHTML = '✅ Saved';
+            document.getElementById('dayStatus_' + dayNum).style.color = '#28a745';
+            
+            savedDays++;
+            alert('Day ' + dayNum + ' saved successfully!');
+            
+            // Show complete trial section if all days saved
+            if (savedDays >= totalDays) {
+                document.getElementById('saveTrialSection').style.display = 'block';
+            }
+        }
+        
         // Simple initialization that definitely works
         console.log('Trial Management System loading...');
         
