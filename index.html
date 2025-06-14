@@ -810,9 +810,12 @@
 
         function handleLogin(event) {
             event.preventDefault();
-            const clubName = document.getElementById('loginClubName').value;
-            const secretaryName = document.getElementById('loginSecretaryName').value;
-            const password = document.getElementById('loginPassword').value;
+            const clubName = document.getElementById('loginClubName').value.trim();
+            const secretaryName = document.getElementById('loginSecretaryName').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            console.log('Login attempt:', { clubName, secretaryName, password });
+            console.log('Available clubs:', registeredClubs);
 
             const club = registeredClubs.find(c => 
                 c.clubName.toLowerCase() === clubName.toLowerCase() &&
@@ -821,6 +824,7 @@
             );
 
             if (club) {
+                console.log('Login successful');
                 currentUser = club;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
@@ -829,7 +833,8 @@
                 updateDashboard();
                 updateTrialOptions();
             } else {
-                alert('Invalid credentials. Try Demo Dog Club / Demo Secretary / demo123');
+                console.log('Login failed');
+                alert('Invalid credentials. Please try:\nClub: "Demo Dog Club"\nSecretary: "Demo Secretary"\nPassword: "demo123"');
             }
         }
 
@@ -875,80 +880,87 @@
             try {
                 statusDiv.innerHTML = '<h4>🔄 Auto-loading dataforsite.xlsx...</h4><p>Checking for database file...</p>';
                 
-                const response = await fetch('dataforsite.xlsx', { cache: 'no-cache' });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                // Try different possible filenames
+                const possibleFiles = ['dataforsite.xlsx', 'data-for-site.xlsx', 'dataforsite.xls'];
+                let loaded = false;
                 
-                const arrayBuffer = await response.arrayBuffer();
-                const workbook = XLSX.read(new Uint8Array(arrayBuffer));
-                const dataSheet = workbook.Sheets['Sheet1'] || workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
-                
-                if (jsonData.length > 1) {
-                    console.log('Auto-load Excel structure preview:', jsonData.slice(0, 3));
-                    
-                    const uniqueDogs = new Map();
-                    const classesFromData = new Set();
-                    const judgesFromData = new Set();
-                    
-                    jsonData.slice(1).forEach((row, index) => {
-                        if (row && row.length >= 2) {
-                            const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A - ID
-                            const callName = row[1] ? String(row[1]).trim() : '';  // Column B - Call Name
-                            const handlerFullName = row[2] ? String(row[2]).trim() : ''; // Column C - Full Name (not handler)
-                            const handlerName = row[3] ? String(row[3]).trim() : ''; // Column D - Handler Name (THIS IS CORRECT)
-                            const className = row[8] ? String(row[8]).trim() : ''; // Column I - Class Name
-                            const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K - Judge Name
+                for (const filename of possibleFiles) {
+                    try {
+                        console.log(`Trying to load: ${filename}`);
+                        const response = await fetch(filename, { cache: 'no-cache' });
+                        if (response.ok) {
+                            const arrayBuffer = await response.arrayBuffer();
+                            const workbook = XLSX.read(new Uint8Array(arrayBuffer));
+                            const dataSheet = workbook.Sheets['Sheet1'] || workbook.Sheets[workbook.SheetNames[0]];
+                            const jsonData = XLSX.utils.sheet_to_json(dataSheet, {header: 1});
                             
-                            // Dog data - use handler name from Column D
-                            if (regNumber && callName && !uniqueDogs.has(regNumber)) {
-                                uniqueDogs.set(regNumber, {
-                                    regNumber: regNumber,
-                                    callName: callName,
-                                    handler: handlerName || '' // Column D is the actual handler name
+                            if (jsonData.length > 1) {
+                                console.log(`Successfully loaded ${filename}:`, jsonData.slice(0, 3));
+                                
+                                const uniqueDogs = new Map();
+                                const classesFromData = new Set();
+                                const judgesFromData = new Set();
+                                
+                                jsonData.slice(1).forEach((row, index) => {
+                                    if (row && row.length >= 2) {
+                                        const regNumber = row[0] ? String(row[0]).trim() : '';
+                                        const callName = row[1] ? String(row[1]).trim() : '';
+                                        const handlerName = row[3] ? String(row[3]).trim() : '';
+                                        const className = row[8] ? String(row[8]).trim() : '';
+                                        const judgeName = row[10] ? String(row[10]).trim() : '';
+                                        
+                                        if (regNumber && callName && !uniqueDogs.has(regNumber)) {
+                                            uniqueDogs.set(regNumber, {
+                                                regNumber: regNumber,
+                                                callName: callName,
+                                                handler: handlerName || ''
+                                            });
+                                        }
+                                        
+                                        if (className && className.length > 2) {
+                                            classesFromData.add(className);
+                                        }
+                                        
+                                        if (judgeName && judgeName.length > 3) {
+                                            judgesFromData.add(judgeName);
+                                        }
+                                    }
                                 });
-                            }
-                            
-                            // Class data from Column I
-                            if (className && className.length > 2) {
-                                classesFromData.add(className);
-                            }
-                            
-                            // Judge data from Column K
-                            if (judgeName && judgeName.length > 3) {
-                                judgesFromData.add(judgeName);
+
+                                if (uniqueDogs.size > 5) {
+                                    dogData = Array.from(uniqueDogs.values());
+                                    if (classesFromData.size > 3) availableClasses = [...classesFromData].sort();
+                                    if (judgesFromData.size > 2) availableJudges = [...judgesFromData].sort();
+                                    
+                                    updateDataStatusDisplay();
+                                    statusDiv.className = 'data-loading-status success';
+                                    statusDiv.innerHTML = `<h4>✅ Database automatically loaded from ${filename}!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded</p>`;
+                                    setTimeout(() => statusDiv.style.display = 'none', 8000);
+                                    
+                                    console.log('Auto-load success - Final dogData:', dogData.slice(0, 5));
+                                    loaded = true;
+                                    break;
+                                }
                             }
                         }
-                    });
-
-                    console.log('Auto-load - Unique dogs found:', uniqueDogs.size);
-                    console.log('Auto-load - Sample dogs:', Array.from(uniqueDogs.values()).slice(0, 5));
-
-                    if (uniqueDogs.size > 10) { // Lowered threshold for testing
-                        dogData = Array.from(uniqueDogs.values());
-                        
-                        if (classesFromData.size > 3) availableClasses = [...classesFromData].sort();
-                        if (judgesFromData.size > 2) availableJudges = [...judgesFromData].sort();
-                        
-                        updateDataStatusDisplay();
-                        statusDiv.className = 'data-loading-status success';
-                        statusDiv.innerHTML = `<h4>✅ Database automatically loaded!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded from dataforsite.xlsx</p>`;
-                        setTimeout(() => statusDiv.style.display = 'none', 8000);
-                        
-                        console.log('Auto-load - Final dogData:', dogData.slice(0, 5));
-                        console.log('Auto-load - Judges found:', availableJudges);
-                        console.log('Auto-load - Classes found:', availableClasses);
-                        return true; // Successfully loaded
-                    } else {
-                        console.log('Auto-load - Not enough dogs found, keeping demo data');
+                    } catch (fileError) {
+                        console.log(`Failed to load ${filename}:`, fileError.message);
+                        continue;
                     }
                 }
+                
+                if (!loaded) {
+                    throw new Error('No valid database file found');
+                }
+                
+                return loaded;
             } catch (error) {
                 console.log('Auto-load failed:', error);
                 statusDiv.className = 'data-loading-status error';
-                statusDiv.innerHTML = `<h4>⚠️ Auto-load failed</h4><p>dataforsite.xlsx not found or invalid. Using demo data. Upload manually if needed.</p>`;
+                statusDiv.innerHTML = `<h4>⚠️ Auto-load failed</h4><p>No database file found. Using demo data. Upload manually if needed.</p>`;
                 setTimeout(() => statusDiv.style.display = 'none', 8000);
+                return false;
             }
-            return false; // Failed to load
         }
 
         function loadExcelData() {
