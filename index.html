@@ -732,12 +732,13 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" required placeholder="Enter your password">
                 </div>
-                <button type="submit" class="btn">Sign In</button>
-                <button type="button" class="btn btn-secondary" onclick="showRegistration()">Register New Club</button>
-                <br><br>
-                <button type="button" class="btn" onclick="demoLogin()" style="background: #28a745; width: 100%;">🎯 Demo Login</button>
-                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem; text-align: center;">
-                    Try the demo with one click!
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <button type="submit" class="btn" style="flex: 1;">Sign In</button>
+                    <button type="button" class="btn btn-secondary" onclick="showRegistration()" style="flex: 1;">Register New Club</button>
+                </div>
+                <button type="button" class="btn" onclick="console.log('Demo button clicked!'); demoLogin();" style="background: #28a745; width: 100%; margin-bottom: 0.5rem;">🎯 Demo Login</button>
+                <p style="font-size: 0.9rem; color: #666; text-align: center; margin: 0;">
+                    Click above to try the demo instantly!
                 </p>
             </form>
             
@@ -1002,10 +1003,15 @@
         });
 
         function demoLogin() {
+            console.log('Demo login clicked');
             document.getElementById('clubEmail').value = 'demo@dogclub.com';
             document.getElementById('secretaryName').value = 'Demo Secretary';
             document.getElementById('password').value = 'demo123';
-            handleLogin();
+            
+            // Add a small delay to ensure values are set
+            setTimeout(() => {
+                handleLogin();
+            }, 100);
         }
 
         function handleLogin() {
@@ -1027,11 +1033,23 @@
             if (club) {
                 currentUser = club;
                 localStorage.setItem('currentUser', JSON.stringify(club));
+                console.log('Login successful, showing main app');
                 showMainApp();
             } else {
+                console.log('Login failed - credentials not found');
                 showAlert('Invalid credentials. Please check your email, name, and password.', 'danger');
                 // Show available demo credentials for debugging
                 console.log('Demo credentials: demo@dogclub.com / Demo Secretary / demo123');
+                
+                // Debug: show what clubs are available
+                console.log('Available clubs:');
+                registeredClubs.forEach((club, index) => {
+                    console.log(`Club ${index}:`, {
+                        email: club.clubEmail,
+                        secretary: club.secretaryName,
+                        password: club.password
+                    });
+                });
             }
         }
 
