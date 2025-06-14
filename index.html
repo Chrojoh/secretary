@@ -864,17 +864,17 @@
                     jsonData.slice(1).forEach((row, index) => {
                         if (row && row.length >= 2) {
                             const regNumber = row[0] ? String(row[0]).trim() : ''; // Column A
-                            const callName = row[1] ? String(row[1]).trim() : '';  // Column B
+                            const callName = row[1] ? String(row[1]).trim() : '';  // Column B  
                             const handlerName = row[2] ? String(row[2]).trim() : ''; // Column C
                             const className = row[8] ? String(row[8]).trim() : ''; // Column I (index 8)
                             const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K (index 10)
                             
-                            // Dog data
-                            if (regNumber && callName && regNumber.includes('-') && !uniqueDogs.has(regNumber)) {
+                            // Dog data - ensure we capture all dogs, not just those with dashes
+                            if (regNumber && callName && !uniqueDogs.has(regNumber)) {
                                 uniqueDogs.set(regNumber, {
                                     regNumber: regNumber,
                                     callName: callName,
-                                    handler: handlerName
+                                    handler: handlerName || ''
                                 });
                             }
                             
@@ -890,19 +890,25 @@
                         }
                     });
 
-                    if (uniqueDogs.size > 50) {
+                    console.log('Unique dogs found:', uniqueDogs.size);
+                    console.log('Sample dogs:', Array.from(uniqueDogs.values()).slice(0, 5));
+
+                    if (uniqueDogs.size > 10) { // Lowered threshold for testing
                         dogData = Array.from(uniqueDogs.values());
                         
-                        if (classesFromData.size > 5) availableClasses = [...classesFromData].sort();
-                        if (judgesFromData.size > 3) availableJudges = [...judgesFromData].sort();
+                        if (classesFromData.size > 3) availableClasses = [...classesFromData].sort();
+                        if (judgesFromData.size > 2) availableJudges = [...judgesFromData].sort();
                         
                         updateDataStatusDisplay();
                         statusDiv.className = 'data-loading-status success';
                         statusDiv.innerHTML = `<h4>✅ Database auto-loaded!</h4><p>🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges loaded</p>`;
                         setTimeout(() => statusDiv.style.display = 'none', 5000);
                         
+                        console.log('Final dogData:', dogData.slice(0, 5));
                         console.log('Judges found:', availableJudges);
                         console.log('Classes found:', availableClasses);
+                    } else {
+                        console.log('Not enough dogs found, using demo data');
                     }
                 }
             } catch (error) {
@@ -939,12 +945,12 @@
                                 const className = row[8] ? String(row[8]).trim() : ''; // Column I
                                 const judgeName = row[10] ? String(row[10]).trim() : ''; // Column K
                                 
-                                // Dog data
+                                // Dog data - capture all valid entries
                                 if (regNumber && callName && !uniqueDogs.has(regNumber)) {
                                     uniqueDogs.set(regNumber, { 
                                         regNumber, 
                                         callName, 
-                                        handler: handlerName 
+                                        handler: handlerName || ''
                                     });
                                 }
                                 
@@ -960,14 +966,18 @@
                             }
                         });
 
-                        if (uniqueDogs.size > 10) {
+                        console.log('Manual load - Unique dogs found:', uniqueDogs.size);
+                        console.log('Manual load - Sample dogs:', Array.from(uniqueDogs.values()).slice(0, 5));
+
+                        if (uniqueDogs.size > 5) { // Lowered threshold for testing
                             dogData = Array.from(uniqueDogs.values());
-                            if (classesFromData.size > 5) availableClasses = [...classesFromData].sort();
-                            if (judgesFromData.size > 3) availableJudges = [...judgesFromData].sort();
+                            if (classesFromData.size > 3) availableClasses = [...classesFromData].sort();
+                            if (judgesFromData.size > 2) availableJudges = [...judgesFromData].sort();
                             
                             updateDataStatusDisplay();
                             showStatusMessage(`✅ Excel loaded! 🐕 ${dogData.length} dogs, 🏆 ${availableClasses.length} classes, 👨‍⚖️ ${availableJudges.length} judges imported`, 'success');
                             
+                            console.log('Manual load - Final dogData:', dogData.slice(0, 5));
                             console.log('Manual load - Judges found:', availableJudges);
                             console.log('Manual load - Classes found:', availableClasses);
                         }
@@ -1398,17 +1408,35 @@
                 return;
             }
 
-            const matches = dogData.filter(dog => dog.regNumber.toLowerCase().includes(query));
+            console.log('Searching for:', query, 'in dogData:', dogData.slice(0, 3));
+            
+            const matches = dogData.filter(dog => 
+                dog.regNumber.toLowerCase().includes(query) ||
+                dog.callName.toLowerCase().includes(query)
+            );
+            
+            console.log('Found matches:', matches);
+            
             if (matches.length > 0) {
-                dropdown.innerHTML = matches.map(dog => 
-                    `<div class="typeahead-item" onclick="selectRegNumber('${dog.regNumber}', '${dog.callName}')">${dog.regNumber} - ${dog.callName}</div>`
+                dropdown.innerHTML = matches.slice(0, 10).map(dog => 
+                    `<div class="typeahead-item" onclick="selectRegNumber('${dog.regNumber.replace(/'/g, "\\'")}', '${dog.callName.replace(/'/g, "\\'")}', '${(dog.handler || '').replace(/'/g, "\\'")}')">${dog.regNumber} - ${dog.callName}</div>`
                 ).join('');
                 dropdown.style.display = 'block';
 
-                const exactMatch = matches.find(dog => dog.regNumber.toLowerCase() === query);
+                const exactMatch = matches.find(dog => 
+                    dog.regNumber.toLowerCase() === query ||
+                    dog.callName.toLowerCase() === query
+                );
                 if (exactMatch) {
                     callNameDiv.textContent = exactMatch.callName;
                     callNameDiv.style.color = '#28a745';
+                    // Auto-fill handler if available
+                    if (exactMatch.handler) {
+                        document.getElementById('handlerName').value = exactMatch.handler;
+                    }
+                } else {
+                    callNameDiv.textContent = `${matches.length} matches found`;
+                    callNameDiv.style.color = '#007bff';
                 }
             } else {
                 dropdown.style.display = 'none';
@@ -1417,16 +1445,15 @@
             }
         }
 
-        function selectRegNumber(regNumber, callName) {
+        function selectRegNumber(regNumber, callName, handlerName) {
             document.getElementById('regNumber').value = regNumber;
             document.getElementById('callName').textContent = callName;
             document.getElementById('callName').style.color = '#28a745';
             document.getElementById('regNumberDropdown').style.display = 'none';
             
             // Auto-fill handler name if available
-            const dog = dogData.find(d => d.regNumber === regNumber);
-            if (dog && dog.handler) {
-                document.getElementById('handlerName').value = dog.handler;
+            if (handlerName && handlerName.trim()) {
+                document.getElementById('handlerName').value = handlerName;
             }
         }
 
