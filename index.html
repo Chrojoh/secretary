@@ -2227,6 +2227,53 @@
                 </div>
             </div>
 
+            <script>
+        // Global Variables
+        let dogData = [];
+        let availableClasses = [];
+        let availableJudges = [];
+        let trialConfig = [];
+        let entryResults = [];
+        let runningOrders = {};
+        let trialMetadata = {};
+        let totalDays = 0;
+        let savedDays = 0;
+        let currentUser = null;
+        let registeredClubs = [];
+
+        // Initialize Data
+        function initializeData() {
+            dogData = [
+                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
+                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
+                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
+                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
+                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
+                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
+                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
+                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
+            ];
+            
+            availableClasses = [
+                "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4",
+                "Ranger 1", "Ranger 2", "Ranger 3",
+                "Dasher 3", "Dasher 4", "Dasher 5",
+                "Obedience 1", "Obedience 2", "Obedience 3",
+                "Starter", "Advanced", "Pro", "ARF",
+                "Zoom 1", "Zoom 2", "Games 1", "Games 2"
+            ];
+            
+            availableJudges = [
+                "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
+            ];
+
+            registeredClubs = [{
+                clubName: "Demo Dog Club",
+                secretaryName: "Demo Secretary",
+                email: "demo@example.com",
+                password: "demo123"
+
             <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
                 <div class="data-upload">
@@ -2374,50 +2421,6 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        // Global Variables
-        let dogData = [];
-        let availableClasses = [];
-        let availableJudges = [];
-        let trialConfig = [];
-        let entryResults = [];
-        let runningOrders = {};
-        let trialMetadata = {};
-        let totalDays = 0;
-        let savedDays = 0;
-        let currentUser = null;
-        let registeredClubs = [];
-
-        // Initialize Data
-        function initializeData() {
-            dogData = [
-                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
-                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
-                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
-                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
-                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
-                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
-                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
-                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
-            ];
-            
-            availableClasses = [
-                "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4",
-                "Ranger 1", "Ranger 2", "Ranger 3",
-                "Dasher 3", "Dasher 4", "Dasher 5",
-                "Obedience 1", "Obedience 2", "Obedience 3",
-                "Starter", "Advanced", "Pro", "ARF",
-                "Zoom 1", "Zoom 2", "Games 1", "Games 2"
-            ];
-            
-            availableJudges = [
-                "Sarah Knight", "Lane Michie", "Gary Truitt", 
-                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
-            ];
-
-            registeredClubs = [{
-                clubName: "Demo Dog Club",
-                secretaryName: "Demo Secretary",
-                email: "demo@example.com",
-                password: "demo123"
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
+    
