@@ -1,112 +1,154 @@
-# 🚀 C-WAGS Deployment Checklist
+name: Convert Excel Data to JSON
 
-## Prerequisites
-- [ ] GitHub account
-- [ ] Your `dataforsite.xlsx` file ready
-- [ ] Repository name chosen (e.g., `cwags-trial-system`)
+on:
+  push:
+    paths:
+      - 'dataforsite.xlsx'
+      - 'data/*.xlsx'
+  workflow_dispatch:
 
-## Step 1: Create Repository
-1. [ ] Go to GitHub.com and click "New Repository"
-2. [ ] Name it (e.g., `cwags-trial-system`)
-3. [ ] Make it **Public** (required for free GitHub Pages)
-4. [ ] ✅ Initialize with README
-5. [ ] Click "Create Repository"
-
-## Step 2: Upload System Files
-Upload these files to your repository root:
-
-### Required Files:
-- [ ] `index.html` (main application)
-- [ ] `dataforsite.xlsx` (your Excel data)
-- [ ] `.github/workflows/convert-excel-data.yml` (auto-conversion)
-- [ ] `.github/workflows/pages.yml` (GitHub Pages deployment)
-- [ ] `README.md` (documentation)
-- [ ] `_config.yml` (Jekyll config)
-- [ ] `.gitignore` (exclude unnecessary files)
-
-### Required Directories:
-- [ ] Create `data/` folder
-- [ ] Add `data/.gitkeep` file
-
-## Step 3: Enable GitHub Features
-
-### Enable GitHub Actions:
-1. [ ] Go to repository **Settings**
-2. [ ] Click **Actions** → **General**
-3. [ ] Select **"Allow all actions and reusable workflows"**
-4. [ ] Click **Save**
-
-### Enable GitHub Pages:
-1. [ ] In repository **Settings**
-2. [ ] Scroll to **Pages** section
-3. [ ] Source: **"GitHub Actions"**
-4. [ ] Click **Save**
-
-## Step 4: Test Deployment
-
-### Verify Auto-Conversion:
-1. [ ] Go to **Actions** tab
-2. [ ] Should see "Convert Excel Data to JSON" workflow
-3. [ ] Wait for green checkmark ✅
-4. [ ] Check that `data/records.json` was created
-
-### Verify Site Deployment:
-1. [ ] Go to **Actions** tab
-2. [ ] Should see "Deploy to GitHub Pages" workflow  
-3. [ ] Wait for green checkmark ✅
-4. [ ] Visit: `https://yourusername.github.io/repository-name`
-
-## Step 5: Verify Data Loading
-1. [ ] Open your deployed site
-2. [ ] Should see loading indicator
-3. [ ] Data should populate automatically
-4. [ ] Check "Records" tab for your Excel data
-5. [ ] Look for data freshness indicator (bottom-right)
-
-## 🔄 Future Data Updates
-
-### To Update Data:
-1. [ ] Go to your GitHub repository
-2. [ ] Click on `dataforsite.xlsx`
-3. [ ] Click **"Upload files"** or drag new file
-4. [ ] Commit changes
-5. [ ] Wait 2-3 minutes
-6. [ ] Refresh your site - data automatically updates!
-
-## ⚠️ Troubleshooting
-
-### Site Not Loading?
-- [ ] Check repository is **Public**
-- [ ] Verify GitHub Pages is enabled
-- [ ] Check Actions tab for errors
-- [ ] Try hard refresh (Ctrl+F5)
-
-### Data Not Updating?
-- [ ] Verify GitHub Actions are enabled
-- [ ] Check workflow ran successfully
-- [ ] Ensure Excel file is named exactly `dataforsite.xlsx`
-- [ ] Check file is in repository root (not in subfolder)
-
-### Workflow Errors?
-- [ ] Check Excel file format (must be `.xlsx`)
-- [ ] Verify file isn't corrupted
-- [ ] Check Actions logs for specific error messages
-
-## 📞 Support
-- Create an **Issue** in your repository for problems
-- Check the **Actions** tab for detailed error logs
-- Verify all files are in correct locations
-
-## 🎉 Success Criteria
-- [ ] Site loads at your GitHub Pages URL
-- [ ] Excel data appears in Records tab
-- [ ] Dashboard shows correct statistics
-- [ ] All forms are functional
-- [ ] Data freshness indicator appears
-
----
-
-**Your Site URL:** `https://yourusername.github.io/repository-name`
-
-**Estimated Setup Time:** 15-30 minutes  
-**Data Update Time:** 2-3 minutes after Excel upload
+jobs:
+  convert-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: |
+        npm init -y
+        npm install xlsx papaparse
+    
+    - name: Convert XLSX to JSON
+      run: |
+        node -e "
+        const XLSX = require('xlsx');
+        const fs = require('fs');
+        const path = require('path');
+        
+        console.log('Starting Excel to JSON conversion...');
+        
+        // Create data directory if it doesn't exist
+        if (!fs.existsSync('data')) {
+          fs.mkdirSync('data');
+        }
+        
+        // Find Excel files
+        const excelFiles = ['dataforsite.xlsx'];
+        
+        excelFiles.forEach(filename => {
+          if (fs.existsSync(filename)) {
+            console.log(\`Processing \${filename}...\`);
+            
+            try {
+              const workbook = XLSX.readFile(filename);
+              const result = {
+                lastUpdated: new Date().toISOString(),
+                filename: filename,
+                sheets: {}
+              };
+              
+              workbook.SheetNames.forEach(sheetName => {
+                console.log(\`  Converting sheet: \${sheetName}\`);
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+                  header: 1, 
+                  defval: null,
+                  raw: false 
+                });
+                
+                // Clean up the data
+                const cleanData = jsonData.filter(row => 
+                  row && row.some(cell => cell !== null && cell !== undefined && cell !== '')
+                );
+                
+                if (cleanData.length > 0) {
+                  const headers = cleanData[0];
+                  const rows = cleanData.slice(1);
+                  
+                  result.sheets[sheetName] = {
+                    headers: headers,
+                    data: rows,
+                    rowCount: rows.length
+                  };
+                  
+                  console.log(\`    \${rows.length} data rows processed\`);
+                }
+              });
+              
+              // Write JSON file
+              const outputFile = \`data/\${path.parse(filename).name}.json\`;
+              fs.writeFileSync(outputFile, JSON.stringify(result, null, 2));
+              console.log(\`✓ Created \${outputFile}\`);
+              
+              // Create a simplified records file for easier access
+              if (result.sheets.Sheet1 && result.sheets.Sheet1.data.length > 0) {
+                const records = result.sheets.Sheet1.data.map(row => {
+                  if (!row[0]) return null; // Skip empty rows
+                  
+                  return {
+                    id: row[0] || '',
+                    callName: row[1] || '',
+                    fullName: row[2] || '',
+                    handlerFullName: row[3] || '',
+                    handlerFirstName: row[5] || '',
+                    handlerLastName: row[6] || '',
+                    className: row[8] || '',
+                    judgeName: row[10] || ''
+                  };
+                }).filter(record => record && record.id);
+                
+                const recordsFile = 'data/records.json';
+                fs.writeFileSync(recordsFile, JSON.stringify({
+                  lastUpdated: new Date().toISOString(),
+                  totalRecords: records.length,
+                  records: records
+                }, null, 2));
+                console.log(\`✓ Created \${recordsFile} with \${records.length} records\`);
+              }
+              
+            } catch (error) {
+              console.error(\`Error processing \${filename}:\`, error);
+              process.exit(1);
+            }
+          } else {
+            console.log(\`File \${filename} not found, skipping...\`);
+          }
+        });
+        
+        console.log('✓ Excel to JSON conversion completed successfully');
+        "
+    
+    - name: Commit updated JSON files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/*.json
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Auto-update JSON data from Excel files [skip ci]"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Create deployment summary
+      run: |
+        echo "## Data Conversion Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- Conversion completed at: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- Files processed:" >> $GITHUB_STEP_SUMMARY
+        if [ -f "data/dataforsite.json" ]; then
+          RECORD_COUNT=$(node -e "const data = require('./data/records.json'); console.log(data.totalRecords);")
+          echo "  - dataforsite.xlsx → data/dataforsite.json" >> $GITHUB_STEP_SUMMARY
+          echo "  - Total records: $RECORD_COUNT" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "- JSON files available at: \`data/*.json\`" >> $GITHUB_STEP_SUMMARY
