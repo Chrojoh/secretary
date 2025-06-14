@@ -451,6 +451,8 @@
             </form>
             <div style="text-align: center; margin-top: 20px; color: #666;">
                 <p><strong>Demo:</strong> Club: "Demo Dog Club" | Secretary: "Demo Secretary" | Password: "demo123"</p>
+                <button onclick="autoFillDemo()" style="margin-top: 10px; padding: 8px 15px; background: #28a745;">🚀 Auto-Fill Demo</button>
+                <button onclick="testLogin()" style="margin-left: 10px; padding: 8px 15px; background: #17a2b8;">🔍 Test System</button>
             </div>
         </div>
         
@@ -737,10 +739,39 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Global Variables
-        let dogData = [];
-        let availableClasses = [];
-        let availableJudges = [];
+        // Global Variables - Initialize immediately
+        let dogData = [
+            { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
+            { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
+            { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
+            { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
+            { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
+            { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
+            { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
+            { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
+        ];
+        
+        let availableClasses = [
+            "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4",
+            "Ranger 1", "Ranger 2", "Ranger 3",
+            "Dasher 3", "Dasher 4", "Dasher 5",
+            "Obedience 1", "Obedience 2", "Obedience 3",
+            "Starter", "Advanced", "Pro", "ARF",
+            "Zoom 1", "Zoom 2", "Games 1", "Games 2"
+        ];
+        
+        let availableJudges = [
+            "Sarah Knight", "Lane Michie", "Gary Truitt", 
+            "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
+        ];
+        
+        let registeredClubs = [{
+            clubName: "Demo Dog Club",
+            secretaryName: "Demo Secretary",
+            email: "demo@example.com",
+            password: "demo123"
+        }];
+        
         let trialConfig = [];
         let entryResults = [];
         let runningOrders = {};
@@ -748,7 +779,6 @@
         let totalDays = 0;
         let savedDays = 0;
         let currentUser = null;
-        let registeredClubs = [];
         let customWaiver = `<p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
 <p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers. I understand that my participation and my dog's participation in this trial is entirely voluntary.</p>
 
@@ -762,41 +792,11 @@
 
 <p><strong>PHOTO/VIDEO RELEASE:</strong> I grant permission for photographs and/or video recordings of me and my dog taken during this trial to be used for promotional purposes.</p>`;
 
-        // Initialize Data
+        // Simple initialization - no complex async
         function initializeData() {
-            dogData = [
-                { regNumber: "12345", callName: "Buddy", handler: "Demo Handler" },
-                { regNumber: "67890", callName: "Luna", handler: "Demo Handler 2" },
-                { regNumber: "11111", callName: "Max", handler: "Demo Handler 3" },
-                { regNumber: "22222", callName: "Bella", handler: "Demo Handler 4" },
-                { regNumber: "33333", callName: "Charlie", handler: "Demo Handler 5" },
-                { regNumber: "44444", callName: "Daisy", handler: "Demo Handler 6" },
-                { regNumber: "55555", callName: "Rocky", handler: "Demo Handler 7" },
-                { regNumber: "66666", callName: "Molly", handler: "Demo Handler 8" }
-            ];
-            
-            availableClasses = [
-                "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4",
-                "Ranger 1", "Ranger 2", "Ranger 3",
-                "Dasher 3", "Dasher 4", "Dasher 5",
-                "Obedience 1", "Obedience 2", "Obedience 3",
-                "Starter", "Advanced", "Pro", "ARF",
-                "Zoom 1", "Zoom 2", "Games 1", "Games 2"
-            ];
-            
-            availableJudges = [
-                "Sarah Knight", "Lane Michie", "Gary Truitt", 
-                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
-            ];
-
-            registeredClubs = [{
-                clubName: "Demo Dog Club",
-                secretaryName: "Demo Secretary",
-                email: "demo@example.com",
-                password: "demo123"
-            }];
-            
-            console.log('Demo data initialized - Sample dog data:', dogData.slice(0, 3));
+            console.log('✅ Data already initialized globally for GitHub hosting');
+            console.log('Demo club:', registeredClubs[0]);
+            updateDataStatusDisplay();
         }
 
         // Login Functions
@@ -810,31 +810,47 @@
 
         function handleLogin(event) {
             event.preventDefault();
+            console.log('🔐 Login attempt started...');
+            
             const clubName = document.getElementById('loginClubName').value.trim();
             const secretaryName = document.getElementById('loginSecretaryName').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
-            console.log('Login attempt:', { clubName, secretaryName, password });
+            console.log('Entered credentials:', { clubName, secretaryName, password });
             console.log('Available clubs:', registeredClubs);
 
-            const club = registeredClubs.find(c => 
-                c.clubName.toLowerCase() === clubName.toLowerCase() &&
-                c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
-                c.password === password
-            );
+            // Simple exact match for GitHub hosting
+            let loginSuccess = false;
+            
+            if (clubName === "Demo Dog Club" && secretaryName === "Demo Secretary" && password === "demo123") {
+                loginSuccess = true;
+                currentUser = registeredClubs[0];
+                console.log('✅ Demo login successful');
+            } else {
+                // Try fuzzy match as backup
+                const club = registeredClubs.find(c => 
+                    c.clubName.toLowerCase() === clubName.toLowerCase() &&
+                    c.secretaryName.toLowerCase() === secretaryName.toLowerCase() &&
+                    c.password === password
+                );
+                if (club) {
+                    loginSuccess = true;
+                    currentUser = club;
+                    console.log('✅ Fuzzy match login successful');
+                }
+            }
 
-            if (club) {
-                console.log('Login successful');
-                currentUser = club;
+            if (loginSuccess) {
+                console.log('🎉 Login successful, switching to main app...');
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
-                document.getElementById('clubInfo').textContent = club.clubName;
-                document.getElementById('secretaryInfo').textContent = `Secretary: ${club.secretaryName}`;
+                document.getElementById('clubInfo').textContent = currentUser.clubName;
+                document.getElementById('secretaryInfo').textContent = `Secretary: ${currentUser.secretaryName}`;
                 updateDashboard();
                 updateTrialOptions();
             } else {
-                console.log('Login failed');
-                alert('Invalid credentials. Please try:\nClub: "Demo Dog Club"\nSecretary: "Demo Secretary"\nPassword: "demo123"');
+                console.log('❌ Login failed');
+                alert('Login failed. Please use:\nClub: Demo Dog Club\nSecretary: Demo Secretary\nPassword: demo123');
             }
         }
 
@@ -1605,8 +1621,27 @@
 
         // Waiver Management Functions
         function initializeWaiver() {
-            document.getElementById('waiverEditor').value = customWaiver;
-            updateWaiverDisplay();
+            console.log('🔧 Initializing waiver...');
+            try {
+                const waiverEditor = document.getElementById('waiverEditor');
+                const waiverDisplay = document.getElementById('waiverDisplay');
+                
+                if (waiverEditor) {
+                    waiverEditor.value = customWaiver;
+                    console.log('✅ Waiver editor populated');
+                } else {
+                    console.log('⚠️ Waiver editor not found');
+                }
+                
+                if (waiverDisplay) {
+                    updateWaiverDisplay();
+                    console.log('✅ Waiver display updated');
+                } else {
+                    console.log('⚠️ Waiver display not found');
+                }
+            } catch (error) {
+                console.error('❌ Waiver initialization error:', error);
+            }
         }
 
         function updateWaiverDisplay() {
@@ -1693,6 +1728,31 @@
                 document.getElementById('secretaryInfo').textContent = '';
                 showTab('entry');
                 updateTrialOptions();
+            }
+        }
+
+        // Debug and helper functions
+        function autoFillDemo() {
+            console.log('🎯 Auto-filling demo credentials...');
+            document.getElementById('loginClubName').value = 'Demo Dog Club';
+            document.getElementById('loginSecretaryName').value = 'Demo Secretary';
+            document.getElementById('loginPassword').value = 'demo123';
+            console.log('✅ Demo credentials filled');
+        }
+
+        function testLogin() {
+            console.log('🔍 Testing login system...');
+            console.log('Current registeredClubs:', registeredClubs);
+            console.log('dogData length:', dogData.length);
+            console.log('availableClasses length:', availableClasses.length);
+            console.log('availableJudges length:', availableJudges.length);
+            
+            if (registeredClubs.length === 0) {
+                console.error('❌ No clubs registered! Reinitializing...');
+                initializeData();
+            } else {
+                console.log('✅ System appears to be working');
+                alert('System test: ' + registeredClubs.length + ' clubs, ' + dogData.length + ' dogs loaded. Check console for details.');
             }
         }
 
@@ -1999,21 +2059,49 @@
             }
         });
 
-        // Initialize application
-        window.onload = async function() {
-            console.log('🚀 Trial Management System initializing...');
+        // Simplified initialization for GitHub Pages
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 GitHub-optimized initialization starting...');
+            
+            // Basic setup
             initializeData();
             updateTrialOptions();
-            updateDataStatusDisplay();
             checkDirectEntry();
-            initializeWaiver();
             
-            // Automatically try to load database on startup
-            console.log('🔄 Attempting automatic database load...');
-            const autoLoaded = await loadDataForSiteFile();
+            // Initialize waiver safely
+            setTimeout(function() {
+                try {
+                    const waiverEditor = document.getElementById('waiverEditor');
+                    const waiverDisplay = document.getElementById('waiverDisplay');
+                    
+                    if (waiverEditor) {
+                        waiverEditor.value = customWaiver;
+                    }
+                    if (waiverDisplay) {
+                        waiverDisplay.innerHTML = customWaiver;
+                    }
+                    console.log('✅ Waiver initialized');
+                } catch (e) {
+                    console.log('⚠️ Waiver init skipped:', e.message);
+                }
+            }, 100);
             
-            if (!autoLoaded) {
-                console.log('⚠️ Auto-load failed, using demo data');
+            // Try Excel loading (but don't block on it)
+            setTimeout(function() {
+                loadDataForSiteFile().catch(function(e) {
+                    console.log('⚠️ Excel auto-load failed (expected on GitHub):', e.message);
+                });
+            }, 500);
+            
+            console.log('✅ GitHub initialization complete');
+        });
+
+        // Backup initialization
+        window.onload = function() {
+            console.log('🔄 Backup window.onload triggered');
+            if (registeredClubs.length === 0) {
+                console.log('🔧 Running backup initialization...');
+                initializeData();
             }
         };
     </script>
