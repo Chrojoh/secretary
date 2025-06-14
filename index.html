@@ -1127,10 +1127,12 @@
 
         // Data Loading Functions
         function loadStoredData() {
+            console.log('Loading stored data...');
             const storedClubs = localStorage.getItem('registeredClubs');
             if (storedClubs) {
                 try {
                     registeredClubs = JSON.parse(storedClubs);
+                    console.log('Loaded stored clubs:', registeredClubs);
                 } catch (error) {
                     console.error('Error parsing stored clubs:', error);
                     registeredClubs = [];
@@ -1148,11 +1150,14 @@
             
             const existingDemo = registeredClubs.find(c => c.clubEmail === "demo@dogclub.com");
             if (!existingDemo) {
+                console.log('Adding demo club to registeredClubs');
                 registeredClubs.push(demoClub);
                 localStorage.setItem('registeredClubs', JSON.stringify(registeredClubs));
+            } else {
+                console.log('Demo club already exists');
             }
             
-            console.log('Registered clubs:', registeredClubs);
+            console.log('Final registered clubs:', registeredClubs);
 
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser) {
@@ -1165,6 +1170,49 @@
                 }
             }
         }
+
+        // Initialize immediately when script loads
+        console.log('Initializing data immediately...');
+        
+        // Initialize with demo club right away
+        registeredClubs = [{
+            clubName: "Demo Dog Club",
+            clubEmail: "demo@dogclub.com",
+            secretaryName: "Demo Secretary",
+            password: "demo123",
+            registrationDate: new Date().toISOString()
+        }];
+        
+        console.log('Demo club initialized:', registeredClubs);
+
+        // Initialize when DOM is ready but also call loadStoredData to check for saved data
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            loadStoredData(); // This will merge with any saved clubs
+            loadDogDatabase();
+            
+            // Set up form handlers
+            const loginForm = document.getElementById('loginForm');
+            const registrationForm = document.getElementById('registrationForm');
+            
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Login form submitted');
+                    handleLogin();
+                });
+            }
+            
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Registration form submitted');
+                    handleRegistration();
+                });
+            }
+            
+            console.log('Initialization complete, registeredClubs:', registeredClubs);
+        });
 
         function loadUserTrialData() {
             if (!currentUser) return;
