@@ -1,0 +1,112 @@
+# 🚀 C-WAGS Deployment Checklist
+
+## Prerequisites
+- [ ] GitHub account
+- [ ] Your `dataforsite.xlsx` file ready
+- [ ] Repository name chosen (e.g., `cwags-trial-system`)
+
+## Step 1: Create Repository
+1. [ ] Go to GitHub.com and click "New Repository"
+2. [ ] Name it (e.g., `cwags-trial-system`)
+3. [ ] Make it **Public** (required for free GitHub Pages)
+4. [ ] ✅ Initialize with README
+5. [ ] Click "Create Repository"
+
+## Step 2: Upload System Files
+Upload these files to your repository root:
+
+### Required Files:
+- [ ] `index.html` (main application)
+- [ ] `dataforsite.xlsx` (your Excel data)
+- [ ] `.github/workflows/convert-excel-data.yml` (auto-conversion)
+- [ ] `.github/workflows/pages.yml` (GitHub Pages deployment)
+- [ ] `README.md` (documentation)
+- [ ] `_config.yml` (Jekyll config)
+- [ ] `.gitignore` (exclude unnecessary files)
+
+### Required Directories:
+- [ ] Create `data/` folder
+- [ ] Add `data/.gitkeep` file
+
+## Step 3: Enable GitHub Features
+
+### Enable GitHub Actions:
+1. [ ] Go to repository **Settings**
+2. [ ] Click **Actions** → **General**
+3. [ ] Select **"Allow all actions and reusable workflows"**
+4. [ ] Click **Save**
+
+### Enable GitHub Pages:
+1. [ ] In repository **Settings**
+2. [ ] Scroll to **Pages** section
+3. [ ] Source: **"GitHub Actions"**
+4. [ ] Click **Save**
+
+## Step 4: Test Deployment
+
+### Verify Auto-Conversion:
+1. [ ] Go to **Actions** tab
+2. [ ] Should see "Convert Excel Data to JSON" workflow
+3. [ ] Wait for green checkmark ✅
+4. [ ] Check that `data/records.json` was created
+
+### Verify Site Deployment:
+1. [ ] Go to **Actions** tab
+2. [ ] Should see "Deploy to GitHub Pages" workflow  
+3. [ ] Wait for green checkmark ✅
+4. [ ] Visit: `https://yourusername.github.io/repository-name`
+
+## Step 5: Verify Data Loading
+1. [ ] Open your deployed site
+2. [ ] Should see loading indicator
+3. [ ] Data should populate automatically
+4. [ ] Check "Records" tab for your Excel data
+5. [ ] Look for data freshness indicator (bottom-right)
+
+## 🔄 Future Data Updates
+
+### To Update Data:
+1. [ ] Go to your GitHub repository
+2. [ ] Click on `dataforsite.xlsx`
+3. [ ] Click **"Upload files"** or drag new file
+4. [ ] Commit changes
+5. [ ] Wait 2-3 minutes
+6. [ ] Refresh your site - data automatically updates!
+
+## ⚠️ Troubleshooting
+
+### Site Not Loading?
+- [ ] Check repository is **Public**
+- [ ] Verify GitHub Pages is enabled
+- [ ] Check Actions tab for errors
+- [ ] Try hard refresh (Ctrl+F5)
+
+### Data Not Updating?
+- [ ] Verify GitHub Actions are enabled
+- [ ] Check workflow ran successfully
+- [ ] Ensure Excel file is named exactly `dataforsite.xlsx`
+- [ ] Check file is in repository root (not in subfolder)
+
+### Workflow Errors?
+- [ ] Check Excel file format (must be `.xlsx`)
+- [ ] Verify file isn't corrupted
+- [ ] Check Actions logs for specific error messages
+
+## 📞 Support
+- Create an **Issue** in your repository for problems
+- Check the **Actions** tab for detailed error logs
+- Verify all files are in correct locations
+
+## 🎉 Success Criteria
+- [ ] Site loads at your GitHub Pages URL
+- [ ] Excel data appears in Records tab
+- [ ] Dashboard shows correct statistics
+- [ ] All forms are functional
+- [ ] Data freshness indicator appears
+
+---
+
+**Your Site URL:** `https://yourusername.github.io/repository-name`
+
+**Estimated Setup Time:** 15-30 minutes  
+**Data Update Time:** 2-3 minutes after Excel upload
