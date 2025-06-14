@@ -804,6 +804,18 @@
                         <div id="recentEntries">No entries yet</div>
                     </div>
                     <div class="dashboard-card">
+                        <h4>🗄️ Database Management</h4>
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn btn-secondary" onclick="document.getElementById('uploadExcel').click()">📁 Upload Dog Database</button>
+                            <input type="file" id="uploadExcel" accept=".xlsx,.xls" style="display: none;" onchange="loadExcelFile()">
+                        </div>
+                        <div id="databaseInfo">
+                            <div>🐕 <span id="dogCount">${dogData.length}</span> dogs</div>
+                            <div>🏆 <span id="classCount">${availableClasses.length}</span> classes</div>
+                            <div>👨‍⚖️ <span id="judgeCount">${availableJudges.length}</span> judges</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
                         <h4>🎯 Quick Actions</h4>
                         <div class="quick-actions">
                             <button class="btn" onclick="showTab('setup')">Create New Trial</button>
@@ -1168,74 +1180,112 @@
         // Dog Database Loading
         async function loadDogDatabase() {
             try {
-                console.log('Loading dog database from dataforsite.xlsx...');
-                
-                const fileData = await window.fs.readFile('dataforsite.xlsx');
-                console.log(`Database file loaded: ${fileData.length} bytes`);
-                
-                const workbook = XLSX.read(fileData, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-                
-                console.log(`Processing ${rawData.length} rows...`);
-                
-                const processedDogs = [];
-                const classesSet = new Set();
-                const judgesSet = new Set();
-                
-                // Process each row (skip header row)
-                for (let i = 1; i < rawData.length; i++) {
-                    const row = rawData[i];
+                // Check if we're in Claude's artifact environment
+                if (typeof window.fs !== 'undefined' && window.fs.readFile) {
+                    console.log('Loading dog database from dataforsite.xlsx...');
                     
-                    if (row && row.length >= 11) {
-                        const regNumber = row[0] ? String(row[0]).trim() : '';
-                        const callName = row[1] ? String(row[1]).trim() : '';
-                        const fullName = row[2] ? String(row[2]).trim() : '';
-                        const handlerName = row[3] ? String(row[3]).trim() : '';
-                        const className = row[8] ? String(row[8]).trim() : '';
-                        const judgeName = row[10] ? String(row[10]).trim() : '';
+                    const fileData = await window.fs.readFile('dataforsite.xlsx');
+                    console.log(`Database file loaded: ${fileData.length} bytes`);
+                    
+                    const workbook = XLSX.read(fileData, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    
+                    console.log(`Processing ${rawData.length} rows...`);
+                    
+                    const processedDogs = [];
+                    const classesSet = new Set();
+                    const judgesSet = new Set();
+                    
+                    // Process each row (skip header row)
+                    for (let i = 1; i < rawData.length; i++) {
+                        const row = rawData[i];
                         
-                        if (regNumber && callName && regNumber.includes('-')) {
-                            processedDogs.push({
-                                regNumber,
-                                callName,
-                                fullName,
-                                handler: handlerName,
-                                className,
-                                judge: judgeName
-                            });
+                        if (row && row.length >= 11) {
+                            const regNumber = row[0] ? String(row[0]).trim() : '';
+                            const callName = row[1] ? String(row[1]).trim() : '';
+                            const fullName = row[2] ? String(row[2]).trim() : '';
+                            const handlerName = row[3] ? String(row[3]).trim() : '';
+                            const className = row[8] ? String(row[8]).trim() : '';
+                            const judgeName = row[10] ? String(row[10]).trim() : '';
                             
-                            if (className) classesSet.add(className);
-                            if (judgeName) judgesSet.add(judgeName);
+                            if (regNumber && callName && regNumber.includes('-')) {
+                                processedDogs.push({
+                                    regNumber,
+                                    callName,
+                                    fullName,
+                                    handler: handlerName,
+                                    className,
+                                    judge: judgeName
+                                });
+                                
+                                if (className) classesSet.add(className);
+                                if (judgeName) judgesSet.add(judgeName);
+                            }
                         }
                     }
+                    
+                    dogData = processedDogs;
+                    availableClasses = Array.from(classesSet).sort();
+                    availableJudges = Array.from(judgesSet).sort();
+                    
+                    console.log(`✅ Database loaded: ${dogData.length} dogs, ${availableClasses.length} classes, ${availableJudges.length} judges`);
+                    
+                    // Show success message
+                    document.getElementById('dataStatus').style.display = 'block';
+                    document.getElementById('dataStatusText').innerHTML = `
+                        🐕 ${dogData.length.toLocaleString()} dogs loaded<br>
+                        🏆 ${availableClasses.length} classes available<br>
+                        👨‍⚖️ ${availableJudges.length} judges in database
+                    `;
+                } else {
+                    console.log('Running in browser environment - using demo data');
+                    throw new Error('Browser environment detected');
                 }
                 
-                dogData = processedDogs;
-                availableClasses = Array.from(classesSet).sort();
-                availableJudges = Array.from(judgesSet).sort();
+            } catch (error) {
+                console.log('Using demo/fallback data');
                 
-                console.log(`✅ Database loaded: ${dogData.length} dogs, ${availableClasses.length} classes, ${availableJudges.length} judges`);
+                // Enhanced demo data that works in any environment
+                dogData = [
+                    { regNumber: "07-0001-01", callName: "BJ", handler: "Shirley Ottmer", className: "Patrol 1", judge: "Linda Alberda" },
+                    { regNumber: "07-0001-02", callName: "Jaidon", handler: "Shirley Ottmer", className: "Detective 2", judge: "Ginger Alpine" },
+                    { regNumber: "07-0001-03", callName: "Jake", handler: "Shirley Ottmer", className: "Investigator 3", judge: "Paige Alpine-Malone" },
+                    { regNumber: "07-0001-04", callName: "Ozone", handler: "Shirley Ottmer", className: "Super Sleuth 4", judge: "Sarah Knight" },
+                    { regNumber: "07-0002-01", callName: "Liz", handler: "Russ Hornfisher", className: "Ranger 1", judge: "Lane Michie" },
+                    { regNumber: "07-0002-02", callName: "Morgan", handler: "Russ Hornfisher", className: "Detective 1", judge: "Gary Truitt" },
+                    { regNumber: "07-0003-01", callName: "Julie", handler: "Bonnie Hornfisher", className: "Ranger 1", judge: "Linda Alberda" },
+                    { regNumber: "07-0003-02", callName: "Becky", handler: "Bonnie Hornfisher", className: "Ranger 2", judge: "Ginger Alpine" },
+                    { regNumber: "07-0003-03", callName: "Ben", handler: "Bonnie Hornfisher", className: "Ranger 3", judge: "Paige Alpine-Malone" },
+                    { regNumber: "07-0004-01", callName: "Max", handler: "Demo Handler", className: "Patrol 1", judge: "Sarah Knight" },
+                    { regNumber: "07-0004-02", callName: "Bella", handler: "Demo Handler", className: "Detective 1", judge: "Lane Michie" },
+                    { regNumber: "07-0004-03", callName: "Charlie", handler: "Demo Handler", className: "Super Sleuth 1", judge: "Gary Truitt" }
+                ];
                 
-                // Show success message
+                availableClasses = [
+                    "Patrol 1", "Patrol 2", "Patrol 3",
+                    "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
+                    "Ranger 1", "Ranger 2", "Ranger 3",
+                    "Investigator 1", "Investigator 2", "Investigator 3",
+                    "Detective 1", "Detective 2", "Detective 3",
+                    "Dasher 1", "Dasher 2", "Dasher 3", "Dasher 4", "Dasher 5"
+                ];
+                
+                availableJudges = [
+                    "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                    "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone",
+                    "Judge Johnson", "Judge Williams", "Judge Davis"
+                ];
+                
+                // Show demo data message
                 document.getElementById('dataStatus').style.display = 'block';
                 document.getElementById('dataStatusText').innerHTML = `
-                    🐕 ${dogData.length.toLocaleString()} dogs loaded<br>
+                    🎯 Demo database loaded<br>
+                    🐕 ${dogData.length} demo dogs available<br>
                     🏆 ${availableClasses.length} classes available<br>
-                    👨‍⚖️ ${availableJudges.length} judges in database
+                    👨‍⚖️ ${availableJudges.length} judges in database<br>
+                    <small>💡 Upload your own Excel file to replace demo data</small>
                 `;
-                
-            } catch (error) {
-                console.error('Error loading dog database:', error);
-                showAlert('Could not load dog database. Some features may be limited.', 'warning');
-                
-                // Fallback to demo data
-                dogData = [
-                    { regNumber: "07-0001-01", callName: "BJ", handler: "Demo Handler", className: "Patrol 1", judge: "Linda Alberda" },
-                    { regNumber: "07-0001-02", callName: "Jaidon", handler: "Demo Handler", className: "Detective 2", judge: "Ginger Alpine" }
-                ];
-                availableClasses = ["Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4"];
-                availableJudges = ["Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"];
             }
         }
 
