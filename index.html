@@ -1037,8 +1037,8 @@
             let dayConfig = [];
 
             for (let c = 1; c <= classCount; c++) {
-                const className = document.getElementById(`className${day}-${c}`).value.trim();
-                const roundCount = parseInt(document.getElementById(`roundCount${day}-${c}`).value) || 0;
+                const className = document.getElementById(`className_${day}_${c}`).value.trim();
+                const roundCount = parseInt(document.getElementById(`roundCount_${day}_${c}`).value) || 0;
                 
                 if (!className) {
                     alert(`Please enter a class name for Class ${c} on Day ${day}`);
@@ -1052,7 +1052,7 @@
 
                 // Check each round has a judge assigned
                 for (let r = 1; r <= roundCount; r++) {
-                    const judgeElement = document.getElementById(`judge${day}-${c}-${r}`);
+                    const judgeElement = document.getElementById(`judge_${day}_${c}_${r}`);
                     if (!judgeElement || !judgeElement.value.trim()) {
                         alert(`Please assign a judge for ${className} Round ${r} on Day ${day}`);
                         return;
@@ -1061,7 +1061,7 @@
 
                 // Add each round as a separate config
                 for (let r = 1; r <= roundCount; r++) {
-                    const judge = document.getElementById(`judge${day}-${c}-${r}`).value.trim();
+                    const judge = document.getElementById(`judge_${day}_${c}_${r}`).value.trim();
                     dayConfig.push({
                         day: day,
                         date: date,
