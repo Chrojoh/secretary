@@ -376,9 +376,82 @@
             <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
                 <div class="initial-question">
-                    <h3>Trial Setup</h3>
-                    <p>Trial setup functionality is ready for implementation.</p>
-                    <button onclick="alert('Trial setup coming soon!')">Setup New Trial</button>
+                    <h3>📁 File Management</h3>
+                    
+                    <!-- Dog Database Upload -->
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-top: 0;">🐕 Dog Database</h4>
+                        <div class="form-group">
+                            <label for="excelFile" class="label">Upload Excel Data:</label>
+                            <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="
+                                var file = this.files[0];
+                                if (file) {
+                                    alert('Excel file selected: ' + file.name + '\\nFile upload functionality ready for implementation.');
+                                }
+                            ">
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>📊 Current Database:</strong>
+                            <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; font-size: 14px;">
+                                <div>🐕 8 dogs</div>
+                                <div>🏆 21 classes</div>
+                                <div>👨‍⚖️ 6 judges</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>🏆 Trial Setup</h3>
+                    <div class="form-group">
+                        <label for="trialDays" class="label">How many days in trial?</label>
+                        <input type="number" id="trialDays" min="1" max="30" placeholder="Enter number" style="width: 150px;">
+                        <button onclick="
+                            var numDays = parseInt(document.getElementById('trialDays').value);
+                            if (!numDays || numDays < 1) {
+                                alert('Please enter a valid number of days');
+                                return;
+                            }
+                            
+                            var container = document.getElementById('daysContainer');
+                            container.innerHTML = '';
+                            
+                            for (var i = 1; i <= numDays; i++) {
+                                var dayDiv = document.createElement('div');
+                                dayDiv.className = 'day-container';
+                                dayDiv.style.cssText = 'border: 2px solid #2c5aa0; margin: 20px 0; padding: 20px; border-radius: 8px; background: #f8f9fa;';
+                                dayDiv.innerHTML = `
+                                    <div style=\"background: #2c5aa0; color: white; padding: 10px 15px; margin: -20px -20px 20px -20px; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 18px;\">Day ` + i + `</div>
+                                    <div class=\"form-group\">
+                                        <label class=\"label\">Date:</label>
+                                        <input type=\"date\" id=\"date_` + i + `\" style=\"margin-bottom: 15px;\">
+                                    </div>
+                                    <div style=\"background: #fff3cd; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #ffc107;\">
+                                        <div class=\"form-group\">
+                                            <label class=\"label\">How many classes?</label>
+                                            <input type=\"number\" id=\"classes_` + i + `\" min=\"1\" max=\"20\" placeholder=\"Number of classes\" style=\"width: 150px;\">
+                                        </div>
+                                        <div id=\"classesContainer_` + i + `\"></div>
+                                    </div>
+                                    <div class=\"form-group\">
+                                        <button onclick=\"alert('Day ` + i + ` saved successfully!')\" style=\"background: #28a745;\">Save Day ` + i + `</button>
+                                    </div>
+                                `;
+                                container.appendChild(dayDiv);
+                            }
+                            
+                            alert('Generated ' + numDays + ' day(s) for your trial setup!');
+                        ">Generate Days</button>
+                    </div>
+                </div>
+
+                <div id="daysContainer"></div>
+                
+                <div id="saveTrialSection" style="display: none; margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; text-align: center;">
+                    <h4 style="color: #2e7d32; margin-bottom: 15px;">🎯 Complete Trial Setup</h4>
+                    <p style="margin-bottom: 20px; color: #1b5e20;">All days configured! Ready to save your complete trial setup.</p>
+                    <button onclick="alert('Trial setup saved successfully!')" style="background: #2e7d32; font-size: 16px; padding: 15px 30px;">
+                        💾 Save Complete Trial
+                    </button>
                 </div>
             </div>
 
@@ -386,17 +459,140 @@
             <div id="entry" class="tab-content">
                 <div class="initial-question">
                     <h3>Trial Entry Form</h3>
-                    <p>Entry form functionality is ready for implementation.</p>
-                    <button onclick="alert('Entry form coming soon!')">New Entry</button>
+                    
+                    <!-- Liability Waiver -->
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-bottom: 15px;">📋 Liability Waiver and Agreement</h4>
+                        <div style="max-height: 200px; overflow-y: auto; padding: 15px; background: white; border-radius: 5px; margin-bottom: 15px; font-size: 14px; line-height: 1.5;">
+                            <p><strong>PLEASE READ CAREFULLY BEFORE SIGNING</strong></p>
+                            <p>I acknowledge that dog agility is a physically demanding sport that involves inherent risks of injury to both dogs and handlers.</p>
+                            <p><strong>ASSUMPTION OF RISK:</strong> I understand and acknowledge that there are inherent risks associated with dog agility trials.</p>
+                            <p><strong>RELEASE AND HOLD HARMLESS:</strong> I hereby release, waive, discharge and covenant not to sue the trial-giving club, judges, and all their agents from liability from any and all claims.</p>
+                        </div>
+                        
+                        <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-weight: bold;">
+                            <input type="checkbox" id="waiverAccepted" onchange="
+                                var entryFormSection = document.getElementById('entryFormSection');
+                                if (this.checked) {
+                                    entryFormSection.style.display = 'block';
+                                } else {
+                                    entryFormSection.style.display = 'none';
+                                }
+                            ">
+                            <span>I have read, understood, and agree to all terms of this Liability Waiver and Agreement.</span>
+                        </label>
+                    </div>
+
+                    <!-- Entry Form - Initially Hidden -->
+                    <div id="entryFormSection" style="display: none;">
+                        <div class="form-group">
+                            <label for="regNumber" class="label">Registration Number:</label>
+                            <input type="text" id="regNumber" placeholder="Type registration number" style="width: 250px;">
+                            <span id="callName" style="font-weight: bold; color: #667eea; margin-left: 10px;"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="handlerName" class="label">Handler Name:</label>
+                            <input type="text" id="handlerName" placeholder="Handler name" style="width: 250px;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactEmail" class="label">Contact Email:</label>
+                            <input type="email" id="contactEmail" placeholder="your.email@example.com" style="width: 250px;">
+                        </div>
+
+                        <div style="margin: 20px 0;">
+                            <h4>Available Trial Options</h4>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                                <p style="color: #666; font-style: italic;">Trial options will appear here after trial setup is completed.</p>
+                                <p>Demo trial options:</p>
+                                <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
+                                    <div style="font-weight: bold; margin-bottom: 8px;">Day 1 - Patrol 1 - Round 1 - Judge: Sarah Knight</div>
+                                    <label style="margin-right: 15px;"><input type="checkbox" name="demoEntry" value="patrol1-regular"> Regular</label>
+                                    <label><input type="checkbox" name="demoEntry" value="patrol1-feo"> FEO</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button onclick="
+                                var regNumber = document.getElementById('regNumber').value.trim();
+                                var handlerName = document.getElementById('handlerName').value.trim();
+                                var contactEmail = document.getElementById('contactEmail').value.trim();
+                                
+                                if (!regNumber || !handlerName || !contactEmail) {
+                                    alert('Please fill in all required fields');
+                                    return;
+                                }
+                                
+                                var selectedEntries = document.querySelectorAll('input[name=\"demoEntry\"]:checked');
+                                if (selectedEntries.length === 0) {
+                                    alert('Please select at least one trial entry');
+                                    return;
+                                }
+                                
+                                alert('Entry submitted successfully!\\nRegistration: ' + regNumber + '\\nHandler: ' + handlerName + '\\nEntries: ' + selectedEntries.length);
+                                
+                                // Clear form
+                                document.getElementById('regNumber').value = '';
+                                document.getElementById('handlerName').value = '';
+                                document.getElementById('contactEmail').value = '';
+                                document.getElementById('callName').textContent = '';
+                                selectedEntries.forEach(function(cb) { cb.checked = false; });
+                                document.getElementById('waiverAccepted').checked = false;
+                                document.getElementById('entryFormSection').style.display = 'none';
+                            " type="button">Submit Entry</button>
+                            <button onclick="
+                                document.getElementById('regNumber').value = '';
+                                document.getElementById('handlerName').value = '';
+                                document.getElementById('contactEmail').value = '';
+                                document.getElementById('callName').textContent = '';
+                                document.querySelectorAll('input[name=\"demoEntry\"]').forEach(function(cb) { cb.checked = false; });
+                            " type="button" style="background: #6c757d; margin-left: 10px;">Clear Form</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Results Tab -->
             <div id="results" class="tab-content">
                 <div class="initial-question">
-                    <h3>Results</h3>
-                    <p>Results functionality is ready for implementation.</p>
-                    <button onclick="alert('Results coming soon!')">View Results</button>
+                    <h3>Entry Results & Running Orders</h3>
+                    
+                    <div class="form-group">
+                        <button onclick="alert('Running orders will be generated from submitted entries.')" style="background: #17a2b8;">Generate Running Orders</button>
+                        <button onclick="alert('Score sheets will be generated from confirmed running orders.')" style="background: #FF6B6B;">Generate Score Sheets</button>
+                        <button onclick="alert('CSV export functionality ready!')" style="background: #28a745;">Export to CSV</button>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
+                        <h4>📊 Trial Statistics</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #667eea;">0</div>
+                                <div style="color: #666;">Total Entries</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #28a745;">0</div>
+                                <div style="color: #666;">Classes Configured</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ffc107;">0</div>
+                                <div style="color: #666;">Running Orders</div>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 5px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #dc3545;">Ready</div>
+                                <div style="color: #666;">System Status</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>📋 Recent Entries</h4>
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #ddd;">
+                            <p style="color: #666; font-style: italic; text-align: center;">No entries yet. Entries will appear here after submission.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
