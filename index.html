@@ -835,6 +835,52 @@
 
             <!-- Trial Setup Tab -->
             <div id="setup" class="tab-content">
+                <!-- Database Upload Section -->
+                <div class="section">
+                    <h3>📁 Database Management</h3>
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-top: 0;">🐕 Dog Database</h4>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Upload Excel Database:</label>
+                                <input type="file" id="excelFile" accept=".xlsx,.xls" onchange="loadExcelData()">
+                                <small style="color: #666;">Upload your dataforsite.xlsx or similar dog database file</small>
+                            </div>
+                            <div class="form-field">
+                                <button class="btn btn-secondary" onclick="loadSampleDatabase()">📦 Load Sample Database</button>
+                                <small style="color: #666;">Load expanded demo data for testing</small>
+                            </div>
+                        </div>
+                        <div id="dataStatus"></div>
+                        
+                        <!-- Show current data status -->
+                        <div id="currentDataStatus" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            <h5 style="margin-top: 0;">📊 Current Database Status:</h5>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;">
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;" id="dogCountDisplay">12</div>
+                                    <div style="font-size: 0.9rem; color: #666;">Dogs</div>
+                                </div>
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;" id="classCountDisplay">20</div>
+                                    <div style="font-size: 0.9rem; color: #666;">Classes</div>
+                                </div>
+                                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;" id="judgeCountDisplay">9</div>
+                                    <div style="font-size: 0.9rem; color: #666;">Judges</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" onclick="showDatabasePreview()" style="font-size: 0.9rem;">👁️ Preview Database</button>
+                        </div>
+                        
+                        <!-- Database preview area -->
+                        <div id="databasePreview" style="display: none; margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto;">
+                            <h5>Database Preview:</h5>
+                            <div id="previewContent"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section">
                     <h3>📅 Create New Trial</h3>
                     <div class="form-row">
@@ -1243,8 +1289,170 @@
             }
         }
 
-        // Initialize data with fallback
-        async function loadDogDatabase() {
+        // Excel File Upload and Database Functions
+        function loadExcelData() {
+            const file = document.getElementById('excelFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    
+                    console.log(`Processing Excel file with ${rawData.length} rows...`);
+                    
+                    const processedDogs = [];
+                    const classesSet = new Set();
+                    const judgesSet = new Set();
+                    
+                    // Process each row (skip header row)
+                    for (let i = 1; i < rawData.length; i++) {
+                        const row = rawData[i];
+                        
+                        if (row && row.length >= 3) {
+                            // Handle different Excel formats - adapt based on your file structure
+                            const regNumber = row[0] ? String(row[0]).trim() : '';
+                            const callName = row[1] ? String(row[1]).trim() : '';
+                            const fullName = row[2] ? String(row[2]).trim() : '';
+                            const handlerName = row[3] ? String(row[3]).trim() : '';
+                            const className = row[8] ? String(row[8]).trim() : '';
+                            const judgeName = row[10] ? String(row[10]).trim() : '';
+                            
+                            if (regNumber && callName) {
+                                processedDogs.push({
+                                    regNumber,
+                                    callName,
+                                    fullName,
+                                    handler: handlerName,
+                                    className,
+                                    judge: judgeName
+                                });
+                                
+                                if (className) classesSet.add(className);
+                                if (judgeName) judgesSet.add(judgeName);
+                            }
+                        }
+                    }
+                    
+                    if (processedDogs.length > 0) {
+                        dogData = processedDogs;
+                        availableClasses = Array.from(classesSet).filter(Boolean).sort();
+                        availableJudges = Array.from(judgesSet).filter(Boolean).sort();
+                        
+                        // Ensure we have fallback classes and judges if not in Excel
+                        if (availableClasses.length === 0) {
+                            availableClasses = [
+                                "Patrol 1", "Patrol 2", "Patrol 3",
+                                "Super Sleuth 1", "Super Sleuth 2", "Super Sleuth 3", "Super Sleuth 4",
+                                "Ranger 1", "Ranger 2", "Ranger 3",
+                                "Investigator 1", "Investigator 2", "Investigator 3",
+                                "Detective 1", "Detective 2", "Detective 3"
+                            ];
+                        }
+                        
+                        if (availableJudges.length === 0) {
+                            availableJudges = [
+                                "Sarah Knight", "Lane Michie", "Gary Truitt", 
+                                "Linda Alberda", "Ginger Alpine", "Paige Alpine-Malone"
+                            ];
+                        }
+                        
+                        updateDatabaseDisplay();
+                        showAlert(`Excel file loaded successfully! ${dogData.length} dogs imported.`, 'success');
+                        
+                        console.log(`✅ Excel loaded: ${dogData.length} dogs, ${availableClasses.length} classes, ${availableJudges.length} judges`);
+                    } else {
+                        showAlert('No valid dog data found in Excel file. Check file format.', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Error reading Excel file:', error);
+                    showAlert('Error reading Excel file: ' + error.message, 'danger');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadSampleDatabase() {
+            console.log('Loading expanded sample database...');
+            
+            // Create a more comprehensive sample database
+            dogData = [];
+            const handlerNames = [
+                "Shirley Ottmer", "Russ Hornfisher", "Bonnie Hornfisher", 
+                "Sarah Johnson", "Mike Thompson", "Lisa Anderson", "Dave Wilson",
+                "Carol Martinez", "John Davis", "Emily Brown", "Alex Taylor",
+                "Jessica Lee", "Chris Garcia", "Amanda White", "Robert Clark"
+            ];
+            
+            const dogNames = [
+                "BJ", "Jaidon", "Jake", "Ozone", "Liz", "Morgan", "Julie", "Becky", "Ben",
+                "Max", "Bella", "Charlie", "Luna", "Cooper", "Daisy", "Rocky", "Molly",
+                "Buddy", "Lucy", "Bear", "Sadie", "Tucker", "Chloe", "Duke", "Zoe",
+                "Jack", "Sophie", "Rex", "Ruby", "Zeus", "Penny", "Ace", "Lily"
+            ];
+            
+            // Generate 50+ sample dogs
+            for (let i = 1; i <= 55; i++) {
+                const paddedNum = String(i).padStart(2, '0');
+                const handlerIndex = Math.floor(Math.random() * handlerNames.length);
+                const dogIndex = Math.floor(Math.random() * dogNames.length);
+                
+                dogData.push({
+                    regNumber: `07-${Math.floor(i/10).toString().padStart(3, '0')}-${paddedNum}`,
+                    callName: dogNames[dogIndex] + (i > dogNames.length ? i : ''),
+                    fullName: `${dogNames[dogIndex]}'s Full Show Name ${i}`,
+                    handler: handlerNames[handlerIndex],
+                    className: availableClasses[Math.floor(Math.random() * availableClasses.length)],
+                    judge: availableJudges[Math.floor(Math.random() * availableJudges.length)]
+                });
+            }
+            
+            updateDatabaseDisplay();
+            showAlert(`Sample database loaded! ${dogData.length} demo dogs created for testing.`, 'success');
+            console.log(`✅ Sample database: ${dogData.length} dogs, ${availableClasses.length} classes, ${availableJudges.length} judges`);
+        }
+
+        function updateDatabaseDisplay() {
+            document.getElementById('dogCountDisplay').textContent = dogData.length;
+            document.getElementById('classCountDisplay').textContent = availableClasses.length;
+            document.getElementById('judgeCountDisplay').textContent = availableJudges.length;
+            
+            // Update dashboard if elements exist
+            const dogCountEl = document.getElementById('dogCount');
+            const classCountEl = document.getElementById('classCount');
+            const judgeCountEl = document.getElementById('judgeCount');
+            
+            if (dogCountEl) dogCountEl.textContent = dogData.length;
+            if (classCountEl) classCountEl.textContent = availableClasses.length;
+            if (judgeCountEl) judgeCountEl.textContent = availableJudges.length;
+        }
+
+        function showDatabasePreview() {
+            const previewDiv = document.getElementById('databasePreview');
+            const contentDiv = document.getElementById('previewContent');
+            
+            if (previewDiv.style.display === 'none') {
+                let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">';
+                html += '<thead><tr style="background: #f8f9fa;"><th style="padding: 8px; border: 1px solid #ddd;">Reg #</th><th style="padding: 8px; border: 1px solid #ddd;">Call Name</th><th style="padding: 8px; border: 1px solid #ddd;">Handler</th><th style="padding: 8px; border: 1px solid #ddd;">Class</th></tr></thead><tbody>';
+                
+                dogData.slice(0, 10).forEach(dog => {
+                    html += `<tr><td style="padding: 6px; border: 1px solid #ddd;">${dog.regNumber}</td><td style="padding: 6px; border: 1px solid #ddd;">${dog.callName}</td><td style="padding: 6px; border: 1px solid #ddd;">${dog.handler}</td><td style="padding: 6px; border: 1px solid #ddd;">${dog.className || 'N/A'}</td></tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+                if (dogData.length > 10) {
+                    html += `<p style="margin-top: 10px; color: #666; font-size: 0.9rem;">Showing first 10 of ${dogData.length} dogs...</p>`;
+                }
+                
+                contentDiv.innerHTML = html;
+                previewDiv.style.display = 'block';
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        }
             try {
                 // Check if we're in Claude's artifact environment
                 if (typeof window.fs !== 'undefined' && window.fs.readFile) {
@@ -1394,6 +1602,15 @@
         // Make all functions globally available immediately
         window.demoLogin = demoLogin;
         window.showRegistration = showRegistration;
+        window.showLogin = showLogin;
+        window.handleLogin = handleLogin;
+        window.handleRegistration = handleRegistration;
+        window.testLogin = testLogin;
+        window.loadExcelData = loadExcelData;
+        window.loadSampleDatabase = loadSampleDatabase;
+        window.showDatabasePreview = showDatabasePreview;
+        
+        console.log('All functions defined and made global');ration;
         window.showLogin = showLogin;
         window.handleLogin = handleLogin;
         window.handleRegistration = handleRegistration;
