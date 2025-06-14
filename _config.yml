@@ -1,0 +1,31 @@
+# _config.yml - Jekyll configuration for GitHub Pages
+title: "C-WAGS Trial Management System"
+description: "Comprehensive trial management for Canine-Work And Games organization"
+baseurl: ""
+url: "https://yourusername.github.io"
+
+# GitHub Pages settings
+github_username: yourusername
+repository: your-repository-name
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Exclude files from build
+exclude:
+  - README.md
+  - .gitignore
+  - .github/
+  - node_modules/
+  - package*.json
+
+# Include data files
+include:
+  - data/
+
+# Plugin settings
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
