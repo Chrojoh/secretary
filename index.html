@@ -920,8 +920,12 @@
                 await Promise.all([
                     loadRecordsData(),
                     loadTrialsData(),
-                    loadReportsData()
+                    loadReportsData(),
+                    loadClassesAndJudges()  // Load the classes and judges
                 ]);
+                
+                // Load any stored trials from localStorage
+                loadStoredTrials();
                 
                 updateDashboardStats();
                 populateTrialsTable();
@@ -930,6 +934,8 @@
                 
                 hideLoadingState();
                 console.log('✓ Data loaded successfully');
+                console.log(`✓ Available classes: ${availableClasses.length}`);
+                console.log(`✓ Available judges: ${availableJudges.length}`);
                 
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -1494,7 +1500,10 @@
             });
         }
 
-        // Modal step management
+        // Global data arrays - populated from JSON
+        let availableClasses = [];
+        let availableJudges = [];
+        let allRecordsData = [];
         let currentModalStep = 1;
         let trialConfiguration = {
             type: 'standalone',
@@ -1502,33 +1511,98 @@
             classes: []
         };
 
-        // C-WAGS class options
-        const cwagsClasses = [
-            'Patrol Level 1',
-            'Detective Level 2', 
-            'Investigator Level 3',
-            'Super Sleuth Level 4',
-            'ARF (Any Ready For)',
-            'Zoom Level 1',
-            'Zoom Level 2',
-            'Starter Scent',
-            'Advanced Scent',
-            'Pro Scent'
-        ];
+        // Trial storage - in Phase 1, stored in browser localStorage
+        // In Phase 2, this would be saved to database
+        function saveTrialToStorage(trialData) {
+            try {
+                // Get existing trials from localStorage
+                let savedTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                
+                // Generate trial ID
+                const trialId = 'T' + String(savedTrials.length + 1).padStart(3, '0');
+                
+                // Add metadata
+                const fullTrialData = {
+                    id: trialId,
+                    ...trialData,
+                    status: 'draft',
+                    created: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                
+                // Add to trials array
+                savedTrials.push(fullTrialData);
+                trials.push(fullTrialData);
+                
+                // Save to localStorage
+                localStorage.setItem('cwags_trials', JSON.stringify(savedTrials));
+                
+                // Update UI
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                console.log(`Trial ${trialId} saved to local storage`);
+                return trialId;
+                
+            } catch (error) {
+                console.error('Error saving trial:', error);
+                return null;
+            }
+        }
 
-        // Sample judges list (this would come from your database)
-        const availableJudges = [
-            'Linda Alberda',
-            'Ginger Alpine',
-            'Paige Alpine-Malone',
-            'Anita Ambani',
-            'Shirley Ottmer',
-            'Mary Johnson',
-            'Bob Smith',
-            'Carol Williams',
-            'David Brown',
-            'Lisa Davis'
-        ];
+        // Load trials from localStorage on startup
+        function loadStoredTrials() {
+            try {
+                const savedTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                // Merge with any existing sample trials
+                trials = [...trials, ...savedTrials];
+                console.log(`Loaded ${savedTrials.length} trials from local storage`);
+            } catch (error) {
+                console.error('Error loading stored trials:', error);
+            }
+        }
+
+        // Load classes and judges from JSON data
+        async function loadClassesAndJudges() {
+            try {
+                const response = await fetch('data/records.json');
+                if (!response.ok) throw new Error('Records file not found');
+                
+                const data = await response.json();
+                allRecordsData = data.records || [];
+                
+                // Extract unique classes from Column I (className)
+                const classSet = new Set();
+                allRecordsData.forEach(record => {
+                    if (record.className && record.className.trim()) {
+                        classSet.add(record.className.trim());
+                    }
+                });
+                availableClasses = Array.from(classSet).sort();
+                
+                // Extract unique judges from Column K (judgeName)
+                const judgeSet = new Set();
+                allRecordsData.forEach(record => {
+                    if (record.judgeName && record.judgeName.trim()) {
+                        judgeSet.add(record.judgeName.trim());
+                    }
+                });
+                availableJudges = Array.from(judgeSet).sort();
+                
+                console.log(`Loaded ${availableClasses.length} classes and ${availableJudges.length} judges from data`);
+                
+            } catch (error) {
+                console.error('Failed to load classes and judges:', error);
+                // Fallback to sample data
+                availableClasses = [
+                    'Patrol Level 1',
+                    'Detective Level 2', 
+                    'Investigator Level 3',
+                    'Super Sleuth Level 4'
+                ];
+                availableJudges = ['Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer'];
+            }
+        }
 
         function nextStep() {
             const selectedType = document.querySelector('input[name="trialType"]:checked').value;
@@ -1576,7 +1650,7 @@
                                 <label for="class${i}">Class Type</label>
                                 <select id="class${i}" onchange="updateClassConfig(${i})" required>
                                     <option value="">Select Class...</option>
-                                    ${cwagsClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
+                                    ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1721,14 +1795,38 @@
                 trialData.classes.push(classData);
             }
             
-            // Pre-populate the trial application form
-            populateTrialApplication(trialData);
+            // Save trial to storage
+            const trialId = saveTrialToStorage(trialData);
             
-            // Close modal and switch to Applications tab
-            hideModal('newTrialModal');
-            showTab('applications');
+            if (trialId) {
+                // Pre-populate the trial application form
+                populateTrialApplication(trialData);
+                
+                // Close modal and switch to Applications tab
+                hideModal('newTrialModal');
+                showTab('applications');
+                
+                alert(`Trial ${trialId} created and saved! Please complete the remaining application details.`);
+                
+                // Reset modal
+                resetTrialModal();
+            } else {
+                alert('Error saving trial. Please try again.');
+            }
+        }
+
+        function resetTrialModal() {
+            // Reset modal to first step
+            document.getElementById('trialTypeStep').style.display = 'block';
+            document.getElementById('standaloneStep').style.display = 'none';
+            document.getElementById('leagueStep').style.display = 'none';
+            currentModalStep = 1;
             
-            alert('Trial configuration created! Please complete the remaining application details.');
+            // Clear form data
+            document.getElementById('standaloneDate').value = '';
+            document.getElementById('numClasses').value = '';
+            document.getElementById('classConfiguration').innerHTML = '';
+            document.getElementById('createStandaloneBtn').style.display = 'none';
         }
 
         function populateTrialApplication(trialData) {
