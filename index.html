@@ -661,58 +661,12 @@
         <!-- Entry Management Tab -->
         <div id="entries" class="tab-content">
             <h2 style="margin-bottom: 2rem; color: #4a5568;">Entry Management</h2>
-            <p style="color: #718096; margin-bottom: 2rem;">Manage dog entries and registrations from the loaded data.</p>
+            <p style="color: #718096; margin-bottom: 2rem;">Select a trial to manage entries and generate running orders.</p>
             
             <div id="entriesContent">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="dogSearch">Search Dogs (Registration #, Name, or Handler)</label>
-                        <div class="typeahead-container">
-                            <input type="text" id="dogSearch" placeholder="Type to search dog records..." 
-                                   oninput="searchDogs(this.value)" 
-                                   onfocus="searchDogs(this.value)">
-                            <div class="typeahead-dropdown" id="dogSearchDropdown"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="trialSelect">Select Trial for Entry</label>
-                        <select id="trialSelect" onchange="updateTrialInfo()">
-                            <option value="">Choose a trial...</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div id="dogInfo" style="display: none; background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
-                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Selected Dog Information</h4>
-                    <div id="dogDetails"></div>
-                </div>
-                
-                <div id="trialInfo" style="display: none; background: #e6fffa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
-                    <h4 style="color: #2c7a7b; margin-bottom: 1rem;">Trial Information</h4>
-                    <div id="trialDetails"></div>
-                </div>
-                
-                <div class="table-container" style="margin-top: 2rem;">
-                    <h3 style="padding: 1rem; margin: 0; background: #f7fafc; color: #4a5568;">
-                        Dog Records from dataforsite.xlsx
-                        <span id="recordCount" style="font-weight: normal; font-size: 0.9rem; color: #718096;"></span>
-                    </h3>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Registration #</th>
-                                <th>Call Name</th>
-                                <th>Full Name</th>
-                                <th>Handler</th>
-                                <th>Current Class</th>
-                                <th>Judge</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dogRecordsTable">
-                            <!-- Dog records will be populated here -->
-                        </tbody>
-                    </table>
+                <div style="text-align: center; color: #a0aec0; padding: 3rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                    <p>Create a trial first to manage entries</p>
                 </div>
             </div>
         </div>
@@ -869,237 +823,28 @@
     <script>
         // Global variables
         let trials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
-        let dogData = []; // Data from dataforsite.xlsx
-        let availableClasses = [];
-        let availableJudges = [];
         let currentStep = 1;
         let selectedTrialType = null;
         let editingTrialId = null;
         
-        // Load data from the auto-converted JSON files
-        async function loadDataFromRepository() {
-            console.log('Loading data from repository...');
-            
-            try {
-                // Try to load the main data file converted from Excel
-                const dataResponse = await fetch('data/records.json');
-                if (dataResponse.ok) {
-                    const data = await dataResponse.json();
-                    console.log('Loaded records data:', data);
-                    
-                    if (data.records) {
-                        dogData = data.records;
-                        console.log(`Loaded ${dogData.length} dog records`);
-                        
-                        // Extract unique classes from the data
-                        const classSet = new Set();
-                        dogData.forEach(record => {
-                            if (record.className && record.className.trim()) {
-                                classSet.add(record.className.trim());
-                            }
-                        });
-                        availableClasses = Array.from(classSet).sort();
-                        console.log('Available classes from data:', availableClasses);
-                        
-                        // Extract unique judges from the data
-                        const judgeSet = new Set();
-                        dogData.forEach(record => {
-                            if (record.judgeName && record.judgeName.trim()) {
-                                judgeSet.add(record.judgeName.trim());
-                            }
-                        });
-                        availableJudges = Array.from(judgeSet).sort();
-                        console.log('Available judges from data:', availableJudges);
-                        
-                        updateDataFreshness(data.lastUpdated);
-                    }
-                } else {
-                    console.log('Records data file not found, using fallback data');
-                    loadFallbackData();
-                }
-                
-                // Try to load existing trials data if it exists
-                try {
-                    const trialsResponse = await fetch('data/trials.json');
-                    if (trialsResponse.ok) {
-                        const trialsData = await trialsResponse.json();
-                        if (trialsData.trials) {
-                            // Merge with localStorage trials
-                            const repoTrials = trialsData.trials;
-                            const localTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
-                            
-                            // Combine and deduplicate
-                            const allTrials = [...repoTrials, ...localTrials];
-                            const uniqueTrials = allTrials.filter((trial, index, arr) => 
-                                arr.findIndex(t => t.id === trial.id) === index
-                            );
-                            
-                            trials = uniqueTrials;
-                            console.log(`Loaded ${trials.length} trials (${repoTrials.length} from repo, ${localTrials.length} from local)`);
-                        }
-                    }
-                } catch (error) {
-                    console.log('No trials data in repository, using local storage only');
-                }
-                
-            } catch (error) {
-                console.error('Error loading repository data:', error);
-                loadFallbackData();
-            }
-        }
+        // Sample data for typeahead
+        const availableClasses = [
+            'Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 
+            'Super Sleuth Level 4', 'Starter', 'Advanced', 'Pro', 'ARF',
+            'Rally Level 1', 'Rally Level 2', 'Rally Level 3',
+            'Obedience Level 1', 'Obedience Level 2', 'Obedience Level 3'
+        ];
         
-        function loadFallbackData() {
-            console.log('Loading fallback data...');
-            // Fallback data if repository data is not available
-            availableClasses = [
-                'Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 
-                'Super Sleuth Level 4', 'Starter', 'Advanced', 'Pro', 'ARF',
-                'Rally Level 1', 'Rally Level 2', 'Rally Level 3',
-                'Obedience Level 1', 'Obedience Level 2', 'Obedience Level 3'
-            ];
-            
-            availableJudges = [
-                'Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer', 'John Smith',
-                'Mary Johnson', 'Bob Wilson', 'Lisa Davis', 'Carol Brown',
-                'David Lee', 'Susan Miller', 'Mike Taylor', 'Jennifer White'
-            ];
-            
-            // Sample dog data
-            dogData = [
-                {
-                    id: '07-0001-01',
-                    callName: 'BJ',
-                    fullName: 'Jed\'s Black Jack',
-                    handlerFullName: 'Shirley Ottmer',
-                    handlerFirstName: 'Shirley',
-                    handlerLastName: 'Ottmer',
-                    className: 'Patrol Level 1',
-                    judgeName: 'Linda Alberda'
-                },
-                {
-                    id: '07-0001-02',
-                    callName: 'Jaidon',
-                    fullName: 'Romyldale\'s Jaidon',
-                    handlerFullName: 'Shirley Ottmer',
-                    handlerFirstName: 'Shirley',
-                    handlerLastName: 'Ottmer',
-                    className: 'Detective Level 2',
-                    judgeName: 'Ginger Alpine'
-                }
-            ];
-        }
-        
-        function updateDataFreshness(lastUpdated) {
-            // Create or update data freshness indicator
-            let indicator = document.getElementById('dataFreshness');
-            if (!indicator) {
-                indicator = document.createElement('div');
-                indicator.id = 'dataFreshness';
-                indicator.style.cssText = `
-                    position: fixed; bottom: 20px; right: 20px; 
-                    background: rgba(255,255,255,0.9); padding: 0.5rem 1rem;
-                    border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                    font-size: 0.875rem; color: #718096; z-index: 1000;
-                `;
-                document.body.appendChild(indicator);
-            }
-            
-            if (lastUpdated) {
-                const updateDate = new Date(lastUpdated);
-                const now = new Date();
-                const diffHours = Math.floor((now - updateDate) / (1000 * 60 * 60));
-                
-                let timeAgo;
-                if (diffHours < 1) timeAgo = 'just updated';
-                else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
-                else timeAgo = `${Math.floor(diffHours / 24)}d ago`;
-                
-                indicator.innerHTML = `📊 Data updated ${timeAgo}`;
-            } else {
-                indicator.innerHTML = `📊 Using local data`;
-            }
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                if (indicator.parentNode) {
-                    indicator.style.opacity = '0.5';
-                }
-            }, 5000);
-        }
-        
-        // Enhanced dog lookup functionality
-        function searchDogRecords(query) {
-            if (!query || query.length < 2) return [];
-            
-            const lowerQuery = query.toLowerCase();
-            return dogData.filter(dog => 
-                (dog.id && dog.id.toLowerCase().includes(lowerQuery)) ||
-                (dog.callName && dog.callName.toLowerCase().includes(lowerQuery)) ||
-                (dog.fullName && dog.fullName.toLowerCase().includes(lowerQuery)) ||
-                (dog.handlerFullName && dog.handlerFullName.toLowerCase().includes(lowerQuery))
-            ).slice(0, 10); // Limit to 10 results
-        }
-        
-        function getDogByRegistration(regNumber) {
-            return dogData.find(dog => dog.id === regNumber);
-        }
-        
-        // Sample data for typeahead - will be populated from loaded data
-        const availableClasses = [];
-        const availableJudges = [];
+        const availableJudges = [
+            'Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer', 'John Smith',
+            'Mary Johnson', 'Bob Wilson', 'Lisa Davis', 'Carol Brown',
+            'David Lee', 'Susan Miller', 'Mike Taylor', 'Jennifer White'
+        ];
 
         // Initialize the application
-        async function init() {
-            console.log('Initializing C-WAGS Trial Management System...');
-            
-            // Show loading state
-            showLoadingState();
-            
-            try {
-                // Load data from repository first
-                await loadDataFromRepository();
-                
-                // Load local trials
-                loadTrials();
-                
-                // Update display
-                updateTrialsDisplay();
-                
-                console.log('Initialization complete');
-                console.log(`Available classes: ${availableClasses.length}`);
-                console.log(`Available judges: ${availableJudges.length}`);
-                console.log(`Dog records: ${dogData.length}`);
-                console.log(`Trials: ${trials.length}`);
-                
-            } catch (error) {
-                console.error('Initialization error:', error);
-            } finally {
-                hideLoadingState();
-            }
-        }
-        
-        function showLoadingState() {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = 'loadingState';
-            loadingDiv.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                            background: rgba(255,255,255,0.9); z-index: 3000; 
-                            display: flex; align-items: center; justify-content: center;">
-                    <div style="text-align: center; color: #4a5568;">
-                        <div style="font-size: 2rem; margin-bottom: 1rem;">🐕</div>
-                        <div style="font-size: 1.2rem; font-weight: 600;">Loading C-WAGS Data...</div>
-                        <div style="margin-top: 0.5rem;">Fetching latest records from repository</div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(loadingDiv);
-        }
-        
-        function hideLoadingState() {
-            const loadingDiv = document.getElementById('loadingState');
-            if (loadingDiv) {
-                loadingDiv.remove();
-            }
+        function init() {
+            loadTrials();
+            updateTrialsDisplay();
         }
 
         // Tab management
@@ -1782,158 +1527,6 @@
         function updateTrialsDisplay() {
             updateTrialsGrid();
             updateTrialsTable();
-            updateTrialSelectors();
-            updateDogRecordsTable();
-        }
-        
-        function updateTrialSelectors() {
-            const trialSelect = document.getElementById('trialSelect');
-            if (trialSelect) {
-                trialSelect.innerHTML = '<option value="">Choose a trial...</option>';
-                trials.forEach(trial => {
-                    const option = document.createElement('option');
-                    option.value = trial.id;
-                    option.textContent = `${trial.name} (${trial.type === 'league' ? trial.dates[0] + ' - ' + trial.dates[trial.dates.length-1] : trial.date})`;
-                    trialSelect.appendChild(option);
-                });
-            }
-        }
-        
-        function updateDogRecordsTable() {
-            const tableBody = document.getElementById('dogRecordsTable');
-            const recordCount = document.getElementById('recordCount');
-            
-            if (tableBody && dogData.length > 0) {
-                recordCount.textContent = `(${dogData.length} records loaded)`;
-                
-                tableBody.innerHTML = dogData.map(dog => `
-                    <tr>
-                        <td>${dog.id || 'N/A'}</td>
-                        <td>${dog.callName || 'N/A'}</td>
-                        <td>${dog.fullName || 'N/A'}</td>
-                        <td>${dog.handlerFullName || (dog.handlerFirstName + ' ' + dog.handlerLastName).trim() || 'N/A'}</td>
-                        <td>${dog.className || 'N/A'}</td>
-                        <td>${dog.judgeName || 'N/A'}</td>
-                        <td>
-                            <button class="btn btn-secondary" onclick="selectDogForEntry('${dog.id}')" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
-                                Select
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            } else if (tableBody) {
-                recordCount.textContent = '(No records loaded)';
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: #a0aec0; padding: 2rem;">
-                            ${dogData.length === 0 ? 'No dog records found. Make sure dataforsite.xlsx is in the data/ folder.' : 'Loading...'}
-                        </td>
-                    </tr>
-                `;
-            }
-        }
-        
-        function searchDogs(query) {
-            const dropdown = document.getElementById('dogSearchDropdown');
-            if (!dropdown) return;
-            
-            if (!query || query.length < 2) {
-                dropdown.style.display = 'none';
-                return;
-            }
-            
-            const results = searchDogRecords(query);
-            
-            if (results.length > 0) {
-                dropdown.innerHTML = results.map(dog => `
-                    <div class="typeahead-item" onclick="selectDogFromSearch('${dog.id}')">
-                        <strong>${dog.id}</strong> - ${dog.callName} (${dog.handlerFullName || (dog.handlerFirstName + ' ' + dog.handlerLastName).trim()})
-                    </div>
-                `).join('');
-                dropdown.style.display = 'block';
-            } else {
-                dropdown.innerHTML = '<div class="typeahead-item" style="color: #a0aec0;">No dogs found matching "' + query + '"</div>';
-                dropdown.style.display = 'block';
-            }
-        }
-        
-        function selectDogFromSearch(dogId) {
-            const dog = getDogByRegistration(dogId);
-            if (dog) {
-                document.getElementById('dogSearch').value = `${dog.id} - ${dog.callName}`;
-                document.getElementById('dogSearchDropdown').style.display = 'none';
-                showDogInfo(dog);
-            }
-        }
-        
-        function selectDogForEntry(dogId) {
-            const dog = getDogByRegistration(dogId);
-            if (dog) {
-                document.getElementById('dogSearch').value = `${dog.id} - ${dog.callName}`;
-                showDogInfo(dog);
-            }
-        }
-        
-        function showDogInfo(dog) {
-            const dogInfo = document.getElementById('dogInfo');
-            const dogDetails = document.getElementById('dogDetails');
-            
-            if (dogInfo && dogDetails) {
-                dogDetails.innerHTML = `
-                    <div class="form-grid">
-                        <div><strong>Registration #:</strong> ${dog.id || 'N/A'}</div>
-                        <div><strong>Call Name:</strong> ${dog.callName || 'N/A'}</div>
-                        <div><strong>Full Name:</strong> ${dog.fullName || 'N/A'}</div>
-                        <div><strong>Handler:</strong> ${dog.handlerFullName || (dog.handlerFirstName + ' ' + dog.handlerLastName).trim() || 'N/A'}</div>
-                        <div><strong>Current Class:</strong> ${dog.className || 'N/A'}</div>
-                        <div><strong>Judge:</strong> ${dog.judgeName || 'N/A'}</div>
-                    </div>
-                `;
-                dogInfo.style.display = 'block';
-            }
-        }
-        
-        function updateTrialInfo() {
-            const trialSelect = document.getElementById('trialSelect');
-            const trialInfo = document.getElementById('trialInfo');
-            const trialDetails = document.getElementById('trialDetails');
-            
-            if (!trialSelect || !trialInfo || !trialDetails) return;
-            
-            const selectedTrialId = trialSelect.value;
-            if (!selectedTrialId) {
-                trialInfo.style.display = 'none';
-                return;
-            }
-            
-            const trial = trials.find(t => t.id === selectedTrialId);
-            if (trial) {
-                const dateDisplay = trial.type === 'league' 
-                    ? `${trial.dates[0]} to ${trial.dates[trial.dates.length - 1]} (${trial.dates.length} nights)`
-                    : trial.date;
-                
-                const classesDisplay = trial.classes.map(cls => 
-                    trial.type === 'league' 
-                        ? `Night ${cls.night}: ${cls.name} (${cls.rounds.length} rounds)`
-                        : `${cls.name} (${cls.rounds.length} rounds)`
-                ).join('<br>');
-                
-                trialDetails.innerHTML = `
-                    <div class="form-grid">
-                        <div><strong>Trial Name:</strong> ${trial.name}</div>
-                        <div><strong>Host:</strong> ${trial.host}</div>
-                        <div><strong>Location:</strong> ${trial.location}, ${trial.cityState}</div>
-                        <div><strong>Type:</strong> ${trial.type === 'league' ? '🏆 League' : '🎯 Standalone'}</div>
-                        <div><strong>Date(s):</strong> ${dateDisplay}</div>
-                        <div><strong>Status:</strong> <span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></div>
-                    </div>
-                    <div style="margin-top: 1rem;">
-                        <strong>Classes:</strong><br>
-                        ${classesDisplay}
-                    </div>
-                `;
-                trialInfo.style.display = 'block';
-            }
         }
 
         function updateTrialsGrid() {
@@ -2124,10 +1717,7 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('DOM loaded, initializing...');
-            await init();
-        });
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
