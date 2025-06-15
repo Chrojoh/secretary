@@ -1718,15 +1718,27 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="standaloneJudge${i}">Judge</label>
-                                <input type="text" id="standaloneJudge${i}" placeholder="Judge name" list="judgeList${i}">
-                                <datalist id="judgeList${i}">
-                                    ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
-                                    <option value="Linda Alberda">
-                                    <option value="Ginger Alpine">
-                                    <option value="Shirley Ottmer">
-                                </datalist>
+                                <label for="standaloneRounds${i}">Number of Rounds</label>
+                                <select id="standaloneRounds${i}" onchange="generateStandaloneRounds(${i})" required>
+                                    <option value="">Select...</option>
+                                    <option value="1">1 Round</option>
+                                    <option value="2">2 Rounds</option>
+                                    <option value="3">3 Rounds</option>
+                                    <option value="4">4 Rounds</option>
+                                </select>
                             </div>
+                        </div>
+                        
+                        <div id="standaloneRoundsConfig${i}" style="margin-top: 1rem;">
+                            <!-- Round configurations will be generated here -->
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="standaloneFEO${i}" style="margin-right: 0.5rem;">
+                                <span>FEO (For Exhibition Only) offered for this class</span>
+                            </label>
+                            <small style="color: #718096; margin-top: 0.25rem;">Check if participants can enter this class for exhibition without competing for placement</small>
                         </div>
                     </div>
                 `;
@@ -1734,6 +1746,42 @@
             
             container.innerHTML = html;
             createBtn.style.display = 'inline-block';
+        }
+
+        function generateStandaloneRounds(classIndex) {
+            const numRounds = parseInt(document.getElementById(`standaloneRounds${classIndex}`).value);
+            const container = document.getElementById(`standaloneRoundsConfig${classIndex}`);
+            
+            if (!numRounds) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div style="background: #f0f4ff; padding: 1rem; border-radius: 10px; margin-top: 1rem;">';
+            html += '<h6 style="margin-bottom: 1rem; color: #4a5568;">Round Assignments</h6>';
+            html += '<div class="form-grid">';
+            
+            for (let round = 1; round <= numRounds; round++) {
+                html += `
+                    <div class="form-group">
+                        <label for="standaloneJudge${classIndex}_${round}">Round ${round} Judge</label>
+                        <input type="text" 
+                               id="standaloneJudge${classIndex}_${round}" 
+                               placeholder="Judge name" 
+                               list="judgeList${classIndex}_${round}"
+                               required>
+                        <datalist id="judgeList${classIndex}_${round}">
+                            ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
+                            <option value="Linda Alberda">
+                            <option value="Ginger Alpine">
+                            <option value="Shirley Ottmer">
+                        </datalist>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div>';
+            container.innerHTML = html;
         }
 
         function createStandaloneTrial() {
@@ -1745,21 +1793,45 @@
                 return;
             }
             
-            // Collect class data
-            const classes = [];
-            const judges = [];
+            // Collect class data with rounds
+            const classDetails = [];
+            const allClasses = [];
+            const allJudges = [];
             
             for (let i = 0; i < numClasses; i++) {
                 const className = document.getElementById(`standaloneClass${i}`).value;
-                const judge = document.getElementById(`standaloneJudge${i}`).value;
+                const numRounds = parseInt(document.getElementById(`standaloneRounds${i}`).value || 0);
+                const feoOffered = document.getElementById(`standaloneFEO${i}`).checked;
                 
                 if (!className) {
                     alert(`Please select a class type for Class ${i + 1}.`);
                     return;
                 }
                 
-                classes.push(className);
-                if (judge) judges.push(judge);
+                if (!numRounds) {
+                    alert(`Please select number of rounds for Class ${i + 1}.`);
+                    return;
+                }
+                
+                // Collect round judges
+                const rounds = [];
+                for (let round = 1; round <= numRounds; round++) {
+                    const judge = document.getElementById(`standaloneJudge${i}_${round}`).value;
+                    if (!judge) {
+                        alert(`Please assign a judge for Class ${i + 1}, Round ${round}.`);
+                        return;
+                    }
+                    rounds.push({ round: round, judge: judge });
+                    if (!allJudges.includes(judge)) allJudges.push(judge);
+                }
+                
+                classDetails.push({
+                    name: className,
+                    rounds: rounds,
+                    feoOffered: feoOffered
+                });
+                
+                allClasses.push(className);
             }
             
             // Create trial object
@@ -1770,9 +1842,10 @@
                 host: 'Host Organization', // Will be filled in application form
                 location: 'TBD',
                 city: 'TBD',
-                classes: classes,
-                judge: judges[0] || 'TBD',
-                judges: judges.join(', '),
+                classes: allClasses,
+                classDetails: classDetails,
+                judge: allJudges[0] || 'TBD',
+                judges: allJudges.join(', '),
                 status: 'draft',
                 created: new Date().toISOString(),
                 lastModified: new Date().toISOString(),
@@ -1786,7 +1859,7 @@
             populateTrialsTable();
             
             hideModal('newTrialModal');
-            alert(`Standalone trial ${newTrial.id} created successfully! You can now edit it to add more details.`);
+            alert(`Standalone trial ${newTrial.id} created successfully with ${classDetails.length} classes and ${allJudges.length} judges! You can now edit it to add more details.`);
             
             // Auto-open edit modal
             setTimeout(() => editTrial(newTrial.id), 500);
@@ -1870,21 +1943,69 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="leagueNight${nightIndex}Judge${i}">Judge</label>
-                                <input type="text" id="leagueNight${nightIndex}Judge${i}" placeholder="Judge name" list="judgeListLeague${nightIndex}${i}">
-                                <datalist id="judgeListLeague${nightIndex}${i}">
-                                    ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
-                                    <option value="Linda Alberda">
-                                    <option value="Ginger Alpine">
-                                    <option value="Shirley Ottmer">
-                                </datalist>
+                                <label for="leagueNight${nightIndex}Rounds${i}">Number of Rounds</label>
+                                <select id="leagueNight${nightIndex}Rounds${i}" onchange="generateLeagueRounds(${nightIndex}, ${i})" required>
+                                    <option value="">Select...</option>
+                                    <option value="1">1 Round</option>
+                                    <option value="2">2 Rounds</option>
+                                    <option value="3">3 Rounds</option>
+                                    <option value="4">4 Rounds</option>
+                                </select>
                             </div>
+                        </div>
+                        
+                        <div id="leagueNight${nightIndex}RoundsConfig${i}" style="margin-top: 1rem;">
+                            <!-- Round configurations will be generated here -->
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="leagueNight${nightIndex}FEO${i}" style="margin-right: 0.5rem;">
+                                <span>FEO (For Exhibition Only) offered for this class</span>
+                            </label>
+                            <small style="color: #718096; margin-top: 0.25rem;">Check if participants can enter this class for exhibition without competing for placement</small>
                         </div>
                     </div>
                 `;
             }
             
             html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function generateLeagueRounds(nightIndex, classIndex) {
+            const numRounds = parseInt(document.getElementById(`leagueNight${nightIndex}Rounds${classIndex}`).value);
+            const container = document.getElementById(`leagueNight${nightIndex}RoundsConfig${classIndex}`);
+            
+            if (!numRounds) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '<div style="background: #f0f4ff; padding: 1rem; border-radius: 10px; margin-top: 1rem;">';
+            html += '<h6 style="margin-bottom: 1rem; color: #4a5568;">Round Assignments</h6>';
+            html += '<div class="form-grid">';
+            
+            for (let round = 1; round <= numRounds; round++) {
+                html += `
+                    <div class="form-group">
+                        <label for="leagueNight${nightIndex}Judge${classIndex}_${round}">Round ${round} Judge</label>
+                        <input type="text" 
+                               id="leagueNight${nightIndex}Judge${classIndex}_${round}" 
+                               placeholder="Judge name" 
+                               list="judgeListLeague${nightIndex}_${classIndex}_${round}"
+                               required>
+                        <datalist id="judgeListLeague${nightIndex}_${classIndex}_${round}">
+                            ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
+                            <option value="Linda Alberda">
+                            <option value="Ginger Alpine">
+                            <option value="Shirley Ottmer">
+                        </datalist>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div>';
             container.innerHTML = html;
         }
 
@@ -1897,7 +2018,7 @@
                 return;
             }
             
-            // Collect league data
+            // Collect league data with rounds
             const nights = [];
             const allClasses = [];
             const allJudges = [];
@@ -1911,28 +2032,52 @@
                     return;
                 }
                 
+                const nightClassDetails = [];
                 const nightClasses = [];
                 const nightJudges = [];
                 
                 for (let i = 0; i < numClasses; i++) {
                     const className = document.getElementById(`leagueNight${night}Class${i}`)?.value;
-                    const judge = document.getElementById(`leagueNight${night}Judge${i}`)?.value;
+                    const numRounds = parseInt(document.getElementById(`leagueNight${night}Rounds${i}`)?.value || 0);
+                    const feoOffered = document.getElementById(`leagueNight${night}FEO${i}`)?.checked;
                     
                     if (!className) {
                         alert(`Please select a class type for Night ${night + 1}, Class ${i + 1}.`);
                         return;
                     }
                     
-                    nightClasses.push(className);
-                    if (judge) nightJudges.push(judge);
+                    if (!numRounds) {
+                        alert(`Please select number of rounds for Night ${night + 1}, Class ${i + 1}.`);
+                        return;
+                    }
                     
+                    // Collect round judges for this class
+                    const rounds = [];
+                    for (let round = 1; round <= numRounds; round++) {
+                        const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
+                        if (!judge) {
+                            alert(`Please assign a judge for Night ${night + 1}, Class ${i + 1}, Round ${round}.`);
+                            return;
+                        }
+                        rounds.push({ round: round, judge: judge });
+                        if (!nightJudges.includes(judge)) nightJudges.push(judge);
+                        if (!allJudges.includes(judge)) allJudges.push(judge);
+                    }
+                    
+                    nightClassDetails.push({
+                        name: className,
+                        rounds: rounds,
+                        feoOffered: feoOffered
+                    });
+                    
+                    nightClasses.push(className);
                     if (!allClasses.includes(className)) allClasses.push(className);
-                    if (judge && !allJudges.includes(judge)) allJudges.push(judge);
                 }
                 
                 nights.push({
                     date: nightDate,
                     classes: nightClasses,
+                    classDetails: nightClassDetails,
                     judges: nightJudges
                 });
             }
@@ -1966,7 +2111,15 @@
             populateTrialsTable();
             
             hideModal('newTrialModal');
-            alert(`League trial ${newTrial.id} created successfully with ${numNights} nights! You can now edit it to add more details.`);
+            
+            // Calculate total rounds and classes
+            const totalRounds = nights.reduce((sum, night) => {
+                return sum + night.classDetails.reduce((nightSum, classDetail) => {
+                    return nightSum + classDetail.rounds.length;
+                }, 0);
+            }, 0);
+            
+            alert(`League trial ${newTrial.id} created successfully!\n\n• ${numNights} nights\n• ${allClasses.length} different classes\n• ${totalRounds} total rounds\n• ${allJudges.length} judges\n\nYou can now edit it to add more details.`);
             
             // Auto-open edit modal
             setTimeout(() => editTrial(newTrial.id), 500);
