@@ -1,4 +1,286 @@
-<!DOCTYPE html>
+function updateTrialsDisplay() {
+            updateTrialsGrid();
+            updateTrialsTable();
+            updateTrialSelectors();
+            updateApplicationTrialSelector();
+            updateDogRecordsTable();
+        }
+        
+        function updateApplicationTrialSelector() {
+            const appTrialSelect = document.getElementById('appTrialSelect');
+            if (appTrialSelect) {
+                appTrialSelect.innerHTML = '<option value="">Choose a trial...</option>';
+                trials.forEach(trial => {
+                    const option = document.createElement('option');
+                    option.value = trial.id;
+                    
+                    const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
+                        ? trial.dates[0] + ' - ' + trial.dates[trial.dates.length-1]
+                        : (trial.date || 'No date');
+                    
+                    option.textContent = `${trial.name || 'Unnamed Trial'} (${dateDisplay})`;
+                    appTrialSelect.appendChild(option);
+                });
+            }
+        }
+        
+        function generateTrialApplication() {
+            const trialSelect = document.getElementById('appTrialSelect');
+            const selectedTrialId = trialSelect.value;
+            
+            if (!selectedTrialId) {
+                document.getElementById('trialApplicationForm').style.display = 'none';
+                return;
+            }
+            
+            const trial = trials.find(t => t.id === selectedTrialId);
+            if (!trial) return;
+            
+            // Populate the application form with trial data
+            populateApplicationForm(trial);
+            document.getElementById('trialApplicationForm').style.display = 'block';
+        }
+        
+        function populateApplicationForm(trial) {
+            try {
+                // Basic information
+                const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
+                    ? trial.dates.join(', ')
+                    : (trial.date || 'No date set');
+                
+                document.getElementById('appTrialDates').value = dateDisplay;
+                document.getElementById('appCityState').value = trial.cityState || '';
+                document.getElementById('appHostName').value = trial.host || '';
+                document.getElementById('appTrialLocation').value = trial.location || '';
+                
+                // Set submitted date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('appSubmittedDate').value = today;
+                
+                // Set league status
+                const leagueRadios = document.querySelectorAll('input[name="league"]');
+                leagueRadios.forEach(radio => {
+                    radio.checked = radio.value === (trial.type === 'league' ? 'YES' : 'NO');
+                });
+                
+                // Populate judges list
+                const judgesList = [];
+                if (trial.classes && trial.classes.length > 0) {
+                    trial.classes.forEach(classData => {
+                        if (classData.rounds) {
+                            classData.rounds.forEach(round => {
+                                if (round.judge && !judgesList.includes(round.judge)) {
+                                    judgesList.push(round.judge);
+                                }
+                            });
+                        }
+                    });
+                }
+                document.getElementById('appJudges').value = judgesList.join(', ');
+                
+                // Populate class schedule table
+                populateClassScheduleTable(trial);
+                
+                // Set trial type checkboxes based on classes
+                setTrialTypeCheckboxes(trial);
+                
+                // Calculate entry deadline (7 days before trial)
+                if (trial.date || (trial.dates && trial.dates.length > 0)) {
+                    const trialDate = new Date(trial.date || trial.dates[0]);
+                    const deadline = new Date(trialDate);
+                    deadline.setDate(trialDate.getDate() - 7);
+                    document.getElementById('entryDeadline').value = deadline.toISOString().split('T')[0];
+                }
+                
+                console.log('Application form populated for trial:', trial.name);
+                
+            } catch (error) {
+                console.error('Error populating application form:', error);
+                alert('Error loading trial application: ' + error.message);
+            }
+        }
+        
+        function populateClassScheduleTable(trial) {
+            const tableBody = document.getElementById('classScheduleTable');
+            const headers = [];
+            
+            // Clear existing content
+            tableBody.innerHTML = '';
+            
+            if (!trial.classes || trial.classes.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #a0aec0;">No classes configured</td></tr>';
+                return;
+            }
+            
+            // Set up headers based on trial type
+            if (trial.type === 'league') {
+                // League trial - use dates as headers
+                trial.dates.forEach((date, index) => {
+                    const headerElement = document.getElementById(`scheduleHeader${index + 1}`);
+                    if (headerElement) {
+                        const formattedDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        headerElement.textContent = `Day ${index + 1} (${formattedDate})`;
+                    }
+                });
+                
+                // Group classes by night
+                const classesByNight = {};
+                trial.classes.forEach(classData => {
+                    const night = classData.night || 1;
+                    if (!classesByNight[night]) classesByNight[night] = [];
+                    classesByNight[night].push(classData);
+                });
+                
+                // Create rows for each unique class name across all nights
+                const allClassNames = [...new Set(trial.classes.map(c => c.name))];
+                allClassNames.forEach(className => {
+                    const row = document.createElement('tr');
+                    let rowHtml = `<td><strong>${className}</strong></td>`;
+                    
+                    for (let night = 1; night <= trial.dates.length; night++) {
+                        const nightClasses = classesByNight[night] || [];
+                        const classData = nightClasses.find(c => c.name === className);
+                        
+                        if (classData && classData.rounds) {
+                            const judges = classData.rounds.map(r => r.judge).join(', ');
+                            rowHtml += `<td>${judges}</td>`;
+                        } else {
+                            rowHtml += `<td>-</td>`;
+                        }
+                    }
+                    
+                    // Fill remaining columns
+                    for (let i = trial.dates.length + 1; i <= 6; i++) {
+                        rowHtml += `<td>-</td>`;
+                    }
+                    
+                    row.innerHTML = rowHtml;
+                    tableBody.appendChild(row);
+                });
+                
+            } else {
+                // Standalone trial - all classes on same day
+                const headerElement = document.getElementById('scheduleHeader1');
+                if (headerElement) {
+                    const formattedDate = new Date(trial.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    headerElement.textContent = `Day 1 (${formattedDate})`;
+                }
+                
+                trial.classes.forEach(classData => {
+                    const row = document.createElement('tr');
+                    const judges = classData.rounds ? classData.rounds.map(r => r.judge).join(', ') : '';
+                    
+                    let rowHtml = `<td><strong>${classData.name}</strong></td>`;
+                    rowHtml += `<td>${judges}</td>`;
+                    
+                    // Fill remaining columns with dashes
+                    for (let i = 2; i <= 6; i++) {
+                        rowHtml += `<td>-</td>`;
+                    }
+                    
+                    row.innerHTML = rowHtml;
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+        
+        function setTrialTypeCheckboxes(trial) {
+            // Reset all checkboxes
+            document.getElementById('appObedience').checked = false;
+            document.getElementById('appRally').checked = false;
+            document.getElementById('appScent').checked = false;
+            document.getElementById('appGames').checked = false;
+            
+            // Set checkboxes based on class names
+            if (trial.classes && trial.classes.length > 0) {
+                trial.classes.forEach(classData => {
+                    const className = (classData.name || '').toLowerCase();
+                    
+                    if (className.includes('obedience') || className.includes('level')) {
+                        document.getElementById('appObedience').checked = true;
+                    }
+                    if (className.includes('rally')) {
+                        document.getElementById('appRally').checked = true;
+                    }
+                    if (className.includes('scent') || className.includes('patrol') || 
+                        className.includes('detective') || className.includes('investigator') || 
+                        className.includes('sleuth')) {
+                        document.getElementById('appScent').checked = true;
+                    }
+                    if (className.includes('game') || className.includes('color') || 
+                        className.includes('pair') || className.includes('team')) {
+                        document.getElementById('appGames').checked = true;
+                    }
+                });
+            }
+        }
+        
+        function generateEntryFormLink() {
+            const trialSelect = document.getElementById('appTrialSelect');
+            const selectedTrialId = trialSelect.value;
+            
+            if (!selectedTrialId) {
+                alert('Please select a trial first.');
+                return;
+            }
+            
+            const trial = trials.find(t => t.id === selectedTrialId);
+            if (!trial) return;
+            
+            // Collect entry fees
+            const entryFees = {
+                firstClass: parseFloat(document.getElementById('entryFeeFirst').value) || 25.00,
+                additionalClass: parseFloat(document.getElementById('entryFeeAdditional').value) || 20.00,
+                juniorDiscount: parseFloat(document.getElementById('entryFeeJunior').value) || 5.00,
+                lateFee: parseFloat(document.getElementById('entryFeeLateFee').value) || 10.00,
+                entryDeadline: document.getElementById('entryDeadline').value,
+                entryLimit: document.getElementById('entryLimit').value || null
+            };
+            
+            // Store entry form data with pricing
+            const entryFormData = {
+                trialId: trial.id,
+                trialName: trial.name,
+                trialType: trial.type,
+                dates: trial.type === 'league' ? trial.dates : [trial.date],
+                host: trial.host,
+                location: trial.location + ', ' + trial.cityState,
+                contact: document.getElementById('appTrialContact').value,
+                email: document.getElementById('appContactEmail').value,
+                phone: document.getElementById('appContactPhone').value,
+                classes: trial.classes,
+                fees: entryFees,
+                status: 'accepting_entries',
+                created: new Date().toISOString()
+            };
+            
+            // Save to localStorage for entry form access
+            let entryForms = JSON.parse(localStorage.getItem('cwags_entry_forms') || '{}');
+            entryForms[trial.id] = entryFormData;
+            localStorage.setItem('cwags_entry_forms', JSON.stringify(entryForms));
+            
+            // Generate the link
+            const baseUrl = window.location.origin + window.location.pathname;
+            const entryUrl = `${baseUrl}?entry=${trial.id}`;
+            
+            // Display the link
+            document.getElementById('generatedEntryLink').textContent = entryUrl;
+            document.getElementById('entryFormLinkDisplay').style.display = 'block';
+            
+            console.log('Entry form link generated:', entryUrl);
+            showAlert('success', 'Entry form link generated successfully!');
+        }
+        
+        function copyEntryFormLink() {
+            const linkText = document.getElementById('generatedEntryLink').textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(linkText).then(() => {
+                    showAlert('success', 'Entry form link copied to clipboard!');
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -586,6 +868,7 @@
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
             <button class="nav-tab" onclick="showTab('management')">Trial Management</button>
+            <button class="nav-tab" onclick="showTab('application')">Trial Application</button>
             <button class="nav-tab" onclick="showTab('entries')">Entry Management</button>
             <button class="nav-tab" onclick="showTab('reports')">Reports</button>
         </div>
@@ -655,6 +938,289 @@
                         <!-- Trials will be populated here -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Trial Application Tab -->
+        <div id="application" class="tab-content">
+            <h2 style="margin-bottom: 2rem; color: #4a5568;">C-WAGS Trial Application</h2>
+            
+            <div class="form-grid" style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="appTrialSelect">Select Trial to Generate Application</label>
+                    <select id="appTrialSelect" onchange="generateTrialApplication()">
+                        <option value="">Choose a trial...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="applicationStatus">Application Status</label>
+                    <select id="applicationStatus">
+                        <option value="draft">Draft</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="approved">Approved</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="trialApplicationForm" style="display: none;">
+                <!-- C-WAGS Official Application Form -->
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); margin-bottom: 2rem;">
+                    <div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 1rem; margin-bottom: 2rem;">
+                        <h1 style="color: #4a5568; margin: 0; font-size: 1.8rem;">C-WAGS</h1>
+                        <h2 style="color: #667eea; margin: 0.5rem 0 0 0; font-size: 1.4rem;">Obedience / Rally / Games / Scent - TRIAL APPLICATION</h2>
+                    </div>
+
+                    <!-- Basic Trial Information -->
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appTrialDates"><strong>Trial Dates:</strong></label>
+                            <input type="text" id="appTrialDates" readonly style="background: #f7fafc;">
+                        </div>
+                        <div class="form-group">
+                            <label for="appCityState"><strong>Held - City, St/Pr:</strong></label>
+                            <input type="text" id="appCityState" readonly style="background: #f7fafc;">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appHostName"><strong>Host Name:</strong></label>
+                            <input type="text" id="appHostName" readonly style="background: #f7fafc;">
+                        </div>
+                        <div class="form-group">
+                            <label for="appTrialLocation"><strong>Name of Trial Location:</strong></label>
+                            <input type="text" id="appTrialLocation" readonly style="background: #f7fafc;">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appPremiumWebsite"><strong>Premium website:</strong></label>
+                            <input type="url" id="appPremiumWebsite" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label for="appSubmittedDate"><strong>Submitted date:</strong></label>
+                            <input type="date" id="appSubmittedDate">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appTrialContact"><strong>Trial Contact Name:</strong></label>
+                            <input type="text" id="appTrialContact" placeholder="Trial secretary name">
+                        </div>
+                        <div class="form-group">
+                            <label for="appContactEmail"><strong>Email:</strong></label>
+                            <input type="email" id="appContactEmail" placeholder="secretary@club.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label for="appContactPhone"><strong>Contact Phone:</strong></label>
+                        <input type="tel" id="appContactPhone" placeholder="(555) 123-4567">
+                    </div>
+
+                    <!-- Trial Type Checkboxes -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: #4a5568; margin-bottom: 1rem;">Trial Types:</h4>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="appObedience" style="margin-right: 0.5rem;">
+                                <strong>Obedience</strong>
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="appRally" style="margin-right: 0.5rem;">
+                                <strong>Rally</strong>
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="appScent" style="margin-right: 0.5rem;">
+                                <strong>Scent</strong>
+                            </label>
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" id="appGames" style="margin-right: 0.5rem;">
+                                <strong>Games</strong>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appJudges"><strong>Judges:</strong></label>
+                            <textarea id="appJudges" rows="3" readonly style="background: #f7fafc;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="appAdvocates"><strong>C-WAGS Advocate(s):</strong></label>
+                            <textarea id="appAdvocates" rows="3" placeholder="Enter C-WAGS advocates for this trial"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Class Schedule Table -->
+                    <div style="margin-bottom: 2rem;">
+                        <h4 style="color: #4a5568; margin-bottom: 1rem;">Class Schedule - List judge (first name okay) under the day and round that they are judging</h4>
+                        <div style="overflow-x: auto;">
+                            <table class="table" style="min-width: 800px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 150px;">Class</th>
+                                        <th id="scheduleHeader1">Day ___</th>
+                                        <th id="scheduleHeader2">Day ___</th>
+                                        <th id="scheduleHeader3">Day ___</th>
+                                        <th id="scheduleHeader4">Day ___</th>
+                                        <th id="scheduleHeader5">Day ___</th>
+                                        <th id="scheduleHeader6">Day ___</th>
+                                    </tr>
+                                    <tr style="background: #f7fafc;">
+                                        <th>Judge</th>
+                                        <th>Judge</th>
+                                        <th>Judge</th>
+                                        <th>Judge</th>
+                                        <th>Judge</th>
+                                        <th>Judge</th>
+                                        <th>Judge</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="classScheduleTable">
+                                    <!-- Schedule will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Trial Details -->
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appInsideOutside"><strong>Inside / Outside trial:</strong></label>
+                            <select id="appInsideOutside">
+                                <option value="Inside">Inside</option>
+                                <option value="Outside">Outside</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="appRingSurface"><strong>Ring Surface:</strong></label>
+                            <input type="text" id="appRingSurface" placeholder="e.g., Matting, Grass, Dirt">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appLeague"><strong>League:</strong></label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <label><input type="radio" name="league" value="YES"> YES</label>
+                                <label><input type="radio" name="league" value="NO"> NO</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="appRingAreas"><strong>Number of Rings/Search Areas:</strong></label>
+                            <input type="number" id="appRingAreas" min="1" value="1">
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label for="appInsuranceDate"><strong>Insurance Expiration Date:</strong></label>
+                            <input type="date" id="appInsuranceDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appScentResets"><strong>Scent – Resets Offered:</strong></label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <label><input type="radio" name="scentResets" value="Yes"> Yes</label>
+                                <label><input type="radio" name="scentResets" value="No"> No</label>
+                            </div>
+                            <small style="color: #718096;">If yes, include each as line in class schedule</small>
+                        </div>
+                    </div>
+
+                    <!-- Entry Fees Section -->
+                    <div style="background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <h4 style="color: #2c7a7b; margin-bottom: 1rem;">💰 Entry Fees & Pricing</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="entryFeeFirst"><strong>First Class Entry Fee:</strong></label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="margin-right: 0.5rem;">$</span>
+                                    <input type="number" id="entryFeeFirst" min="0" step="0.01" value="25.00" style="flex: 1;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="entryFeeAdditional"><strong>Additional Class Entry Fee:</strong></label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="margin-right: 0.5rem;">$</span>
+                                    <input type="number" id="entryFeeAdditional" min="0" step="0.01" value="20.00" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="entryFeeJunior"><strong>Junior Handler Discount:</strong></label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="margin-right: 0.5rem;">$</span>
+                                    <input type="number" id="entryFeeJunior" min="0" step="0.01" value="5.00" style="flex: 1;">
+                                    <span style="margin-left: 0.5rem; color: #718096;">per class</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="entryFeeLateFee"><strong>Late Entry Fee:</strong></label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="margin-right: 0.5rem;">$</span>
+                                    <input type="number" id="entryFeeLateFee" min="0" step="0.01" value="10.00" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="entryDeadline"><strong>Entry Deadline:</strong></label>
+                                <input type="date" id="entryDeadline">
+                            </div>
+                            <div class="form-group">
+                                <label for="entryLimit"><strong>Entry Limit (if any):</strong></label>
+                                <input type="number" id="entryLimit" min="1" placeholder="No limit">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application Fees Info -->
+                    <div style="background: #fef5e7; border: 2px solid #ed8936; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem;">
+                        <h4 style="color: #c05621; margin-bottom: 1rem;">Application Fee Information</h4>
+                        <p style="color: #c05621; margin: 0; line-height: 1.5;">
+                            Application fee due with application covers a trial on consecutive days (or one league trial maximum 6 dates within an eight-week period). 
+                            <strong>$25 if received at least 25 days prior, $35 received less than 25 days.</strong><br>
+                            Post-trial administrative fee of <strong>$1.50 per entered team runs</strong> payable with results.<br><br>
+                            
+                            Return completed application and certificate of insurance by email to <strong>cwags.trials@gmail.com</strong>. 
+                            Payment may be made using web payment link on Trial Host Payment <a href="https://c-wags.org/online-payments/" target="_blank">https://c-wags.org/online-payments/</a> web page 
+                            OR mail to: <strong>C-WAGS ℅ Shirley Ottmer 3693 Fairview Ave, Jackson, MI 49203.</strong><br><br>
+                            
+                            Mailed checks or money orders on Canadian banks must include an additional $6 for bank fee.<br>
+                            <strong>Application fee waived and post-trial fee is $1.00 per entry for organizations' first trial.</strong><br>
+                            Any Class Entries by Shirley Ottmer will be paid to host at $5 per class entered.
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e2e8f0;">
+                        <button class="btn btn-primary" onclick="generateEntryFormLink()" style="margin-right: 1rem;">
+                            🔗 Generate Entry Form Link
+                        </button>
+                        <button class="btn btn-secondary" onclick="printTrialApplication()" style="margin-right: 1rem;">
+                            🖨️ Print Application
+                        </button>
+                        <button class="btn btn-secondary" onclick="saveApplicationData()">
+                            💾 Save Application
+                        </button>
+                    </div>
+
+                    <div id="entryFormLinkDisplay" style="display: none; background: #c6f6d5; border: 2px solid #38a169; border-radius: 10px; padding: 1.5rem; margin-top: 2rem;">
+                        <h4 style="color: #2d7d32; margin-bottom: 1rem;">📝 Entry Form Link Generated!</h4>
+                        <div style="background: white; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; word-break: break-all;">
+                            <strong>Entry Form URL:</strong><br>
+                            <span id="generatedEntryLink"></span>
+                        </div>
+                        <button class="btn btn-secondary" onclick="copyEntryFormLink()">📋 Copy Link</button>
+                        <p style="color: #2d7d32; margin: 1rem 0 0 0; font-size: 0.9rem;">
+                            Share this link with participants to register for your trial. The link includes all trial information and pricing.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1856,22 +2422,190 @@
             updateDogRecordsTable();
         }
         
-        function updateTrialSelectors() {
-            const trialSelect = document.getElementById('trialSelect');
-            if (trialSelect) {
-                trialSelect.innerHTML = '<option value="">Choose a trial...</option>';
-                trials.forEach(trial => {
-                    const option = document.createElement('option');
-                    option.value = trial.id;
-                    
-                    const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
-                        ? trial.dates[0] + ' - ' + trial.dates[trial.dates.length-1]
-                        : (trial.date || 'No date');
-                    
-                    option.textContent = `${trial.name || 'Unnamed Trial'} (${dateDisplay})`;
-                    trialSelect.appendChild(option);
+        function copyEntryFormLink() {
+            const linkText = document.getElementById('generatedEntryLink').textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(linkText).then(() => {
+                    showAlert('success', 'Entry form link copied to clipboard!');
                 });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = linkText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showAlert('success', 'Entry form link copied to clipboard!');
             }
+        }
+        
+        function printTrialApplication() {
+            // Create a print-friendly version
+            const printContent = document.getElementById('trialApplicationForm').innerHTML;
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>C-WAGS Trial Application</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                        h1, h2 { color: #4a5568; }
+                        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+                        .form-group label { font-weight: bold; display: block; margin-bottom: 0.25rem; }
+                        .form-group input, .form-group textarea, .form-group select { 
+                            width: 100%; padding: 0.5rem; border: 1px solid #ccc; 
+                        }
+                        .table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+                        .table th, .table td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+                        .table th { background: #f5f5f5; }
+                        @media print {
+                            .btn { display: none; }
+                            #entryFormLinkDisplay { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        }
+        
+        function saveApplicationData() {
+            const trialSelect = document.getElementById('appTrialSelect');
+            const selectedTrialId = trialSelect.value;
+            
+            if (!selectedTrialId) {
+                alert('Please select a trial first.');
+                return;
+            }
+            
+            const trial = trials.find(t => t.id === selectedTrialId);
+            if (!trial) return;
+            
+            // Collect all application data
+            const applicationData = {
+                trialId: selectedTrialId,
+                premiumWebsite: document.getElementById('appPremiumWebsite').value,
+                submittedDate: document.getElementById('appSubmittedDate').value,
+                trialContact: document.getElementById('appTrialContact').value,
+                contactEmail: document.getElementById('appContactEmail').value,
+                contactPhone: document.getElementById('appContactPhone').value,
+                advocates: document.getElementById('appAdvocates').value,
+                insideOutside: document.getElementById('appInsideOutside').value,
+                ringSurface: document.getElementById('appRingSurface').value,
+                ringAreas: document.getElementById('appRingAreas').value,
+                insuranceDate: document.getElementById('appInsuranceDate').value,
+                scentResets: document.querySelector('input[name="scentResets"]:checked')?.value,
+                entryFees: {
+                    firstClass: parseFloat(document.getElementById('entryFeeFirst').value) || 25.00,
+                    additionalClass: parseFloat(document.getElementById('entryFeeAdditional').value) || 20.00,
+                    juniorDiscount: parseFloat(document.getElementById('entryFeeJunior').value) || 5.00,
+                    lateFee: parseFloat(document.getElementById('entryFeeLateFee').value) || 10.00
+                },
+                entryDeadline: document.getElementById('entryDeadline').value,
+                entryLimit: document.getElementById('entryLimit').value,
+                status: document.getElementById('applicationStatus').value,
+                lastSaved: new Date().toISOString()
+            };
+            
+            // Update trial with application data
+            const trialIndex = trials.findIndex(t => t.id === selectedTrialId);
+            if (trialIndex !== -1) {
+                trials[trialIndex].applicationData = applicationData;
+                trials[trialIndex].applicationStatus = applicationData.status;
+                saveTrials();
+                updateTrialsDisplay();
+                showAlert('success', 'Application data saved successfully!');
+            }
+        }
+        
+        // Enhanced entry form functionality
+        function showEntryForm(trialId) {
+            // This function would show the entry form for participants
+            // Implementation would depend on your entry form structure
+            console.log('Show entry form for trial:', trialId);
+            
+            // Get entry form data
+            const entryForms = JSON.parse(localStorage.getItem('cwags_entry_forms') || '{}');
+            const entryFormData = entryForms[trialId];
+            
+            if (entryFormData) {
+                // Show entry form with pricing
+                showEntryFormModal(entryFormData);
+            } else {
+                alert('Entry form not yet configured for this trial. Please generate the entry form link first.');
+            }
+        }
+        
+        function showEntryFormModal(entryFormData) {
+            // Create entry form modal with pricing
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 900px;">
+                    <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                    <h2 style="text-align: center; color: #4a5568;">Entry Form</h2>
+                    <h3 style="text-align: center; color: #667eea; margin-bottom: 2rem;">${entryFormData.trialName}</h3>
+                    
+                    <div style="background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+                        <h4 style="color: #4a5568; margin-bottom: 1rem;">Trial Information</h4>
+                        <div class="form-grid">
+                            <div><strong>Host:</strong> ${entryFormData.host}</div>
+                            <div><strong>Location:</strong> ${entryFormData.location}</div>
+                            <div><strong>Date(s):</strong> ${entryFormData.dates.join(', ')}</div>
+                            <div><strong>Contact:</strong> ${entryFormData.contact || 'TBD'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e6fffa; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+                        <h4 style="color: #2c7a7b; margin-bottom: 1rem;">Entry Fees</h4>
+                        <div class="form-grid">
+                            <div><strong>First Class:</strong> ${entryFormData.fees.firstClass.toFixed(2)}</div>
+                            <div><strong>Additional Classes:</strong> ${entryFormData.fees.additionalClass.toFixed(2)}</div>
+                            <div><strong>Junior Discount:</strong> ${entryFormData.fees.juniorDiscount.toFixed(2)} per class</div>
+                            <div><strong>Late Entry Fee:</strong> ${entryFormData.fees.lateFee.toFixed(2)}</div>
+                        </div>
+                        ${entryFormData.fees.entryDeadline ? 
+                            `<p style="margin-top: 1rem; color: #c05621;"><strong>Entry Deadline:</strong> ${new Date(entryFormData.fees.entryDeadline).toLocaleDateString()}</p>` : 
+                            ''
+                        }
+                        ${entryFormData.fees.entryLimit ? 
+                            `<p style="margin-top: 0.5rem; color: #c05621;"><strong>Entry Limit:</strong> ${entryFormData.fees.entryLimit} entries</p>` : 
+                            ''
+                        }
+                    </div>
+                    
+                    <div style="background: #fef5e7; padding: 1.5rem; border-radius: 10px; text-align: center;">
+                        <h4 style="color: #c05621; margin-bottom: 1rem;">Entry Form</h4>
+                        <p style="color: #c05621; margin-bottom: 1rem;">This is a preview of the entry form that participants will see.</p>
+                        <p style="color: #c05621;">Full entry form implementation would include:</p>
+                        <ul style="color: #c05621; text-align: left; max-width: 600px; margin: 1rem auto;">
+                            <li>Dog registration and handler information</li>
+                            <li>Class selection with automatic fee calculation</li>
+                            <li>Payment processing integration</li>
+                            <li>Entry confirmation and receipts</li>
+                            <li>Running order generation</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close Preview</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
         
         function updateDogRecordsTable() {
