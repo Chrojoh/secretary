@@ -3,63 +3,438 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CWAGS Optimized</title>
-  <link rel="stylesheet" href="cwags_styles.css" />
+  <title>CWAGS Optimized - Fixed</title>
+  <style>
+    /* Embedded CSS - Fixed version */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table th {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .table tr:hover {
+      background: #f7fafc;
+    }
+
+    .table tbody tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #667eea;
+      color: white;
+      transition: all 0.3s ease;
+      margin: 0 0.25rem;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #5a67d8;
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background-color: #cbd5e0;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    select {
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e0;
+      font-size: 1rem;
+      background: white;
+    }
+
+    .controls {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f7fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .pagination {
+      text-align: center;
+      padding: 1rem;
+      background: #f7fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .header {
+      padding: 1rem;
+      margin: 0;
+      background: #f7fafc;
+      color: #4a5568;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .record-count {
+      font-weight: normal;
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    .page-indicator {
+      margin: 0 1rem;
+      font-weight: 500;
+      color: #4a5568;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: #718096;
+      font-style: italic;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="table-container">
-    <h3 style="padding: 1rem; margin: 0; background: #f7fafc; color: #4a5568;">
+    <h3 class="header">
       Dog Records
-      <span id="recordCount" style="font-weight: normal; font-size: 0.9rem; color: #718096;"></span>
+      <span id="recordCount" class="record-count"></span>
     </h3>
 
-    <div style="padding: 1rem;">
-      <label for="pageSize">Records per page:</label>
-      <select id="pageSize" onchange="renderDogTable()">
-        <option value="10">10</option>
-        <option value="25" selected>25</option>
-        <option value="50">50</option>
-      </select>
+    <div class="controls">
+      <div>
+        <label for="pageSize">Records per page:</label>
+        <select id="pageSize">
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div>
+        <button id="refreshBtn">Refresh Data</button>
+      </div>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Registration #</th>
-          <th>Call Name</th>
-          <th>Full Name</th>
-          <th>Handler</th>
-          <th>Class</th>
-          <th>Judge</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="dogRecordsTable"></tbody>
-    </table>
+    <div style="overflow-x: auto;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Registration #</th>
+            <th>Call Name</th>
+            <th>Full Name</th>
+            <th>Handler</th>
+            <th>Class</th>
+            <th>Judge</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="dogRecordsTable">
+          <tr class="no-data">
+            <td colspan="7">Loading data...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div style="text-align: center; padding: 1rem;">
-      <button onclick="changePage(-1)">Previous</button>
-      <span id="pageIndicator"></span>
-      <button onclick="changePage(1)">Next</button>
+    <div class="pagination">
+      <button id="prevBtn">Previous</button>
+      <span id="pageIndicator" class="page-indicator">Page 1 of 1</span>
+      <button id="nextBtn">Next</button>
     </div>
   </div>
 
   <script>
-    // Mock data - replace with fetch if needed
-    const dogData = Array.from({ length: 100 }, (_, i) => ({
-      id: `07-00${i + 1}`,
-      callName: `Dog${i + 1}`,
-      fullName: `Full Dog Name ${i + 1}`,
-      handlerFirstName: "Jane",
-      handlerLastName: `Doe${i + 1}`,
-      handlerFullName: `Jane Doe${i + 1}`,
-      className: i % 2 === 0 ? "Obedience Level 1" : "Rally Level 2",
-      judgeName: i % 2 === 0 ? "Judge A" : "Judge B"
-    }));
-  </script>
-  <script src="cwags_main_script.js"></script>
-  <script>
-    renderDogTable();
+    // Enhanced dog data with more realistic information
+    const dogData = Array.from({ length: 100 }, (_, i) => {
+      const dogNames = ['Buddy', 'Max', 'Bella', 'Luna', 'Charlie', 'Lucy', 'Cooper', 'Bailey', 'Daisy', 'Molly'];
+      const breeds = ['Golden Retriever', 'Labrador', 'German Shepherd', 'Border Collie', 'Poodle', 'Beagle'];
+      const classes = ['Obedience Level 1', 'Rally Level 2', 'Agility Novice', 'Conformation Open', 'Tracking'];
+      const judges = ['Judge Anderson', 'Judge Smith', 'Judge Williams', 'Judge Brown', 'Judge Johnson'];
+      
+      return {
+        id: `07-${String(i + 1).padStart(3, '0')}`,
+        callName: dogNames[i % dogNames.length] + (i > 9 ? ` ${Math.floor(i/10)}` : ''),
+        fullName: `${breeds[i % breeds.length]} ${dogNames[i % dogNames.length]} of Champions`,
+        handlerFirstName: "Handler",
+        handlerLastName: `Name${i + 1}`,
+        handlerFullName: `Handler Name${i + 1}`,
+        className: classes[i % classes.length],
+        judgeName: judges[i % judges.length]
+      };
+    });
+
+    // Application state
+    let currentPage = 1;
+    let currentPageSize = 25;
+
+    // DOM elements
+    const elements = {
+      tableBody: null,
+      recordCount: null,
+      pageIndicator: null,
+      pageSize: null,
+      prevBtn: null,
+      nextBtn: null,
+      refreshBtn: null
+    };
+
+    // Initialize DOM references
+    function initializeElements() {
+      elements.tableBody = document.getElementById('dogRecordsTable');
+      elements.recordCount = document.getElementById('recordCount');
+      elements.pageIndicator = document.getElementById('pageIndicator');
+      elements.pageSize = document.getElementById('pageSize');
+      elements.prevBtn = document.getElementById('prevBtn');
+      elements.nextBtn = document.getElementById('nextBtn');
+      elements.refreshBtn = document.getElementById('refreshBtn');
+
+      // Check if all elements exist
+      const missingElements = Object.entries(elements)
+        .filter(([key, element]) => !element)
+        .map(([key]) => key);
+
+      if (missingElements.length > 0) {
+        console.error('Missing DOM elements:', missingElements);
+        return false;
+      }
+      return true;
+    }
+
+    // Render the dog table with error handling
+    function renderDogTable() {
+      try {
+        if (!elements.tableBody) {
+          console.error('Table body element not found');
+          return;
+        }
+
+        const pageSize = parseInt(elements.pageSize?.value || '25', 10);
+        currentPageSize = pageSize;
+
+        // Validate data
+        if (!Array.isArray(dogData) || dogData.length === 0) {
+          elements.tableBody.innerHTML = '<tr class="no-data"><td colspan="7">No data available</td></tr>';
+          updatePaginationControls(0, pageSize);
+          return;
+        }
+
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const currentDogs = dogData.slice(start, end);
+
+        // Generate table rows with proper escaping
+        const tableHTML = currentDogs.map(dog => {
+          const safeId = escapeHtml(dog.id || '');
+          const safeCallName = escapeHtml(dog.callName || 'N/A');
+          const safeFullName = escapeHtml(dog.fullName || 'N/A');
+          const safeHandlerName = escapeHtml(dog.handlerFullName || 
+            `${dog.handlerFirstName || ''} ${dog.handlerLastName || ''}`.trim() || 'N/A');
+          const safeClassName = escapeHtml(dog.className || 'N/A');
+          const safeJudgeName = escapeHtml(dog.judgeName || 'N/A');
+
+          return `
+            <tr>
+              <td>${safeId}</td>
+              <td><strong>${safeCallName}</strong></td>
+              <td>${safeFullName}</td>
+              <td>${safeHandlerName}</td>
+              <td>${safeClassName}</td>
+              <td>${safeJudgeName}</td>
+              <td><button onclick="selectDogForEntry('${safeId}')">Select</button></td>
+            </tr>
+          `;
+        }).join('');
+
+        elements.tableBody.innerHTML = tableHTML;
+        updatePaginationControls(dogData.length, pageSize);
+
+      } catch (error) {
+        console.error('Error rendering table:', error);
+        elements.tableBody.innerHTML = '<tr class="no-data"><td colspan="7">Error loading data</td></tr>';
+      }
+    }
+
+    // Update pagination controls and indicators
+    function updatePaginationControls(totalRecords, pageSize) {
+      try {
+        const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+        
+        // Update record count
+        if (elements.recordCount) {
+          elements.recordCount.textContent = `(${totalRecords} total records)`;
+        }
+
+        // Update page indicator
+        if (elements.pageIndicator) {
+          elements.pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        }
+
+        // Update button states
+        if (elements.prevBtn) {
+          elements.prevBtn.disabled = currentPage <= 1;
+        }
+        if (elements.nextBtn) {
+          elements.nextBtn.disabled = currentPage >= totalPages;
+        }
+
+      } catch (error) {
+        console.error('Error updating pagination controls:', error);
+      }
+    }
+
+    // Navigate between pages
+    function changePage(delta) {
+      try {
+        const pageSize = parseInt(elements.pageSize?.value || '25', 10);
+        const maxPage = Math.ceil(dogData.length / pageSize) || 1;
+        const newPage = currentPage + delta;
+        
+        if (newPage >= 1 && newPage <= maxPage) {
+          currentPage = newPage;
+          renderDogTable();
+        }
+      } catch (error) {
+        console.error('Error changing page:', error);
+      }
+    }
+
+    // Select a dog for entry
+    function selectDogForEntry(dogId) {
+      try {
+        const dog = dogData.find(d => d.id === dogId);
+        if (!dog) {
+          alert('Dog not found!');
+          return;
+        }
+        
+        // More informative selection message
+        const message = `Selected dog: ${dog.callName}\nFull Name: ${dog.fullName}\nHandler: ${dog.handlerFullName}\nClass: ${dog.className}`;
+        alert(message);
+        
+        // Log for debugging
+        console.log('Selected dog:', dog);
+        
+      } catch (error) {
+        console.error('Error selecting dog:', error);
+        alert('Error selecting dog. Please try again.');
+      }
+    }
+
+    // Utility function to escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Refresh data (placeholder for real data fetching)
+    function refreshData() {
+      try {
+        console.log('Refreshing data...');
+        // In a real application, you would fetch fresh data here
+        // For now, we'll just re-render the table
+        renderDogTable();
+        alert('Data refreshed successfully!');
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+        alert('Error refreshing data. Please try again.');
+      }
+    }
+
+    // Initialize the application
+    function initializeApp() {
+      try {
+        // Initialize DOM element references
+        if (!initializeElements()) {
+          console.error('Failed to initialize DOM elements');
+          return;
+        }
+
+        // Set up event listeners
+        elements.pageSize.addEventListener('change', () => {
+          currentPage = 1; // Reset to first page when changing page size
+          renderDogTable();
+        });
+
+        elements.prevBtn.addEventListener('click', () => changePage(-1));
+        elements.nextBtn.addEventListener('click', () => changePage(1));
+        elements.refreshBtn.addEventListener('click', refreshData);
+
+        // Initial render
+        renderDogTable();
+
+        console.log('CWAGS application initialized successfully');
+
+      } catch (error) {
+        console.error('Error initializing application:', error);
+      }
+    }
+
+    // Start the application when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
+    }
+
+    // Make functions globally available for inline event handlers (backward compatibility)
+    window.selectDogForEntry = selectDogForEntry;
+    window.changePage = changePage;
+    window.renderDogTable = renderDogTable;
   </script>
 </body>
 </html>
