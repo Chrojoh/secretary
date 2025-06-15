@@ -1,4 +1,52 @@
-<!DOCTYPE html>
+function createLeagueTrial() {
+            const startDate = document.getElementById('leagueStartDate').value;
+            const numNights = parseInt(document.getElementById('leagueNights').value);
+            
+            if (!startDate) {
+                alert('Please select a league start date.');
+                return;
+            }
+            
+            // Collect league data with rounds
+            const nights = [];
+            const allClasses = [];
+            const allJudges = [];
+            
+            for (let night = 0; night < numNights; night++) {
+                const nightDate = document.getElementById(`leagueNight${night}Date`).value;
+                const numClasses = parseInt(document.getElementById(`leagueNight${night}Classes`).value || 0);
+                
+                if (!nightDate) {
+                    alert(`Please set a date for Night ${night + 1}.`);
+                    return;
+                }
+                
+                const nightClassDetails = [];
+                const nightClasses = [];
+                const nightJudges = [];
+                
+                for (let i = 0; i < numClasses; i++) {
+                    const className = document.getElementById(`leagueNight${night}Class${i}`)?.value;
+                    const numRounds = parseInt(document.getElementById(`leagueNight${night}Rounds${i}`)?.value || 0);
+                    
+                    if (!className) {
+                        alert(`Please select a class type for Night ${night + 1}, Class ${i + 1}.`);
+                        return;
+                    }
+                    
+                    if (!numRounds) {
+                        alert(`Please select number of rounds for Night ${night + 1}, Class ${i + 1}.`);
+                        return;
+                    }
+                    
+                    // Collect round judges for this class with FEO status
+                    const rounds = [];
+                    for (let round = 1; round <= numRounds; round++) {
+                        const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
+                        const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
+                        
+                        if (!judge) {
+                            <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1734,11 +1782,9 @@
                         </div>
                         
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="standaloneFEO${i}" style="margin-right: 0.5rem;">
-                                <span>FEO (For Exhibition Only) offered for this class</span>
-                            </label>
-                            <small style="color: #718096; margin-top: 0.25rem;">Check if participants can enter this class for exhibition without competing for placement</small>
+                            <div style="background: #f7fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <small style="color: #4a5568; font-weight: 600;">Note: FEO options are set per round above</small>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1776,6 +1822,10 @@
                             <option value="Ginger Alpine">
                             <option value="Shirley Ottmer">
                         </datalist>
+                        <label style="display: flex; align-items: center; margin-top: 0.5rem;">
+                            <input type="checkbox" id="standaloneFEO${classIndex}_${round}" style="margin-right: 0.5rem;">
+                            <span style="font-size: 0.9rem;">FEO offered for Round ${round}</span>
+                        </label>
                     </div>
                 `;
             }
@@ -1801,7 +1851,6 @@
             for (let i = 0; i < numClasses; i++) {
                 const className = document.getElementById(`standaloneClass${i}`).value;
                 const numRounds = parseInt(document.getElementById(`standaloneRounds${i}`).value || 0);
-                const feoOffered = document.getElementById(`standaloneFEO${i}`).checked;
                 
                 if (!className) {
                     alert(`Please select a class type for Class ${i + 1}.`);
@@ -1813,56 +1862,86 @@
                     return;
                 }
                 
-                // Collect round judges
+                // Collect round judges with FEO status
                 const rounds = [];
                 for (let round = 1; round <= numRounds; round++) {
                     const judge = document.getElementById(`standaloneJudge${i}_${round}`).value;
+                    const feoOffered = document.getElementById(`standaloneFEO${i}_${round}`).checked;
+                    
                     if (!judge) {
                         alert(`Please assign a judge for Class ${i + 1}, Round ${round}.`);
                         return;
                     }
-                    rounds.push({ round: round, judge: judge });
+                    rounds.push({ 
+                        round: round, 
+                        judge: judge, 
+                        feoOffered: feoOffered 
+                    });
                     if (!allJudges.includes(judge)) allJudges.push(judge);
                 }
                 
                 classDetails.push({
                     name: className,
-                    rounds: rounds,
-                    feoOffered: feoOffered
+                    rounds: rounds
                 });
                 
                 allClasses.push(className);
             }
             
-            // Create trial object
-            const newTrial = {
-                id: 'T' + String(trials.length + 1).padStart(3, '0'),
-                type: 'standalone',
-                date: date,
-                host: 'Host Organization', // Will be filled in application form
-                location: 'TBD',
-                city: 'TBD',
-                classes: allClasses,
-                classDetails: classDetails,
-                judge: allJudges[0] || 'TBD',
-                judges: allJudges.join(', '),
-                status: 'draft',
-                created: new Date().toISOString(),
-                lastModified: new Date().toISOString(),
-                email: '',
-                phone: ''
-            };
-            
-            trials.push(newTrial);
-            saveTrialsToStorage();
-            updateDashboardStats();
-            populateTrialsTable();
-            
-            hideModal('newTrialModal');
-            alert(`Standalone trial ${newTrial.id} created successfully with ${classDetails.length} classes and ${allJudges.length} judges! You can now edit it to add more details.`);
-            
-            // Auto-open edit modal
-            setTimeout(() => editTrial(newTrial.id), 500);
+            if (currentEditingTrial) {
+                // Update existing trial
+                Object.assign(currentEditingTrial, {
+                    date: date,
+                    classes: allClasses,
+                    classDetails: classDetails,
+                    judge: allJudges[0] || 'TBD',
+                    judges: allJudges.join(', '),
+                    lastModified: new Date().toISOString()
+                });
+                
+                saveTrialsToStorage();
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                hideModal('newTrialModal');
+                alert(`Trial ${currentEditingTrial.id} updated successfully!`);
+                
+                // Reset editing state
+                currentEditingTrial = null;
+                document.querySelector('#newTrialModal h2').textContent = 'Create New Trial';
+                document.getElementById('createStandaloneBtn').textContent = 'Create Trial';
+                
+            } else {
+                // Create new trial
+                const newTrial = {
+                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
+                    type: 'standalone',
+                    date: date,
+                    host: 'Host Organization', // Will be filled in application form
+                    location: 'TBD',
+                    city: 'TBD',
+                    classes: allClasses,
+                    classDetails: classDetails,
+                    judge: allJudges[0] || 'TBD',
+                    judges: allJudges.join(', '),
+                    status: 'draft',
+                    created: new Date().toISOString(),
+                    lastModified: new Date().toISOString(),
+                    email: '',
+                    phone: ''
+                };
+                
+                trials.push(newTrial);
+                saveTrialsToStorage();
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                hideModal('newTrialModal');
+                alert(`Standalone trial ${newTrial.id} created successfully with ${classDetails.length} classes and ${allJudges.length} judges! You can now edit it to add more details.`);
+                
+                // Auto-open edit modal for basic details
+                setTimeout(() => editTrialInEditModal(newTrial), 500);
+            }
         }
 
         // League Trial Functions
@@ -1959,11 +2038,9 @@
                         </div>
                         
                         <div class="form-group" style="margin-top: 1rem;">
-                            <label style="display: flex; align-items: center;">
-                                <input type="checkbox" id="leagueNight${nightIndex}FEO${i}" style="margin-right: 0.5rem;">
-                                <span>FEO (For Exhibition Only) offered for this class</span>
-                            </label>
-                            <small style="color: #718096; margin-top: 0.25rem;">Check if participants can enter this class for exhibition without competing for placement</small>
+                            <div style="background: #f7fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <small style="color: #4a5568; font-weight: 600;">Note: FEO options are set per round above</small>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2001,6 +2078,10 @@
                             <option value="Ginger Alpine">
                             <option value="Shirley Ottmer">
                         </datalist>
+                        <label style="display: flex; align-items: center; margin-top: 0.5rem;">
+                            <input type="checkbox" id="leagueNight${nightIndex}FEO${classIndex}_${round}" style="margin-right: 0.5rem;">
+                            <span style="font-size: 0.9rem;">FEO offered for Round ${round}</span>
+                        </label>
                     </div>
                 `;
             }
@@ -2051,23 +2132,28 @@
                         return;
                     }
                     
-                    // Collect round judges for this class
+                    // Collect round judges for this class with FEO status
                     const rounds = [];
                     for (let round = 1; round <= numRounds; round++) {
                         const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
+                        const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
+                        
                         if (!judge) {
                             alert(`Please assign a judge for Night ${night + 1}, Class ${i + 1}, Round ${round}.`);
                             return;
                         }
-                        rounds.push({ round: round, judge: judge });
+                        rounds.push({ 
+                            round: round, 
+                            judge: judge, 
+                            feoOffered: feoOffered 
+                        });
                         if (!nightJudges.includes(judge)) nightJudges.push(judge);
                         if (!allJudges.includes(judge)) allJudges.push(judge);
                     }
                     
                     nightClassDetails.push({
                         name: className,
-                        rounds: rounds,
-                        feoOffered: feoOffered
+                        rounds: rounds
                     });
                     
                     nightClasses.push(className);
@@ -2082,47 +2168,83 @@
                 });
             }
             
-            // Create league trial object
-            const endDate = nights[nights.length - 1].date;
-            const newTrial = {
-                id: 'L' + String(trials.length + 1).padStart(3, '0'),
-                type: 'league',
-                date: startDate,
-                endDate: endDate,
-                host: 'Host Organization', // Will be filled in application form
-                location: 'TBD',
-                city: 'TBD',
-                classes: allClasses,
-                judge: allJudges[0] || 'TBD',
-                judges: allJudges.join(', '),
-                status: 'draft',
-                league: true,
-                nights: nights,
-                totalNights: numNights,
-                created: new Date().toISOString(),
-                lastModified: new Date().toISOString(),
-                email: '',
-                phone: ''
-            };
-            
-            trials.push(newTrial);
-            saveTrialsToStorage();
-            updateDashboardStats();
-            populateTrialsTable();
-            
-            hideModal('newTrialModal');
-            
-            // Calculate total rounds and classes
-            const totalRounds = nights.reduce((sum, night) => {
-                return sum + night.classDetails.reduce((nightSum, classDetail) => {
-                    return nightSum + classDetail.rounds.length;
+            if (currentEditingTrial) {
+                // Update existing league trial
+                const endDate = nights[nights.length - 1].date;
+                Object.assign(currentEditingTrial, {
+                    date: startDate,
+                    endDate: endDate,
+                    classes: allClasses,
+                    judge: allJudges[0] || 'TBD',
+                    judges: allJudges.join(', '),
+                    nights: nights,
+                    totalNights: numNights,
+                    lastModified: new Date().toISOString()
+                });
+                
+                saveTrialsToStorage();
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                hideModal('newTrialModal');
+                
+                // Calculate total rounds for update message
+                const totalRounds = nights.reduce((sum, night) => {
+                    return sum + night.classDetails.reduce((nightSum, classDetail) => {
+                        return nightSum + classDetail.rounds.length;
+                    }, 0);
                 }, 0);
-            }, 0);
-            
-            alert(`League trial ${newTrial.id} created successfully!\n\n• ${numNights} nights\n• ${allClasses.length} different classes\n• ${totalRounds} total rounds\n• ${allJudges.length} judges\n\nYou can now edit it to add more details.`);
-            
-            // Auto-open edit modal
-            setTimeout(() => editTrial(newTrial.id), 500);
+                
+                alert(`League trial ${currentEditingTrial.id} updated successfully!\n\n• ${numNights} nights\n• ${allClasses.length} different classes\n• ${totalRounds} total rounds\n• ${allJudges.length} judges`);
+                
+                // Reset editing state
+                currentEditingTrial = null;
+                document.querySelector('#newTrialModal h2').textContent = 'Create New Trial';
+                document.getElementById('createLeagueBtn').textContent = 'Create League Trial';
+                
+            } else {
+                // Create new league trial
+                const endDate = nights[nights.length - 1].date;
+                const newTrial = {
+                    id: 'L' + String(trials.length + 1).padStart(3, '0'),
+                    type: 'league',
+                    date: startDate,
+                    endDate: endDate,
+                    host: 'Host Organization', // Will be filled in application form
+                    location: 'TBD',
+                    city: 'TBD',
+                    classes: allClasses,
+                    judge: allJudges[0] || 'TBD',
+                    judges: allJudges.join(', '),
+                    status: 'draft',
+                    league: true,
+                    nights: nights,
+                    totalNights: numNights,
+                    created: new Date().toISOString(),
+                    lastModified: new Date().toISOString(),
+                    email: '',
+                    phone: ''
+                };
+                
+                trials.push(newTrial);
+                saveTrialsToStorage();
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                hideModal('newTrialModal');
+                
+                // Calculate total rounds and classes
+                const totalRounds = nights.reduce((sum, night) => {
+                    return sum + night.classDetails.reduce((nightSum, classDetail) => {
+                        return nightSum + classDetail.rounds.length;
+                    }, 0);
+                }, 0);
+                
+                alert(`League trial ${newTrial.id} created successfully!\n\n• ${numNights} nights\n• ${allClasses.length} different classes\n• ${totalRounds} total rounds\n• ${allJudges.length} judges\n\nYou can now edit it to add more details.`);
+                
+                // Auto-open edit modal for basic details
+                setTimeout(() => editTrialInEditModal(newTrial), 500);
+            }
         }
 
         function editTrial(trialId) {
@@ -2133,10 +2255,115 @@
                 return;
             }
 
+            // Check if this is a trial with detailed configuration (classDetails)
+            if (trial.classDetails || trial.nights) {
+                // This trial has round/class details - edit in creation modal
+                editTrialInCreationModal(trial);
+            } else {
+                // This is a basic trial - edit in simple edit modal
+                editTrialInEditModal(trial);
+            }
+        }
+
+        function editTrialInCreationModal(trial) {
+            // Reset and configure the creation modal for editing
+            currentEditingTrial = trial;
+            currentTrialStep = trial.type === 'standalone' ? 2 : 3;
+            trialConfiguration = { type: trial.type, nights: trial.nights || [], classes: trial.classDetails || [] };
+            
+            // Reset modal steps
+            document.getElementById('trialTypeStep').style.display = 'none';
+            document.getElementById('standaloneStep').style.display = 'none';
+            document.getElementById('leagueStep').style.display = 'none';
+            
+            // Configure modal title
+            document.querySelector('#newTrialModal h2').textContent = `Edit Trial ${trial.id}`;
+            
+            if (trial.type === 'standalone') {
+                // Populate standalone trial data
+                document.getElementById('standaloneStep').style.display = 'block';
+                document.getElementById('standaloneDate').value = trial.date || '';
+                
+                if (trial.classDetails) {
+                    document.getElementById('standaloneClasses').value = trial.classDetails.length;
+                    generateStandaloneClasses();
+                    
+                    // Populate class details
+                    setTimeout(() => {
+                        trial.classDetails.forEach((classDetail, i) => {
+                            document.getElementById(`standaloneClass${i}`).value = classDetail.name;
+                            document.getElementById(`standaloneRounds${i}`).value = classDetail.rounds.length;
+                            generateStandaloneRounds(i);
+                            
+                            // Populate round details
+                            setTimeout(() => {
+                                classDetail.rounds.forEach((round, roundIndex) => {
+                                    const roundNum = round.round;
+                                    document.getElementById(`standaloneJudge${i}_${roundNum}`).value = round.judge;
+                                    document.getElementById(`standaloneFEO${i}_${roundNum}`).checked = round.feoOffered || false;
+                                });
+                            }, 100);
+                        });
+                    }, 100);
+                }
+                
+                // Change button to update
+                document.getElementById('createStandaloneBtn').textContent = 'Update Trial';
+                document.getElementById('createStandaloneBtn').style.display = 'inline-block';
+                
+            } else if (trial.type === 'league') {
+                // Populate league trial data
+                document.getElementById('leagueStep').style.display = 'block';
+                document.getElementById('leagueStartDate').value = trial.date || '';
+                
+                if (trial.nights) {
+                    document.getElementById('leagueNights').value = trial.nights.length;
+                    generateLeagueNights();
+                    
+                    // Populate night details
+                    setTimeout(() => {
+                        trial.nights.forEach((night, nightIndex) => {
+                            document.getElementById(`leagueNight${nightIndex}Date`).value = night.date;
+                            if (night.classDetails) {
+                                document.getElementById(`leagueNight${nightIndex}Classes`).value = night.classDetails.length;
+                                generateLeagueNightClasses(nightIndex);
+                                
+                                // Populate class and round details
+                                setTimeout(() => {
+                                    night.classDetails.forEach((classDetail, classIndex) => {
+                                        document.getElementById(`leagueNight${nightIndex}Class${classIndex}`).value = classDetail.name;
+                                        document.getElementById(`leagueNight${nightIndex}Rounds${classIndex}`).value = classDetail.rounds.length;
+                                        generateLeagueRounds(nightIndex, classIndex);
+                                        
+                                        // Populate round details
+                                        setTimeout(() => {
+                                            classDetail.rounds.forEach((round) => {
+                                                const roundNum = round.round;
+                                                document.getElementById(`leagueNight${nightIndex}Judge${classIndex}_${roundNum}`).value = round.judge;
+                                                document.getElementById(`leagueNight${nightIndex}FEO${classIndex}_${roundNum}`).checked = round.feoOffered || false;
+                                            });
+                                        }, 100);
+                                    });
+                                }, 100);
+                            }
+                        });
+                    }, 100);
+                }
+                
+                // Change button to update
+                document.getElementById('createLeagueBtn').textContent = 'Update Trial';
+                document.getElementById('createLeagueBtn').style.display = 'inline-block';
+            }
+            
+            showModal('newTrialModal');
+        }
+
+        function editTrialInEditModal(trial) {
+            // Use the existing edit modal for basic trials
             currentEditingTrial = trial;
             
             // Populate edit modal with trial data
-            document.getElementById('editTrialTitle').textContent = `Edit Trial ${trialId}`;
+            document.getElementById('editTrialTitle').textContent = `Edit Trial ${trial.id}`;
             document.getElementById('editTrialDate').value = trial.date || '';
             document.getElementById('editTrialStatus').value = trial.status || 'draft';
             document.getElementById('editHostName').value = trial.host || '';
