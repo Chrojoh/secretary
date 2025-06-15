@@ -661,12 +661,58 @@
         <!-- Entry Management Tab -->
         <div id="entries" class="tab-content">
             <h2 style="margin-bottom: 2rem; color: #4a5568;">Entry Management</h2>
-            <p style="color: #718096; margin-bottom: 2rem;">Select a trial to manage entries and generate running orders.</p>
+            <p style="color: #718096; margin-bottom: 2rem;">Manage dog entries and registrations from the loaded data.</p>
             
             <div id="entriesContent">
-                <div style="text-align: center; color: #a0aec0; padding: 3rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
-                    <p>Create a trial first to manage entries</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="dogSearch">Search Dogs (Registration #, Name, or Handler)</label>
+                        <div class="typeahead-container">
+                            <input type="text" id="dogSearch" placeholder="Type to search dog records..." 
+                                   oninput="searchDogs(this.value)" 
+                                   onfocus="searchDogs(this.value)">
+                            <div class="typeahead-dropdown" id="dogSearchDropdown"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="trialSelect">Select Trial for Entry</label>
+                        <select id="trialSelect" onchange="updateTrialInfo()">
+                            <option value="">Choose a trial...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="dogInfo" style="display: none; background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Selected Dog Information</h4>
+                    <div id="dogDetails"></div>
+                </div>
+                
+                <div id="trialInfo" style="display: none; background: #e6fffa; padding: 1.5rem; border-radius: 10px; margin: 1rem 0;">
+                    <h4 style="color: #2c7a7b; margin-bottom: 1rem;">Trial Information</h4>
+                    <div id="trialDetails"></div>
+                </div>
+                
+                <div class="table-container" style="margin-top: 2rem;">
+                    <h3 style="padding: 1rem; margin: 0; background: #f7fafc; color: #4a5568;">
+                        Dog Records from dataforsite.xlsx
+                        <span id="recordCount" style="font-weight: normal; font-size: 0.9rem; color: #718096;"></span>
+                    </h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Registration #</th>
+                                <th>Call Name</th>
+                                <th>Full Name</th>
+                                <th>Handler</th>
+                                <th>Current Class</th>
+                                <th>Judge</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dogRecordsTable">
+                            <!-- Dog records will be populated here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -822,29 +868,261 @@
 
     <script>
         // Global variables
-        let trials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+        let trials = [];
+        let dogData = []; // Data from dataforsite.xlsx
+        let availableClasses = [];
+        let availableJudges = [];
         let currentStep = 1;
         let selectedTrialType = null;
         let editingTrialId = null;
         
-        // Sample data for typeahead
-        const availableClasses = [
-            'Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 
-            'Super Sleuth Level 4', 'Starter', 'Advanced', 'Pro', 'ARF',
-            'Rally Level 1', 'Rally Level 2', 'Rally Level 3',
-            'Obedience Level 1', 'Obedience Level 2', 'Obedience Level 3'
-        ];
+        // Load data from the auto-converted JSON files
+        async function loadDataFromRepository() {
+            console.log('Loading data from repository...');
+            
+            try {
+                // Try to load the main data file converted from Excel
+                const dataResponse = await fetch('data/records.json');
+                if (dataResponse.ok) {
+                    const data = await dataResponse.json();
+                    console.log('Loaded records data:', data);
+                    
+                    if (data.records) {
+                        dogData = data.records;
+                        console.log(`Loaded ${dogData.length} dog records`);
+                        
+                        // Extract unique classes from the data
+                        const classSet = new Set();
+                        dogData.forEach(record => {
+                            if (record.className && record.className.trim()) {
+                                classSet.add(record.className.trim());
+                            }
+                        });
+                        availableClasses = Array.from(classSet).sort();
+                        console.log('Available classes from data:', availableClasses);
+                        
+                        // Extract unique judges from the data
+                        const judgeSet = new Set();
+                        dogData.forEach(record => {
+                            if (record.judgeName && record.judgeName.trim()) {
+                                judgeSet.add(record.judgeName.trim());
+                            }
+                        });
+                        availableJudges = Array.from(judgeSet).sort();
+                        console.log('Available judges from data:', availableJudges);
+                        
+                        updateDataFreshness(data.lastUpdated);
+                    }
+                } else {
+                    console.log('Records data file not found, using fallback data');
+                    loadFallbackData();
+                }
+                
+                // Try to load existing trials data if it exists
+                try {
+                    const trialsResponse = await fetch('data/trials.json');
+                    if (trialsResponse.ok) {
+                        const trialsData = await trialsResponse.json();
+                        if (trialsData.trials) {
+                            // Merge with localStorage trials
+                            const repoTrials = trialsData.trials;
+                            const localTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
+                            
+                            // Combine and deduplicate
+                            const allTrials = [...repoTrials, ...localTrials];
+                            const uniqueTrials = allTrials.filter((trial, index, arr) => 
+                                arr.findIndex(t => t.id === trial.id) === index
+                            );
+                            
+                            trials = uniqueTrials;
+                            console.log(`Loaded ${trials.length} trials (${repoTrials.length} from repo, ${localTrials.length} from local)`);
+                        }
+                    }
+                } catch (error) {
+                    console.log('No trials data in repository, using local storage only');
+                }
+                
+            } catch (error) {
+                console.error('Error loading repository data:', error);
+                loadFallbackData();
+            }
+        }
         
-        const availableJudges = [
-            'Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer', 'John Smith',
-            'Mary Johnson', 'Bob Wilson', 'Lisa Davis', 'Carol Brown',
-            'David Lee', 'Susan Miller', 'Mike Taylor', 'Jennifer White'
-        ];
+        function loadFallbackData() {
+            console.log('Loading fallback data...');
+            // Fallback data if repository data is not available
+            availableClasses = [
+                'Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 
+                'Super Sleuth Level 4', 'Starter', 'Advanced', 'Pro', 'ARF',
+                'Rally Level 1', 'Rally Level 2', 'Rally Level 3',
+                'Obedience Level 1', 'Obedience Level 2', 'Obedience Level 3'
+            ];
+            
+            availableJudges = [
+                'Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer', 'John Smith',
+                'Mary Johnson', 'Bob Wilson', 'Lisa Davis', 'Carol Brown',
+                'David Lee', 'Susan Miller', 'Mike Taylor', 'Jennifer White'
+            ];
+            
+            // Sample dog data
+            dogData = [
+                {
+                    id: '07-0001-01',
+                    callName: 'BJ',
+                    fullName: 'Jed\'s Black Jack',
+                    handlerFullName: 'Shirley Ottmer',
+                    handlerFirstName: 'Shirley',
+                    handlerLastName: 'Ottmer',
+                    className: 'Patrol Level 1',
+                    judgeName: 'Linda Alberda'
+                },
+                {
+                    id: '07-0001-02',
+                    callName: 'Jaidon',
+                    fullName: 'Romyldale\'s Jaidon',
+                    handlerFullName: 'Shirley Ottmer',
+                    handlerFirstName: 'Shirley',
+                    handlerLastName: 'Ottmer',
+                    className: 'Detective Level 2',
+                    judgeName: 'Ginger Alpine'
+                }
+            ];
+            
+            console.log('Fallback data loaded successfully');
+        }
+        
+        function updateDataFreshness(lastUpdated) {
+            // Create or update data freshness indicator
+            let indicator = document.getElementById('dataFreshness');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'dataFreshness';
+                indicator.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px; 
+                    background: rgba(255,255,255,0.9); padding: 0.5rem 1rem;
+                    border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                    font-size: 0.875rem; color: #718096; z-index: 1000;
+                `;
+                document.body.appendChild(indicator);
+            }
+            
+            if (lastUpdated) {
+                const updateDate = new Date(lastUpdated);
+                const now = new Date();
+                const diffHours = Math.floor((now - updateDate) / (1000 * 60 * 60));
+                
+                let timeAgo;
+                if (diffHours < 1) timeAgo = 'just updated';
+                else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
+                else timeAgo = `${Math.floor(diffHours / 24)}d ago`;
+                
+                indicator.innerHTML = `📊 Data updated ${timeAgo}`;
+            } else {
+                indicator.innerHTML = `📊 Using local data`;
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.style.opacity = '0.5';
+                }
+            }, 5000);
+        }
+        
+        // Enhanced dog lookup functionality
+        function searchDogRecords(query) {
+            if (!query || query.length < 2) return [];
+            
+            const lowerQuery = query.toLowerCase();
+            return dogData.filter(dog => 
+                (dog.id && dog.id.toLowerCase().includes(lowerQuery)) ||
+                (dog.callName && dog.callName.toLowerCase().includes(lowerQuery)) ||
+                (dog.fullName && dog.fullName.toLowerCase().includes(lowerQuery)) ||
+                (dog.handlerFullName && dog.handlerFullName.toLowerCase().includes(lowerQuery))
+            ).slice(0, 10); // Limit to 10 results
+        }
+        
+        function getDogByRegistration(regNumber) {
+            return dogData.find(dog => dog.id === regNumber);
+        }
+        
+        // Trial management functions
+        function loadTrials() {
+            try {
+                const stored = localStorage.getItem('cwags_trials');
+                if (stored) {
+                    trials = JSON.parse(stored);
+                } else {
+                    trials = [];
+                }
+                console.log(`Loaded ${trials.length} trials from localStorage`);
+            } catch (error) {
+                console.error('Error loading trials from localStorage:', error);
+                trials = [];
+            }
+        }
+
+        function saveTrials() {
+            try {
+                localStorage.setItem('cwags_trials', JSON.stringify(trials));
+                console.log('Trials saved to localStorage');
+            } catch (error) {
+                console.error('Error saving trials to localStorage:', error);
+            }
+        }
 
         // Initialize the application
-        function init() {
-            loadTrials();
-            updateTrialsDisplay();
+        async function init() {
+            console.log('Initializing C-WAGS Trial Management System...');
+            
+            // Show loading state
+            showLoadingState();
+            
+            try {
+                // Load data from repository first
+                await loadDataFromRepository();
+                
+                // Load local trials
+                loadTrials();
+                
+                // Update display
+                updateTrialsDisplay();
+                
+                console.log('Initialization complete');
+                console.log(`Available classes: ${availableClasses.length}`);
+                console.log(`Available judges: ${availableJudges.length}`);
+                console.log(`Dog records: ${dogData.length}`);
+                console.log(`Trials: ${trials.length}`);
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+            } finally {
+                hideLoadingState();
+            }
+        }
+        
+        function showLoadingState() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loadingState';
+            loadingDiv.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                            background: rgba(255,255,255,0.9); z-index: 3000; 
+                            display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #4a5568;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🐕</div>
+                        <div style="font-size: 1.2rem; font-weight: 600;">Loading C-WAGS Data...</div>
+                        <div style="margin-top: 0.5rem;">Fetching latest records from repository</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+        }
+        
+        function hideLoadingState() {
+            const loadingDiv = document.getElementById('loadingState');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
         }
 
         // Tab management
@@ -1245,20 +1523,39 @@
 
         // Typeahead functionality
         function filterTypeahead(input, type) {
+            if (!input) return;
+            
             const value = input.value.toLowerCase();
             const dropdownId = input.id + 'Dropdown';
             const dropdown = document.getElementById(dropdownId);
             
+            if (!dropdown) return;
+            
             const items = type === 'classes' ? availableClasses : availableJudges;
-            const filtered = items.filter(item => item.toLowerCase().includes(value));
+            
+            if (!items || items.length === 0) {
+                dropdown.innerHTML = '<div class="typeahead-item" style="color: #a0aec0;">No data loaded yet</div>';
+                dropdown.style.display = 'block';
+                return;
+            }
+            
+            const filtered = items.filter(item => 
+                item && item.toLowerCase().includes(value)
+            );
             
             let html = '';
             filtered.forEach(item => {
-                html += `<div class="typeahead-item" onclick="selectTypeaheadItem('${input.id}', '${item}')">${item}</div>`;
+                // Escape quotes in the item name for onclick
+                const escapedItem = item.replace(/'/g, "\\'");
+                html += `<div class="typeahead-item" onclick="selectTypeaheadItem('${input.id}', '${escapedItem}')">${item}</div>`;
             });
             
+            if (html === '') {
+                html = `<div class="typeahead-item" style="color: #a0aec0;">No ${type} found matching "${value}"</div>`;
+            }
+            
             dropdown.innerHTML = html;
-            dropdown.style.display = filtered.length > 0 ? 'block' : 'none';
+            dropdown.style.display = filtered.length > 0 || html.includes('No ') ? 'block' : 'none';
         }
 
         function showTypeahead(input, type) {
@@ -1268,7 +1565,7 @@
         function selectTypeaheadItem(inputId, value) {
             const input = document.getElementById(inputId);
             const dropdown = document.getElementById(inputId + 'Dropdown');
-            if (input) input.value = value;
+            if (input) input.value = value.replace(/\\'/g, "'"); // Unescape quotes
             if (dropdown) dropdown.style.display = 'none';
         }
 
@@ -1328,26 +1625,41 @@
         }
 
         function collectTrialData() {
-            const data = {
-                name: document.getElementById('trialName').value.trim(),
-                host: document.getElementById('hostName').value.trim(),
-                location: document.getElementById('trialLocation').value.trim(),
-                cityState: document.getElementById('cityState').value.trim(),
-                type: selectedTrialType,
-                classes: []
-            };
+            console.log('Collecting trial data...');
             
-            if (selectedTrialType === 'standalone') {
-                data.date = document.getElementById('singleDate').value;
-                data.classes = collectStandaloneClasses();
-            } else {
-                data.dates = collectLeagueDates();
-                data.classes = collectLeagueClasses();
+            try {
+                const data = {
+                    name: document.getElementById('trialName').value.trim(),
+                    host: document.getElementById('hostName').value.trim(),
+                    location: document.getElementById('trialLocation').value.trim(),
+                    cityState: document.getElementById('cityState').value.trim(),
+                    type: selectedTrialType,
+                    classes: []
+                };
+                
+                if (selectedTrialType === 'standalone') {
+                    const singleDateInput = document.getElementById('singleDate');
+                    data.date = singleDateInput ? singleDateInput.value : '';
+                    data.classes = collectStandaloneClasses();
+                } else if (selectedTrialType === 'league') {
+                    data.dates = collectLeagueDates();
+                    data.classes = collectLeagueClasses();
+                }
+                
+                console.log('Trial data collected:', data);
+                
+                if (!validateCollectedData(data)) {
+                    console.log('Validation failed');
+                    return null;
+                }
+                
+                return data;
+                
+            } catch (error) {
+                console.error('Error collecting trial data:', error);
+                alert('Error collecting trial data: ' + error.message);
+                return null;
             }
-            
-            if (!validateCollectedData(data)) return null;
-            
-            return data;
         }
 
         function collectStandaloneClasses() {
@@ -1397,13 +1709,25 @@
         }
 
         function collectLeagueDates() {
-            const numNights = parseInt(document.getElementById('numNights').value);
+            const numNightsInput = document.getElementById('numNights');
+            if (!numNightsInput || !numNightsInput.value) {
+                console.log('No nights input found');
+                return [];
+            }
+            
+            const numNights = parseInt(numNightsInput.value);
             const dates = [];
             
             for (let i = 1; i <= numNights; i++) {
-                dates.push(document.getElementById(`night${i}Date`).value);
+                const dateInput = document.getElementById(`night${i}Date`);
+                if (dateInput && dateInput.value) {
+                    dates.push(dateInput.value);
+                } else {
+                    console.log(`Missing date for night ${i}`);
+                }
             }
             
+            console.log('Collected league dates:', dates);
             return dates;
         }
 
@@ -1509,7 +1833,8 @@
         function generateTrialId() {
             const prefix = selectedTrialType === 'league' ? 'L' : 'T';
             const number = String(trials.length + 1).padStart(3, '0');
-            return `${prefix}${number}`;
+            const timestamp = Date.now().toString().slice(-4); // Last 4 digits of timestamp for uniqueness
+            return `${prefix}${number}_${timestamp}`;
         }
 
         // Trial management functions
@@ -1527,6 +1852,158 @@
         function updateTrialsDisplay() {
             updateTrialsGrid();
             updateTrialsTable();
+            updateTrialSelectors();
+            updateDogRecordsTable();
+        }
+        
+        function updateTrialSelectors() {
+            const trialSelect = document.getElementById('trialSelect');
+            if (trialSelect) {
+                trialSelect.innerHTML = '<option value="">Choose a trial...</option>';
+                trials.forEach(trial => {
+                    const option = document.createElement('option');
+                    option.value = trial.id;
+                    option.textContent = `${trial.name} (${trial.type === 'league' ? trial.dates[0] + ' - ' + trial.dates[trial.dates.length-1] : trial.date})`;
+                    trialSelect.appendChild(option);
+                });
+            }
+        }
+        
+        function updateDogRecordsTable() {
+            const tableBody = document.getElementById('dogRecordsTable');
+            const recordCount = document.getElementById('recordCount');
+            
+            if (tableBody && dogData.length > 0) {
+                recordCount.textContent = `(${dogData.length} records loaded)`;
+                
+                tableBody.innerHTML = dogData.map(dog => `
+                    <tr>
+                        <td>${dog.id || 'N/A'}</td>
+                        <td>${dog.callName || 'N/A'}</td>
+                        <td>${dog.fullName || 'N/A'}</td>
+                        <td>${dog.handlerFullName || (dog.handlerFirstName + ' ' + dog.handlerLastName).trim() || 'N/A'}</td>
+                        <td>${dog.className || 'N/A'}</td>
+                        <td>${dog.judgeName || 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="selectDogForEntry('${dog.id}')" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+                                Select
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else if (tableBody) {
+                recordCount.textContent = '(No records loaded)';
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #a0aec0; padding: 2rem;">
+                            ${dogData.length === 0 ? 'No dog records found. Make sure dataforsite.xlsx is in the data/ folder.' : 'Loading...'}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function searchDogs(query) {
+            const dropdown = document.getElementById('dogSearchDropdown');
+            if (!dropdown) return;
+            
+            if (!query || query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            const results = searchDogRecords(query);
+            
+            if (results.length > 0) {
+                dropdown.innerHTML = results.map(dog => `
+                    <div class="typeahead-item" onclick="selectDogFromSearch('${dog.id}')">
+                        <strong>${dog.id}</strong> - ${dog.callName} (${dog.handlerFullName || (dog.handlerFirstName + ' ' + dog.handlerLastName).trim()})
+                    </div>
+                `).join('');
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.innerHTML = '<div class="typeahead-item" style="color: #a0aec0;">No dogs found matching "' + query + '"</div>';
+                dropdown.style.display = 'block';
+            }
+        }
+        
+        function selectDogFromSearch(dogId) {
+            const dog = getDogByRegistration(dogId);
+            if (dog) {
+                document.getElementById('dogSearch').value = `${dog.id} - ${dog.callName}`;
+                document.getElementById('dogSearchDropdown').style.display = 'none';
+                showDogInfo(dog);
+            }
+        }
+        
+        function selectDogForEntry(dogId) {
+            const dog = getDogByRegistration(dogId);
+            if (dog) {
+                document.getElementById('dogSearch').value = `${dog.id} - ${dog.callName}`;
+                showDogInfo(dog);
+            }
+        }
+        
+        function showDogInfo(dog) {
+            const dogInfo = document.getElementById('dogInfo');
+            const dogDetails = document.getElementById('dogDetails');
+            
+            if (dogInfo && dogDetails) {
+                dogDetails.innerHTML = `
+                    <div class="form-grid">
+                        <div><strong>Registration #:</strong> ${dog.id || 'N/A'}</div>
+                        <div><strong>Call Name:</strong> ${dog.callName || 'N/A'}</div>
+                        <div><strong>Full Name:</strong> ${dog.fullName || 'N/A'}</div>
+                        <div><strong>Handler:</strong> ${dog.handlerFullName || (dog.handlerFirstName + ' ' + dog.handlerLastName).trim() || 'N/A'}</div>
+                        <div><strong>Current Class:</strong> ${dog.className || 'N/A'}</div>
+                        <div><strong>Judge:</strong> ${dog.judgeName || 'N/A'}</div>
+                    </div>
+                `;
+                dogInfo.style.display = 'block';
+            }
+        }
+        
+        function updateTrialInfo() {
+            const trialSelect = document.getElementById('trialSelect');
+            const trialInfo = document.getElementById('trialInfo');
+            const trialDetails = document.getElementById('trialDetails');
+            
+            if (!trialSelect || !trialInfo || !trialDetails) return;
+            
+            const selectedTrialId = trialSelect.value;
+            if (!selectedTrialId) {
+                trialInfo.style.display = 'none';
+                return;
+            }
+            
+            const trial = trials.find(t => t.id === selectedTrialId);
+            if (trial) {
+                const dateDisplay = trial.type === 'league' 
+                    ? `${trial.dates[0]} to ${trial.dates[trial.dates.length - 1]} (${trial.dates.length} nights)`
+                    : trial.date;
+                
+                const classesDisplay = trial.classes.map(cls => 
+                    trial.type === 'league' 
+                        ? `Night ${cls.night}: ${cls.name} (${cls.rounds.length} rounds)`
+                        : `${cls.name} (${cls.rounds.length} rounds)`
+                ).join('<br>');
+                
+                trialDetails.innerHTML = `
+                    <div class="form-grid">
+                        <div><strong>Trial Name:</strong> ${trial.name}</div>
+                        <div><strong>Host:</strong> ${trial.host}</div>
+                        <div><strong>Location:</strong> ${trial.location}, ${trial.cityState}</div>
+                        <div><strong>Type:</strong> ${trial.type === 'league' ? '🏆 League' : '🎯 Standalone'}</div>
+                        <div><strong>Date(s):</strong> ${dateDisplay}</div>
+                        <div><strong>Status:</strong> <span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <strong>Classes:</strong><br>
+                        ${classesDisplay}
+                    </div>
+                `;
+                trialInfo.style.display = 'block';
+            }
         }
 
         function updateTrialsGrid() {
@@ -1549,15 +2026,19 @@
             card.className = 'trial-card';
             card.onclick = () => editTrial(trial.id);
             
-            const dateDisplay = trial.type === 'league' 
+            // Safely handle dates and status
+            const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
                 ? `${trial.dates[0]} - ${trial.dates[trial.dates.length - 1]}`
-                : trial.date;
+                : (trial.date || 'No date set');
+            
+            const status = trial.status || 'draft';
+            const statusDisplay = status.toUpperCase();
             
             card.innerHTML = `
-                <h3>${trial.name}</h3>
+                <h3>${trial.name || 'Unnamed Trial'}</h3>
                 <div class="trial-date">${dateDisplay}</div>
-                <p>${trial.host} | ${trial.cityState}</p>
-                <div class="trial-status status-${trial.status}">${trial.status.toUpperCase()}</div>
+                <p>${trial.host || 'No host'} | ${trial.cityState || 'No location'}</p>
+                <div class="trial-status status-${status}">${statusDisplay}</div>
             `;
             
             return card;
@@ -1567,26 +2048,41 @@
             const tableBody = document.getElementById('trialsTableBody');
             const managementBody = document.getElementById('managementTableBody');
             
-            const generateRow = (trial) => `
-                <tr>
-                    <td>${trial.id}</td>
-                    <td>${trial.name}</td>
-                    <td>${trial.type === 'league' ? '🏆 League' : '🎯 Standalone'}</td>
-                    <td>${trial.type === 'league' 
-                        ? `${trial.dates[0]} - ${trial.dates[trial.dates.length - 1]}` 
-                        : trial.date}</td>
-                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
-                    <td>${trial.classes.length} classes</td>
-                    <td>
-                        <button class="btn btn-secondary" onclick="editTrial('${trial.id}')" style="margin-right: 0.5rem;">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteTrial('${trial.id}')">Delete</button>
-                    </td>
-                </tr>
-            `;
+            const generateRow = (trial) => {
+                // Safely handle status with fallback
+                const status = trial.status || 'draft';
+                const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
+                
+                const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
+                    ? `${trial.dates[0]} - ${trial.dates[trial.dates.length - 1]}` 
+                    : (trial.date || 'No date set');
+                
+                const classCount = trial.classes ? trial.classes.length : 0;
+                
+                return `
+                    <tr>
+                        <td>${trial.id || 'No ID'}</td>
+                        <td>${trial.name || 'Unnamed Trial'}</td>
+                        <td>${trial.type === 'league' ? '🏆 League' : '🎯 Standalone'}</td>
+                        <td>${dateDisplay}</td>
+                        <td><span class="status-badge status-${status}">${statusDisplay}</span></td>
+                        <td>${classCount} classes</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="editTrial('${trial.id}')" style="margin-right: 0.5rem;">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteTrial('${trial.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            };
             
-            const recentTrials = trials.slice(-5); // Show last 5 trials
-            tableBody.innerHTML = recentTrials.map(generateRow).join('');
-            managementBody.innerHTML = trials.map(generateRow).join('');
+            if (tableBody) {
+                const recentTrials = trials.slice(-5); // Show last 5 trials
+                tableBody.innerHTML = recentTrials.map(generateRow).join('');
+            }
+            
+            if (managementBody) {
+                managementBody.innerHTML = trials.map(generateRow).join('');
+            }
         }
 
         function editTrial(trialId) {
@@ -1717,7 +2213,10 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM loaded, initializing...');
+            await init();
+        });
     </script>
 </body>
 </html>
