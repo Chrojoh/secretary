@@ -1104,13 +1104,22 @@
         }
 
         function generateClassInputs() {
-            const numClasses = parseInt(document.getElementById('numClasses').value);
+            const numClassesInput = document.getElementById('numClasses');
             const container = document.getElementById('classInputsContainer');
+            
+            if (!numClassesInput || !container) {
+                console.log('Missing numClasses input or container');
+                return;
+            }
+            
+            const numClasses = parseInt(numClassesInput.value);
             
             if (!numClasses) {
                 container.innerHTML = '';
                 return;
             }
+            
+            console.log('Generating inputs for', numClasses, 'classes');
             
             let html = '';
             for (let i = 1; i <= numClasses; i++) {
@@ -1125,6 +1134,11 @@
             }
             
             container.innerHTML = html;
+            
+            // Generate initial round inputs for each class
+            for (let i = 1; i <= numClasses; i++) {
+                generateRoundsInputs(`c${i}`);
+            }
         }
 
         function generateClassForm(night, classNum) {
@@ -1252,8 +1266,10 @@
         }
 
         function selectTypeaheadItem(inputId, value) {
-            document.getElementById(inputId).value = value;
-            document.getElementById(inputId + 'Dropdown').style.display = 'none';
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(inputId + 'Dropdown');
+            if (input) input.value = value;
+            if (dropdown) dropdown.style.display = 'none';
         }
 
         // Hide typeahead when clicking outside
@@ -1266,30 +1282,49 @@
         });
 
         function saveTrialData() {
-            const trialData = collectTrialData();
+            console.log('Save trial data called');
             
-            if (!trialData) return;
-            
-            if (editingTrialId) {
-                // Update existing trial
-                const index = trials.findIndex(t => t.id === editingTrialId);
-                if (index !== -1) {
-                    trials[index] = { ...trials[index], ...trialData, updatedAt: new Date().toISOString() };
+            try {
+                const trialData = collectTrialData();
+                console.log('Collected trial data:', trialData);
+                
+                if (!trialData) {
+                    console.log('No trial data returned, validation failed');
+                    return;
                 }
-            } else {
-                // Create new trial
-                trialData.id = generateTrialId();
-                trialData.createdAt = new Date().toISOString();
-                trialData.status = 'draft';
-                trials.push(trialData);
+                
+                if (editingTrialId) {
+                    // Update existing trial
+                    console.log('Updating existing trial:', editingTrialId);
+                    const index = trials.findIndex(t => t.id === editingTrialId);
+                    if (index !== -1) {
+                        trials[index] = { ...trials[index], ...trialData, updatedAt: new Date().toISOString() };
+                        console.log('Trial updated');
+                    } else {
+                        console.log('Trial not found for update');
+                    }
+                } else {
+                    // Create new trial
+                    console.log('Creating new trial');
+                    trialData.id = generateTrialId();
+                    trialData.createdAt = new Date().toISOString();
+                    trialData.status = 'draft';
+                    trials.push(trialData);
+                    console.log('New trial created with ID:', trialData.id);
+                }
+                
+                saveTrials();
+                updateTrialsDisplay();
+                hideModal('createTrialModal');
+                hideModal('editTrialModal');
+                
+                showAlert('success', editingTrialId ? 'Trial updated successfully!' : 'Trial created successfully!');
+                console.log('Trial saved successfully');
+                
+            } catch (error) {
+                console.error('Error saving trial:', error);
+                alert('Error saving trial: ' + error.message);
             }
-            
-            saveTrials();
-            updateTrialsDisplay();
-            hideModal('createTrialModal');
-            hideModal('editTrialModal');
-            
-            showAlert('success', editingTrialId ? 'Trial updated successfully!' : 'Trial created successfully!');
         }
 
         function collectTrialData() {
@@ -1316,28 +1351,48 @@
         }
 
         function collectStandaloneClasses() {
-            const numClasses = parseInt(document.getElementById('numClasses').value);
+            const numClassesInput = document.getElementById('numClasses');
+            if (!numClassesInput || !numClassesInput.value) {
+                console.log('No classes selected');
+                return [];
+            }
+            
+            const numClasses = parseInt(numClassesInput.value);
             const classes = [];
             
             for (let i = 1; i <= numClasses; i++) {
+                const classNameInput = document.getElementById(`c${i}ClassName`);
+                const roundsInput = document.getElementById(`c${i}Rounds`);
+                
+                if (!classNameInput || !roundsInput) {
+                    console.log(`Missing inputs for class ${i}`);
+                    continue;
+                }
+                
                 const classData = {
-                    name: document.getElementById(`c${i}ClassName`).value.trim(),
+                    name: classNameInput.value.trim(),
                     rounds: []
                 };
                 
-                const numRounds = parseInt(document.getElementById(`c${i}Rounds`).value);
+                const numRounds = parseInt(roundsInput.value) || 1;
                 for (let r = 1; r <= numRounds; r++) {
                     const roundId = `c${i}r${r}`;
-                    classData.rounds.push({
-                        round: r,
-                        judge: document.getElementById(`${roundId}Judge`).value.trim(),
-                        feoOffered: document.getElementById(`${roundId}FEO`).checked
-                    });
+                    const judgeInput = document.getElementById(`${roundId}Judge`);
+                    const feoInput = document.getElementById(`${roundId}FEO`);
+                    
+                    if (judgeInput) {
+                        classData.rounds.push({
+                            round: r,
+                            judge: judgeInput.value.trim(),
+                            feoOffered: feoInput ? feoInput.checked : false
+                        });
+                    }
                 }
                 
                 classes.push(classData);
             }
             
+            console.log('Collected standalone classes:', classes);
             return classes;
         }
 
@@ -1353,66 +1408,101 @@
         }
 
         function collectLeagueClasses() {
-            const numNights = parseInt(document.getElementById('numNights').value);
+            const numNightsInput = document.getElementById('numNights');
+            if (!numNightsInput || !numNightsInput.value) {
+                console.log('No nights selected for league');
+                return [];
+            }
+            
+            const numNights = parseInt(numNightsInput.value);
             const classes = [];
             
             for (let night = 1; night <= numNights; night++) {
                 const nightContainer = document.getElementById(`night${night}Classes`);
+                if (!nightContainer) {
+                    console.log(`Night ${night} container not found`);
+                    continue;
+                }
+                
                 const classContainers = nightContainer.querySelectorAll('.class-container');
                 
                 classContainers.forEach((container, index) => {
                     const classNum = index + 1;
                     const classId = `n${night}c${classNum}`;
                     
+                    const classNameInput = document.getElementById(`${classId}ClassName`);
+                    const roundsInput = document.getElementById(`${classId}Rounds`);
+                    
+                    if (!classNameInput || !roundsInput) {
+                        console.log(`Missing inputs for night ${night}, class ${classNum}`);
+                        return;
+                    }
+                    
                     const classData = {
                         night: night,
-                        name: document.getElementById(`${classId}ClassName`).value.trim(),
+                        name: classNameInput.value.trim(),
                         rounds: []
                     };
                     
-                    const numRounds = parseInt(document.getElementById(`${classId}Rounds`).value);
+                    const numRounds = parseInt(roundsInput.value) || 1;
                     for (let r = 1; r <= numRounds; r++) {
                         const roundId = `${classId}r${r}`;
-                        classData.rounds.push({
-                            round: r,
-                            judge: document.getElementById(`${roundId}Judge`).value.trim(),
-                            feoOffered: document.getElementById(`${roundId}FEO`).checked
-                        });
+                        const judgeInput = document.getElementById(`${roundId}Judge`);
+                        const feoInput = document.getElementById(`${roundId}FEO`);
+                        
+                        if (judgeInput) {
+                            classData.rounds.push({
+                                round: r,
+                                judge: judgeInput.value.trim(),
+                                feoOffered: feoInput ? feoInput.checked : false
+                            });
+                        }
                     }
                     
                     classes.push(classData);
                 });
             }
             
+            console.log('Collected league classes:', classes);
             return classes;
         }
 
         function validateCollectedData(data) {
+            console.log('Validating trial data:', data);
+            
             if (!data.name || !data.host || !data.location || !data.cityState) {
                 alert('Please fill in all required fields.');
                 return false;
             }
             
-            if (data.classes.length === 0) {
+            if (!data.classes || data.classes.length === 0) {
                 alert('Please add at least one class.');
                 return false;
             }
             
             // Validate classes have names and judges
-            for (const classData of data.classes) {
-                if (!classData.name) {
-                    alert('Please provide names for all classes.');
+            for (let i = 0; i < data.classes.length; i++) {
+                const classData = data.classes[i];
+                if (!classData.name || classData.name.trim() === '') {
+                    alert(`Please provide a name for class ${i + 1}.`);
                     return false;
                 }
                 
-                for (const round of classData.rounds) {
-                    if (!round.judge) {
-                        alert('Please assign judges to all rounds.');
+                if (!classData.rounds || classData.rounds.length === 0) {
+                    alert(`Class "${classData.name}" must have at least one round.`);
+                    return false;
+                }
+                
+                for (let r = 0; r < classData.rounds.length; r++) {
+                    const round = classData.rounds[r];
+                    if (!round.judge || round.judge.trim() === '') {
+                        alert(`Please assign a judge to round ${round.round} of class "${classData.name}".`);
                         return false;
                     }
                 }
             }
             
+            console.log('Validation passed');
             return true;
         }
 
