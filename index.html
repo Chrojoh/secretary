@@ -1,4 +1,424 @@
-<!DOCTYPE html>
+// Entry Form Functions
+        let currentEntryTrial = null;
+        let selectedClasses = {};
+        let entryFees = {
+            firstClass: 25.00,
+            additionalClass: 20.00,
+            juniorDiscount: 5.00
+        };
+
+        function showEntryForm(trialId) {
+            const trial = trials.find(t => t.id === trialId);
+            if (!trial) {
+                alert('Trial not found!');
+                return;
+            }
+
+            if (trial.status !== 'approved' && trial.status !== 'pending') {
+                alert('Entry forms are only available for approved trials.');
+                return;
+            }
+
+            currentEntryTrial = trial;
+            populateEntryForm(trial);
+            showModal('entryFormModal');
+        }
+
+        function populateEntryForm(trial) {
+            // Populate trial header info
+            const header = document.getElementById('entryFormHeader');
+            const entryDeadline = calculateEntryDeadline(trial.date);
+            
+            header.innerHTML = `
+                <div style="text-align: center;">
+                    <h3 style="color: #2d3748; margin-bottom: 0.5rem;">${trial.host}</h3>
+                    <p style="color: #4a5568; margin: 0.25rem 0;"><strong>Date:</strong> ${formatDate(trial.date)}</p>
+                    <p style="color: #4a5568; margin: 0.25rem 0;"><strong>Location:</strong> ${trial.location}, ${trial.city}</p>
+                    <p style="color: #4a5568; margin: 0.25rem 0;"><strong>Contact:</strong> ${trial.contact}</p>
+                    <p style="color: #e53e3e; margin: 0.25rem 0; font-weight: bold;">Entry Deadline: ${formatDate(entryDeadline)}</p>
+                </div>
+            `;
+
+            // Populate available classes
+            populateClassSelection(trial);
+            
+            // Reset form
+            clearEntryForm();
+            updateFeeSummary();
+        }
+
+        function populateClassSelection(trial) {
+            const container = document.getElementById('entryClassSelection');
+            const availableClasses = trial.classes || [];
+            
+            if (availableClasses.length === 0) {
+                container.innerHTML = '<p style="color: #e53e3e;">No classes available for this trial.</p>';
+                return;
+            }
+
+            let html = '';
+            availableClasses.forEach((className, index) => {
+                html += `
+                    <div style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background: white;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" 
+                                   id="class_${index}" 
+                                   value="${className}"
+                                   onchange="toggleClassSelection('${className}', this.checked)"
+                                   style="margin-right: 1rem; transform: scale(1.2);">
+                            <div>
+                                <div style="font-weight: bold; font-size: 1.1rem; color: #2d3748;">${className}</div>
+                                <div style="color: #718096; font-size: 0.9rem;">
+                                    Fee: ${index === 0 ? entryFees.firstClass.toFixed(2) : entryFees.additionalClass.toFixed(2)}
+                                    ${index === 0 ? ' (First Class)' : ' (Additional Class)'}
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleClassSelection(className, isSelected) {
+            if (isSelected) {
+                selectedClasses[className] = true;
+            } else {
+                delete selectedClasses[className];
+            }
+            updateFeeSummary();
+        }
+
+        function updateFeeSummary() {
+            const selectedClassCount = Object.keys(selectedClasses).length;
+            const isJunior = document.getElementById('entryJuniorHandler').checked;
+            
+            let breakdown = '';
+            let total = 0;
+
+            if (selectedClassCount === 0) {
+                breakdown = '<p style="color: #718096;">No classes selected</p>';
+            } else {
+                // First class
+                const firstClassFee = entryFees.firstClass;
+                breakdown += `<div>First Class: ${firstClassFee.toFixed(2)}</div>`;
+                total += firstClassFee;
+
+                // Additional classes
+                if (selectedClassCount > 1) {
+                    const additionalCount = selectedClassCount - 1;
+                    const additionalFee = entryFees.additionalClass * additionalCount;
+                    breakdown += `<div>Additional Classes (${additionalCount}): ${additionalFee.toFixed(2)}</div>`;
+                    total += additionalFee;
+                }
+
+                // Junior discount
+                if (isJunior) {
+                    const discount = entryFees.juniorDiscount * selectedClassCount;
+                    breakdown += `<div style="color: #38a169;">Junior Discount: -${discount.toFixed(2)}</div>`;
+                    total -= discount;
+                }
+            }
+
+            document.getElementById('entryFeeBreakdown').innerHTML = breakdown;
+            document.getElementById('entryFeeTotal').innerHTML = `Total: ${total.toFixed(2)}`;
+        }
+
+        function clearEntryForm() {
+            document.getElementById('entryDogCall').value = '';
+            document.getElementById('entryDogFull').value = '';
+            document.getElementById('entryRegNumber').value = '';
+            document.getElementById('entryBreed').value = '';
+            document.getElementById('entryHandlerFull').value = '';
+            document.getElementById('entryHandlerEmail').value = '';
+            document.getElementById('entryHandlerPhone').value = '';
+            document.getElementById('entryHandlerAddress').value = '';
+            document.getElementById('entryJuniorHandler').checked = false;
+            document.getElementById('entryComments').value = '';
+            document.getElementById('entryAgreement').checked = false;
+            document.getElementById('entrySubmissionMessage').style.display = 'none';
+            
+            // Clear class selections
+            selectedClasses = {};
+            const checkboxes = document.querySelectorAll('#entryClassSelection input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+        }
+
+        function submitEntry() {
+            // Validate entry form
+            const validation = validateEntry();
+            if (!validation.isValid) {
+                showEntryMessage(validation.errors.join('\n'), 'error');
+                return;
+            }
+
+            // Collect entry data
+            const entryData = {
+                trialId: currentEntryTrial.id,
+                trialName: `${currentEntryTrial.host} - ${formatDate(currentEntryTrial.date)}`,
+                submissionDate: new Date().toISOString(),
+                dog: {
+                    callName: document.getElementById('entryDogCall').value.trim(),
+                    fullName: document.getElementById('entryDogFull').value.trim(),
+                    registrationNumber: document.getElementById('entryRegNumber').value.trim(),
+                    breed: document.getElementById('entryBreed').value.trim()
+                },
+                handler: {
+                    fullName: document.getElementById('entryHandlerFull').value.trim(),
+                    email: document.getElementById('entryHandlerEmail').value.trim(),
+                    phone: document.getElementById('entryHandlerPhone').value.trim(),
+                    address: document.getElementById('entryHandlerAddress').value.trim(),
+                    isJunior: document.getElementById('entryJuniorHandler').checked
+                },
+                classes: Object.keys(selectedClasses),
+                totalFee: calculateTotalFee(),
+                comments: document.getElementById('entryComments').value.trim(),
+                status: 'submitted',
+                paymentStatus: 'pending'
+            };
+
+            // Generate entry ID
+            entryData.entryId = generateEntryId();
+
+            // Save entry
+            saveTrialEntry(entryData);
+
+            // Show success message
+            showEntrySuccessMessage(entryData);
+        }
+
+        function validateEntry() {
+            const errors = [];
+
+            // Required fields
+            if (!document.getElementById('entryDogCall').value.trim()) {
+                errors.push('Dog\'s call name is required');
+            }
+            if (!document.getElementById('entryDogFull').value.trim()) {
+                errors.push('Dog\'s full name is required');
+            }
+            if (!document.getElementById('entryHandlerFull').value.trim()) {
+                errors.push('Handler name is required');
+            }
+            if (!document.getElementById('entryHandlerEmail').value.trim()) {
+                errors.push('Handler email is required');
+            }
+
+            // Email validation
+            const email = document.getElementById('entryHandlerEmail').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !emailRegex.test(email)) {
+                errors.push('Please enter a valid email address');
+            }
+
+            // Class selection
+            if (Object.keys(selectedClasses).length === 0) {
+                errors.push('Please select at least one class');
+            }
+
+            // Agreement checkbox
+            if (!document.getElementById('entryAgreement').checked) {
+                errors.push('You must agree to the entry terms and conditions');
+            }
+
+            return {
+                isValid: errors.length === 0,
+                errors: errors
+            };
+        }
+
+        function calculateTotalFee() {
+            const selectedClassCount = Object.keys(selectedClasses).length;
+            const isJunior = document.getElementById('entryJuniorHandler').checked;
+            
+            if (selectedClassCount === 0) return 0;
+
+            let total = entryFees.firstClass; // First class
+            if (selectedClassCount > 1) {
+                total += entryFees.additionalClass * (selectedClassCount - 1); // Additional classes
+            }
+            if (isJunior) {
+                total -= entryFees.juniorDiscount * selectedClassCount; // Junior discount
+            }
+
+            return Math.max(0, total); // Ensure non-negative
+        }
+
+        function generateEntryId() {
+            const timestamp = Date.now().toString(36);
+            const random = Math.random().toString(36).substr(2, 3);
+            return `E${timestamp}${random}`.toUpperCase();
+        }
+
+        function saveTrialEntry(entryData) {
+            try {
+                // Get existing entries
+                let trialEntries = JSON.parse(localStorage.getItem('cwags_trial_entries') || '{}');
+                
+                // Initialize trial entries if not exists
+                if (!trialEntries[entryData.trialId]) {
+                    trialEntries[entryData.trialId] = [];
+                }
+                
+                // Add new entry
+                trialEntries[entryData.trialId].push(entryData);
+                
+                // Save to localStorage
+                localStorage.setItem('cwags_trial_entries', JSON.stringify(trialEntries));
+                
+                console.log(`Entry ${entryData.entryId} saved for trial ${entryData.trialId}`);
+                
+            } catch (error) {
+                console.error('Error saving entry:', error);
+            }
+        }
+
+        function showEntrySuccessMessage(entryData) {
+            const message = `
+🎉 Entry Submitted Successfully!
+
+Entry ID: ${entryData.entryId}
+Trial: ${entryData.trialName}
+Dog: ${entryData.dog.callName} (${entryData.dog.fullName})
+Handler: ${entryData.handler.fullName}
+Classes: ${entryData.classes.join(', ')}
+Total Fee: ${entryData.totalFee.toFixed(2)}
+
+📧 Confirmation email will be sent to: ${entryData.handler.email}
+
+💳 Payment Instructions:
+• Online payment link will be provided in confirmation email
+• Entry is not complete until payment is received
+• Payment deadline: 48 hours after submission
+
+📋 Next Steps:
+1. Check your email for confirmation and payment link
+2. Complete payment within 48 hours
+3. Receive final confirmation and trial packet
+4. Arrive at trial venue as instructed
+
+Thank you for entering the C-WAGS trial!
+            `;
+
+            showEntryMessage(message, 'success');
+            
+            // Clear form and close modal after delay
+            setTimeout(() => {
+                clearEntryForm();
+                hideModal('entryFormModal');
+            }, 5000);
+        }
+
+        function showEntryMessage(message, type) {
+            const messageDiv = document.getElementById('entrySubmissionMessage');
+            messageDiv.style.whiteSpace = 'pre-line';
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.color = type === 'error' ? '#e53e3e' : '#38a169';
+            messageDiv.style.backgroundColor = type === 'error' ? '#fed7d7' : '#c6f6d5';
+            messageDiv.style.padding = '1rem';
+            messageDiv.style.borderRadius = '10px';
+            messageDiv.style.border = type === 'error' ? '2px solid #e53e3e' : '2px solid #38a169';
+            messageDiv.style.marginTop = '1rem';
+        }
+
+        // Add junior handler discount update
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for existing session first
+            if (!checkExistingSession()) {
+                document.getElementById('loginModal').style.display = 'block';
+            }
+            
+            // Add junior handler checkbox listener
+            document.getElementById('entryJuniorHandler').addEventListener('change', updateFeeSummary);
+            
+            // Check if accessing entry form directly via URL
+            checkEntryFormURL();
+            
+            // Other existing event listeners...
+            document.getElementById('classScent').addEventListener('change', function() {
+                const resetGroup = document.getElementById('scentResetGroup');
+                resetGroup.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            document.getElementById('trialSearch').addEventListener('input', function() {
+                // Implementation for trial search
+            });
+            
+            document.getElementById('recordSearch').addEventListener('input', function() {
+                // Implementation for record search
+            });
+            
+            document.getElementById('scoringClass').addEventListener('change', function() {
+                const section = document.getElementById('scoreEntrySection');
+                section.style.display = this.value ? 'block' : 'none';
+            });
+        });
+
+        function checkEntryFormURL() {
+            // Check if URL contains entry form parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const entryTrialId = urlParams.get('entry');
+            
+            if (entryTrialId) {
+                // Auto-open entry form for specified trial
+                setTimeout(() => {
+                    showEntryForm(entryTrialId);
+                }, 1000);
+            }
+        }
+
+        // Function for trial hosts to view entries
+        function viewTrialEntries(trialId) {
+            try {
+                const trialEntries = JSON.parse(localStorage.getItem('cwags_trial_entries') || '{}');
+                const entries = trialEntries[trialId] || [];
+                
+                if (entries.length === 0) {
+                    alert('No entries found for this trial.');
+                    return;
+                }
+                
+                const trial = trials.find(t => t.id === trialId);
+                const trialName = trial ? `${trial.host} - ${formatDate(trial.date)}` : trialId;
+                
+                let summary = `📋 Trial Entries: ${trialName}\n\n`;
+                summary += `Total Entries: ${entries.length}\n`;
+                
+                // Count by class
+                const classCounts = {};
+                entries.forEach(entry => {
+                    entry.classes.forEach(className => {
+                        classCounts[className] = (classCounts[className] || 0) + 1;
+                    });
+                });
+                
+                summary += '\nEntries by Class:\n';
+                Object.entries(classCounts).forEach(([className, count]) => {
+                    summary += `• ${className}: ${count} entries\n`;
+                });
+                
+                // Total fees
+                const totalFees = entries.reduce((sum, entry) => sum + entry.totalFee, 0);
+                summary += `\nTotal Entry Fees: ${totalFees.toFixed(2)}\n`;
+                
+                summary += '\nDetailed Entries:\n';
+                entries.forEach((entry, index) => {
+                    summary += `\n${index + 1}. ${entry.dog.callName} - ${entry.handler.fullName}\n`;
+                    summary += `   Classes: ${entry.classes.join(', ')}\n`;
+                    summary += `   Fee: ${entry.totalFee.toFixed(2)} (${entry.paymentStatus})\n`;
+                    summary += `   Email: ${entry.handler.email}\n`;
+                });
+                
+                alert(summary);
+                console.log('Trial Entries:', entries);
+                
+            } catch (error) {
+                console.error('Error loading trial entries:', error);
+                alert('Error loading trial entries.');
+            }
+        }<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -674,6 +1094,107 @@
             </div>
 
             <div id="registrationMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Entry Form Modal -->
+    <div id="entryFormModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <span class="close" onclick="hideModal('entryFormModal')">&times;</span>
+            <div id="entryFormContent">
+                <h2 style="text-align: center; margin-bottom: 1rem; color: #4a5568;">Trial Entry Form</h2>
+                <div id="entryFormHeader" style="background: #f7fafc; padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
+                    <!-- Trial info will be populated here -->
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="entryDogCall">Dog's Call Name *</label>
+                        <input type="text" id="entryDogCall" placeholder="What you call your dog" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryDogFull">Dog's Full Registered Name *</label>
+                        <input type="text" id="entryDogFull" placeholder="Full registered name" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="entryRegNumber">C-WAGS Registration Number</label>
+                        <input type="text" id="entryRegNumber" placeholder="XX-XXXX-XX (if registered)">
+                    </div>
+                    <div class="form-group">
+                        <label for="entryBreed">Breed</label>
+                        <input type="text" id="entryBreed" placeholder="Dog's breed">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="entryHandlerFull">Handler Full Name *</label>
+                        <input type="text" id="entryHandlerFull" placeholder="Handler's complete name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entryHandlerEmail">Handler Email *</label>
+                        <input type="email" id="entryHandlerEmail" placeholder="email@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="entryHandlerPhone">Handler Phone</label>
+                        <input type="tel" id="entryHandlerPhone" placeholder="(555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="entryHandlerAddress">Handler Address</label>
+                        <input type="text" id="entryHandlerAddress" placeholder="City, State/Province">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="entryJuniorHandler" style="margin-right: 0.5rem;">
+                        Junior Handler (under 18) - $5 discount per class
+                    </label>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Class Entries</h3>
+                <div id="entryClassSelection">
+                    <!-- Available classes will be populated here -->
+                </div>
+
+                <div id="entryFeeSummary" style="background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
+                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Entry Fee Summary</h4>
+                    <div id="entryFeeBreakdown"></div>
+                    <div id="entryFeeTotal" style="font-size: 1.2rem; font-weight: bold; color: #2d3748; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="entryComments">Special Requests/Comments</label>
+                    <textarea id="entryComments" rows="3" placeholder="Any special needs, requests, or comments..."></textarea>
+                </div>
+
+                <div style="background: #fef5e7; border: 2px solid #ed8936; border-radius: 10px; padding: 1rem; margin: 2rem 0;">
+                    <h4 style="color: #c05621; margin-bottom: 0.5rem;">📝 Entry Agreement</h4>
+                    <div style="color: #c05621; font-size: 0.9rem;">
+                        <label style="display: flex; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <input type="checkbox" id="entryAgreement" style="margin-right: 0.5rem; margin-top: 0.2rem;" required>
+                            <span>I agree to abide by C-WAGS rules and regulations. I understand that all dogs must be healthy, current on vaccinations, and under control at all times. I assume all responsibility for my dog's actions and any damage caused.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="submitEntry()" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                        Submit Entry & Pay
+                    </button>
+                    <button class="btn btn-secondary" onclick="hideModal('entryFormModal')" style="margin-left: 1rem;">
+                        Cancel
+                    </button>
+                </div>
+
+                <div id="entrySubmissionMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
+            </div>
         </div>
     </div>
 
@@ -2127,7 +2648,12 @@
                     <td>
                         <button class="btn btn-secondary" onclick="editTrial('${trial.id}')">Edit</button>
                         <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="margin-left: 0.5rem;">View</button>
-                        <button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')" style="margin-left: 0.5rem;">Duplicate</button>
+                        ${trial.status === 'approved' || trial.status === 'pending' ? 
+                            `<br style="margin: 0.5rem 0;"><button class="btn btn-primary" onclick="showEntryForm('${trial.id}')" style="background: #48bb78; margin-right: 0.5rem;">Entry Form</button>
+                            <button class="btn btn-secondary" onclick="viewTrialEntries('${trial.id}')">View Entries</button>` : 
+                            ''
+                        }
+                        <br style="margin: 0.5rem 0;"><button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')">Duplicate</button>
                     </td>
                 `;
             });
@@ -2199,26 +2725,138 @@
             };
 
             if (validateTrialApplication(formData)) {
-                // Add to trials array
-                const newTrial = {
-                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
-                    date: formData.date,
-                    host: formData.host,
-                    location: formData.location,
-                    city: formData.city,
-                    classes: formData.classes,
-                    judge: formData.judges.split('\n')[0] || 'TBD',
-                    status: 'pending',
-                    contact: formData.email,
-                    phone: formData.phone
-                };
+                // Find existing trial if created from modal, or create new one
+                let trial = null;
+                if (window.currentTrialConfig) {
+                    // Update existing trial with application details
+                    trial = trials.find(t => t.date === window.currentTrialConfig.date && t.status === 'draft');
+                    if (trial) {
+                        Object.assign(trial, formData);
+                        trial.status = 'pending';
+                        trial.lastModified = new Date().toISOString();
+                        updateTrialInStorage(trial);
+                    }
+                } 
+                
+                if (!trial) {
+                    // Create new trial from application form
+                    const newTrial = {
+                        id: 'T' + String(trials.length + 1).padStart(3, '0'),
+                        ...formData,
+                        clubId: currentUser?.clubId,
+                        clubName: currentUser?.clubName,
+                        host: formData.host || currentUser?.clubName,
+                        judge: formData.judges.split('\n')[0] || 'TBD',
+                        status: 'pending',
+                        contact: formData.email,
+                        phone: formData.phone,
+                        created: new Date().toISOString(),
+                        lastModified: new Date().toISOString(),
+                        createdBy: currentUser?.contact || 'Unknown'
+                    };
+                    
+                    trials.push(newTrial);
+                    saveTrialToStorage(newTrial);
+                    trial = newTrial;
+                }
 
-                trials.push(newTrial);
+                // Generate entry form link
+                const entryFormUrl = generateEntryFormLink(trial);
+                
                 updateDashboardStats();
                 populateTrialsTable();
                 
-                alert('Trial application submitted successfully!');
+                // Show success message with entry form link
+                showTrialSubmissionSuccess(trial, entryFormUrl);
                 clearForm();
+                window.currentTrialConfig = null;
+            }
+        }
+
+        function generateEntryFormLink(trial) {
+            // In Phase 1, create a local URL. In Phase 2, this would be a real URL
+            const baseUrl = window.location.origin + window.location.pathname;
+            const entryUrl = `${baseUrl}?entry=${trial.id}`;
+            
+            // Store the trial entry info
+            const entryFormData = {
+                trialId: trial.id,
+                trialName: `${trial.host} - ${formatDate(trial.date)}`,
+                trialDate: trial.date,
+                location: `${trial.location}, ${trial.city}`,
+                host: trial.host,
+                contact: trial.contact,
+                classes: trial.classes || [],
+                judges: trial.judges,
+                status: 'accepting_entries',
+                entryDeadline: calculateEntryDeadline(trial.date),
+                fees: calculateTrialFees(trial.classes),
+                created: new Date().toISOString()
+            };
+            
+            // Save entry form data
+            let entryForms = JSON.parse(localStorage.getItem('cwags_entry_forms') || '{}');
+            entryForms[trial.id] = entryFormData;
+            localStorage.setItem('cwags_entry_forms', JSON.stringify(entryForms));
+            
+            return entryUrl;
+        }
+
+        function calculateEntryDeadline(trialDate) {
+            const trial = new Date(trialDate);
+            const deadline = new Date(trial);
+            deadline.setDate(trial.getDate() - 7); // 7 days before trial
+            return deadline.toISOString().split('T')[0];
+        }
+
+        function calculateTrialFees(classes) {
+            // Standard C-WAGS entry fees
+            return {
+                firstClass: 25.00,
+                additionalClass: 20.00,
+                juniorDiscount: 5.00, // $5 off for junior handlers
+                multiDayDiscount: 10.00 // $10 off for multi-day events
+            };
+        }
+
+        function showTrialSubmissionSuccess(trial, entryFormUrl) {
+            const message = `
+🎉 Trial Application Submitted Successfully!
+
+Trial ID: ${trial.id}
+Status: Pending C-WAGS Approval
+
+📝 ENTRY FORM LINK GENERATED:
+${entryFormUrl}
+
+📋 Next Steps:
+1. C-WAGS will review your application
+2. Upon approval, share the entry form link with participants
+3. Participants can register and pay online
+4. You'll receive entry summaries and payment reports
+
+💡 TIP: Bookmark the entry form link and include it in your trial premium!
+
+Would you like to:
+• Copy the entry form link to clipboard
+• Test the entry form
+• Continue to trial management
+            `;
+            
+            if (confirm(message + '\n\nClick OK to copy entry form link to clipboard, Cancel to continue.')) {
+                // Copy to clipboard
+                navigator.clipboard.writeText(entryFormUrl).then(() => {
+                    alert('Entry form link copied to clipboard! 📋\n\nShare this link with participants after your trial is approved.');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = entryFormUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Entry form link copied to clipboard! 📋');
+                });
             }
         }
 
@@ -2755,6 +3393,24 @@
             
             // Store the detailed configuration for later use
             window.currentTrialConfig = trialData;
+            
+            // Add entry form generation info
+            const entryFormNote = document.createElement('div');
+            entryFormNote.style.cssText = `
+                background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; 
+                padding: 1rem; margin-top: 2rem; text-align: center;
+            `;
+            entryFormNote.innerHTML = `
+                <h4 style="color: #2c7a7b; margin-bottom: 0.5rem;">📝 Next Steps</h4>
+                <p style="color: #2c7a7b; margin: 0;">
+                    After submitting your trial application, an <strong>Entry Form Link</strong> will be generated.<br>
+                    Share this link with participants to register for your trial!
+                </p>
+            `;
+            
+            // Insert after the advocates field
+            const advocatesField = document.getElementById('advocates').parentNode.parentNode;
+            advocatesField.parentNode.insertBefore(entryFormNote, advocatesField.nextSibling);
         }
 
         // Trial editing functionality
