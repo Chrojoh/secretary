@@ -833,6 +833,141 @@
         </div>
     </div>
 
+    <!-- Edit Trial Modal -->
+    <div id="editTrialModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="hideModal('editTrialModal')">&times;</span>
+            <h2 id="editTrialTitle">Edit Trial</h2>
+            
+            <div id="editTrialContent">
+                <!-- Trial basic info -->
+                <div class="form-grid" style="margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="editTrialDate">Trial Date</label>
+                        <input type="date" id="editTrialDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTrialStatus">Status</label>
+                        <select id="editTrialStatus">
+                            <option value="draft">Draft</option>
+                            <option value="pending">Pending Approval</option>
+                            <option value="approved">Approved</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="editHostName">Host Name</label>
+                        <input type="text" id="editHostName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTrialLocation">Location</label>
+                        <input type="text" id="editTrialLocation" required>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="editCityState">City, State/Province</label>
+                        <input type="text" id="editCityState" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editContactEmail">Contact Email</label>
+                        <input type="email" id="editContactEmail" required>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label for="editContactPhone">Contact Phone</label>
+                        <input type="tel" id="editContactPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="editJudge">Judge</label>
+                        <input type="text" id="editJudge">
+                    </div>
+                </div>
+
+                <!-- Classes configuration -->
+                <div id="editClassesContainer">
+                    <h3 style="color: #4a5568; margin-bottom: 1rem;">Classes Offered</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editClassObedience"> Obedience
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editClassRally"> Rally
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editClassScent"> Scent
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="editClassGames"> Games
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-top: 2rem;">
+                    <div class="form-group">
+                        <label for="editJudges">Judges List</label>
+                        <textarea id="editJudges" rows="3" placeholder="List all judges for this trial"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAdvocates">C-WAGS Advocates</label>
+                        <textarea id="editAdvocates" rows="3" placeholder="List assigned advocates"></textarea>
+                    </div>
+                </div>
+
+                <!-- Trial details -->
+                <h3 style="color: #4a5568; margin: 2rem 0 1rem 0;">Trial Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editTrialType">Trial Type</label>
+                        <select id="editTrialType">
+                            <option value="inside">Inside</option>
+                            <option value="outside">Outside</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRingSurface">Ring Surface</label>
+                        <input type="text" id="editRingSurface" placeholder="e.g., Matting, Grass, Dirt">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="editNumRings">Number of Rings/Search Areas</label>
+                        <input type="number" id="editNumRings" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="editIsLeague"> League Trial
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div style="text-align: center; margin-top: 2rem; border-top: 2px solid #e2e8f0; padding-top: 2rem;">
+                    <button class="btn btn-primary" onclick="saveTrialChanges()">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="hideModal('editTrialModal')" style="margin-left: 1rem;">Cancel</button>
+                    <button class="btn" onclick="deleteTrialConfirm()" style="margin-left: 1rem; background: #fc8181; color: white;">Delete Trial</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global Variables
         let currentUser = "Demo User";
@@ -843,6 +978,7 @@
         let reports = [];
         let availableClasses = [];
         let availableJudges = [];
+        let currentEditingTrial = null;
 
         // Data initialization - loads from JSON files automatically
         async function initializeData() {
@@ -1168,6 +1304,7 @@
                     <td>
                         <button class="btn btn-secondary" onclick="editTrial('${trial.id}')">Edit</button>
                         <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="margin-left: 0.5rem;">View</button>
+                        <button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')" style="margin-left: 0.5rem;">Duplicate</button>
                     </td>
                 `;
             });
@@ -1245,6 +1382,7 @@
                 };
                 
                 trials.push(newTrial);
+                saveTrialsToStorage();
                 
                 updateDashboardStats();
                 populateTrialsTable();
@@ -1384,7 +1522,178 @@
         }
 
         function editTrial(trialId) {
-            alert(`Editing trial ${trialId}`);
+            // Find the trial to edit
+            const trial = trials.find(t => t.id === trialId);
+            if (!trial) {
+                alert('Trial not found!');
+                return;
+            }
+
+            currentEditingTrial = trial;
+            
+            // Populate edit modal with trial data
+            document.getElementById('editTrialTitle').textContent = `Edit Trial ${trialId}`;
+            document.getElementById('editTrialDate').value = trial.date || '';
+            document.getElementById('editTrialStatus').value = trial.status || 'draft';
+            document.getElementById('editHostName').value = trial.host || '';
+            document.getElementById('editTrialLocation').value = trial.location || '';
+            document.getElementById('editCityState').value = trial.city || '';
+            document.getElementById('editContactEmail').value = trial.email || trial.contact || '';
+            document.getElementById('editContactPhone').value = trial.phone || '';
+            document.getElementById('editJudge').value = trial.judge || '';
+            document.getElementById('editJudges').value = trial.judges || '';
+            document.getElementById('editAdvocates').value = trial.advocates || '';
+            document.getElementById('editTrialType').value = trial.type || 'inside';
+            document.getElementById('editRingSurface').value = trial.surface || '';
+            document.getElementById('editNumRings').value = trial.rings || 1;
+            document.getElementById('editIsLeague').checked = trial.league || false;
+
+            // Set class checkboxes
+            document.getElementById('editClassObedience').checked = trial.classes && trial.classes.includes('Obedience');
+            document.getElementById('editClassRally').checked = trial.classes && trial.classes.includes('Rally');
+            document.getElementById('editClassScent').checked = trial.classes && trial.classes.includes('Scent');
+            document.getElementById('editClassGames').checked = trial.classes && trial.classes.includes('Games');
+            
+            // Show modal
+            showModal('editTrialModal');
+        }
+
+        function saveTrialChanges() {
+            if (!currentEditingTrial) return;
+            
+            // Collect updated trial data
+            const updatedData = {
+                date: document.getElementById('editTrialDate').value,
+                status: document.getElementById('editTrialStatus').value,
+                host: document.getElementById('editHostName').value,
+                location: document.getElementById('editTrialLocation').value,
+                city: document.getElementById('editCityState').value,
+                email: document.getElementById('editContactEmail').value,
+                contact: document.getElementById('editContactEmail').value,
+                phone: document.getElementById('editContactPhone').value,
+                judge: document.getElementById('editJudge').value,
+                judges: document.getElementById('editJudges').value,
+                advocates: document.getElementById('editAdvocates').value,
+                type: document.getElementById('editTrialType').value,
+                surface: document.getElementById('editRingSurface').value,
+                rings: document.getElementById('editNumRings').value,
+                league: document.getElementById('editIsLeague').checked,
+                classes: getEditSelectedClasses(),
+                lastModified: new Date().toISOString()
+            };
+            
+            // Validate required fields
+            if (!updatedData.date || !updatedData.host || !updatedData.location || !updatedData.city) {
+                alert('Please fill in all required fields (Date, Host, Location, City).');
+                return;
+            }
+            
+            if (updatedData.classes.length === 0) {
+                alert('Please select at least one class type.');
+                return;
+            }
+            
+            // Update the trial in the trials array
+            Object.assign(currentEditingTrial, updatedData);
+            
+            // Save to localStorage for persistence
+            saveTrialsToStorage();
+            
+            // Refresh the displays
+            updateDashboardStats();
+            populateTrialsTable();
+            
+            // Close modal
+            hideModal('editTrialModal');
+            
+            alert(`Trial ${currentEditingTrial.id} updated successfully!`);
+            currentEditingTrial = null;
+        }
+
+        function getEditSelectedClasses() {
+            const classes = [];
+            if (document.getElementById('editClassObedience').checked) classes.push('Obedience');
+            if (document.getElementById('editClassRally').checked) classes.push('Rally');
+            if (document.getElementById('editClassScent').checked) classes.push('Scent');
+            if (document.getElementById('editClassGames').checked) classes.push('Games');
+            return classes;
+        }
+
+        function deleteTrialConfirm() {
+            if (!currentEditingTrial) return;
+            
+            const trialId = currentEditingTrial.id;
+            const trialName = `${currentEditingTrial.host} - ${formatDate(currentEditingTrial.date)}`;
+            
+            if (confirm(`Are you sure you want to delete trial ${trialId} (${trialName})?\n\nThis action cannot be undone.`)) {
+                // Remove from trials array
+                const index = trials.findIndex(t => t.id === trialId);
+                if (index > -1) {
+                    trials.splice(index, 1);
+                }
+                
+                // Save to localStorage
+                saveTrialsToStorage();
+                
+                // Refresh displays
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                // Close modal
+                hideModal('editTrialModal');
+                
+                alert(`Trial ${trialId} deleted successfully.`);
+                currentEditingTrial = null;
+            }
+        }
+
+        function duplicateTrial(trialId) {
+            const trial = trials.find(t => t.id === trialId);
+            if (!trial) {
+                alert('Trial not found!');
+                return;
+            }
+            
+            if (confirm(`Create a copy of trial ${trialId}?`)) {
+                const duplicatedTrial = {
+                    ...trial,
+                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
+                    date: '', // Clear date so they have to set new one
+                    status: 'draft',
+                    created: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                
+                trials.push(duplicatedTrial);
+                saveTrialsToStorage();
+                updateDashboardStats();
+                populateTrialsTable();
+                
+                alert(`Trial duplicated as ${duplicatedTrial.id}! Please edit to set the new trial date.`);
+                
+                // Auto-open edit modal for the new trial
+                editTrial(duplicatedTrial.id);
+            }
+        }
+
+        function saveTrialsToStorage() {
+            try {
+                // Save user-created trials to localStorage
+                const userTrials = trials.filter(t => t.created); // Only save trials with created timestamp
+                localStorage.setItem('cwags_trials', JSON.stringify(userTrials));
+                console.log(`Saved ${userTrials.length} trials to localStorage`);
+            } catch (error) {
+                console.error('Error saving trials to storage:', error);
+            }
+        }
+
+        // Modal management
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         function viewTrial(trialId) {
@@ -1426,6 +1735,7 @@
                 if (storedTrials) {
                     const userTrials = JSON.parse(storedTrials);
                     trials = [...trials, ...userTrials];
+                    console.log(`Loaded ${userTrials.length} trials from localStorage`);
                 }
             } catch (error) {
                 console.error('Error loading stored trials:', error);
