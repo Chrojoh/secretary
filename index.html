@@ -1863,7 +1863,12 @@
                 trials.forEach(trial => {
                     const option = document.createElement('option');
                     option.value = trial.id;
-                    option.textContent = `${trial.name} (${trial.type === 'league' ? trial.dates[0] + ' - ' + trial.dates[trial.dates.length-1] : trial.date})`;
+                    
+                    const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
+                        ? trial.dates[0] + ' - ' + trial.dates[trial.dates.length-1]
+                        : (trial.date || 'No date');
+                    
+                    option.textContent = `${trial.name || 'Unnamed Trial'} (${dateDisplay})`;
                     trialSelect.appendChild(option);
                 });
             }
@@ -1978,24 +1983,30 @@
             
             const trial = trials.find(t => t.id === selectedTrialId);
             if (trial) {
-                const dateDisplay = trial.type === 'league' 
+                const dateDisplay = trial.type === 'league' && trial.dates && trial.dates.length > 0
                     ? `${trial.dates[0]} to ${trial.dates[trial.dates.length - 1]} (${trial.dates.length} nights)`
-                    : trial.date;
+                    : (trial.date || 'No date set');
                 
-                const classesDisplay = trial.classes.map(cls => 
-                    trial.type === 'league' 
-                        ? `Night ${cls.night}: ${cls.name} (${cls.rounds.length} rounds)`
-                        : `${cls.name} (${cls.rounds.length} rounds)`
-                ).join('<br>');
+                const classesDisplay = trial.classes && trial.classes.length > 0 
+                    ? trial.classes.map(cls => 
+                        trial.type === 'league' 
+                            ? `Night ${cls.night || '?'}: ${cls.name || 'Unnamed'} (${cls.rounds ? cls.rounds.length : 0} rounds)`
+                            : `${cls.name || 'Unnamed'} (${cls.rounds ? cls.rounds.length : 0} rounds)`
+                    ).join('<br>')
+                    : 'No classes configured';
+                
+                // Safe status handling
+                const status = trial.status || 'draft';
+                const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
                 
                 trialDetails.innerHTML = `
                     <div class="form-grid">
-                        <div><strong>Trial Name:</strong> ${trial.name}</div>
-                        <div><strong>Host:</strong> ${trial.host}</div>
-                        <div><strong>Location:</strong> ${trial.location}, ${trial.cityState}</div>
+                        <div><strong>Trial Name:</strong> ${trial.name || 'Unnamed Trial'}</div>
+                        <div><strong>Host:</strong> ${trial.host || 'No host'}</div>
+                        <div><strong>Location:</strong> ${trial.location || 'No location'}, ${trial.cityState || 'No city'}</div>
                         <div><strong>Type:</strong> ${trial.type === 'league' ? '🏆 League' : '🎯 Standalone'}</div>
                         <div><strong>Date(s):</strong> ${dateDisplay}</div>
-                        <div><strong>Status:</strong> <span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></div>
+                        <div><strong>Status:</strong> <span class="status-badge status-${status}">${statusDisplay}</span></div>
                     </div>
                     <div style="margin-top: 1rem;">
                         <strong>Classes:</strong><br>
@@ -2087,91 +2098,134 @@
 
         function editTrial(trialId) {
             const trial = trials.find(t => t.id === trialId);
-            if (!trial) return;
-            
-            editingTrialId = trialId;
-            selectedTrialType = trial.type;
-            
-            // Populate the modal with existing data
-            document.getElementById('trialName').value = trial.name;
-            document.getElementById('hostName').value = trial.host;
-            document.getElementById('trialLocation').value = trial.location;
-            document.getElementById('cityState').value = trial.cityState;
-            
-            if (trial.type === 'league') {
-                document.getElementById('numNights').value = trial.dates.length;
-                document.getElementById('leagueNights').style.display = 'block';
-                document.getElementById('standaloneDate').style.display = 'none';
-                
-                generateNightInputs();
-                // Populate dates
-                trial.dates.forEach((date, index) => {
-                    document.getElementById(`night${index + 1}Date`).value = date;
-                });
-            } else {
-                document.getElementById('singleDate').value = trial.date;
-                document.getElementById('leagueNights').style.display = 'none';
-                document.getElementById('standaloneDate').style.display = 'block';
+            if (!trial) {
+                console.error('Trial not found:', trialId);
+                alert('Trial not found!');
+                return;
             }
             
-            // Skip to step 3 for editing
-            showStep(3);
-            generateClassesStep();
+            console.log('Editing trial:', trial);
             
-            // Populate class data
-            setTimeout(() => populateClassData(trial), 100);
-            
-            showModal('createTrialModal');
+            try {
+                editingTrialId = trialId;
+                selectedTrialType = trial.type;
+                
+                // Populate the modal with existing data
+                document.getElementById('trialName').value = trial.name || '';
+                document.getElementById('hostName').value = trial.host || '';
+                document.getElementById('trialLocation').value = trial.location || '';
+                document.getElementById('cityState').value = trial.cityState || '';
+                
+                if (trial.type === 'league') {
+                    if (trial.dates && trial.dates.length > 0) {
+                        document.getElementById('numNights').value = trial.dates.length;
+                        document.getElementById('leagueNights').style.display = 'block';
+                        document.getElementById('standaloneDate').style.display = 'none';
+                        
+                        generateNightInputs();
+                        // Populate dates
+                        trial.dates.forEach((date, index) => {
+                            const dateInput = document.getElementById(`night${index + 1}Date`);
+                            if (dateInput) dateInput.value = date;
+                        });
+                    }
+                } else {
+                    document.getElementById('singleDate').value = trial.date || '';
+                    document.getElementById('leagueNights').style.display = 'none';
+                    document.getElementById('standaloneDate').style.display = 'block';
+                }
+                
+                // Skip to step 3 for editing
+                showStep(3);
+                generateClassesStep();
+                
+                // Populate class data
+                setTimeout(() => populateClassData(trial), 100);
+                
+                showModal('createTrialModal');
+                
+            } catch (error) {
+                console.error('Error editing trial:', error);
+                alert('Error loading trial for editing: ' + error.message);
+            }
         }
 
         function populateClassData(trial) {
-            if (trial.type === 'standalone') {
-                document.getElementById('numClasses').value = trial.classes.length;
-                generateClassInputs();
-                
-                setTimeout(() => {
-                    trial.classes.forEach((classData, index) => {
-                        const classId = `c${index + 1}`;
-                        document.getElementById(`${classId}ClassName`).value = classData.name;
-                        document.getElementById(`${classId}Rounds`).value = classData.rounds.length;
-                        
-                        generateRoundsInputs(classId);
-                        
-                        setTimeout(() => {
-                            classData.rounds.forEach((round, roundIndex) => {
-                                const roundId = `${classId}r${round.round}`;
-                                document.getElementById(`${roundId}Judge`).value = round.judge;
-                                document.getElementById(`${roundId}FEO`).checked = round.feoOffered;
+            if (!trial || !trial.classes) {
+                console.log('No class data to populate');
+                return;
+            }
+            
+            try {
+                if (trial.type === 'standalone') {
+                    document.getElementById('numClasses').value = trial.classes.length;
+                    generateClassInputs();
+                    
+                    setTimeout(() => {
+                        trial.classes.forEach((classData, index) => {
+                            const classId = `c${index + 1}`;
+                            const classNameInput = document.getElementById(`${classId}ClassName`);
+                            const roundsInput = document.getElementById(`${classId}Rounds`);
+                            
+                            if (classNameInput) classNameInput.value = classData.name || '';
+                            if (roundsInput) {
+                                roundsInput.value = classData.rounds ? classData.rounds.length : 1;
+                                generateRoundsInputs(classId);
+                                
+                                setTimeout(() => {
+                                    if (classData.rounds) {
+                                        classData.rounds.forEach((round, roundIndex) => {
+                                            const roundId = `${classId}r${round.round || roundIndex + 1}`;
+                                            const judgeInput = document.getElementById(`${roundId}Judge`);
+                                            const feoInput = document.getElementById(`${roundId}FEO`);
+                                            
+                                            if (judgeInput) judgeInput.value = round.judge || '';
+                                            if (feoInput) feoInput.checked = round.feoOffered || false;
+                                        });
+                                    }
+                                }, 50);
+                            }
+                        });
+                    }, 50);
+                } else {
+                    // League classes - more complex population
+                    setTimeout(() => {
+                        if (trial.classes && trial.classes.length > 0) {
+                            trial.classes.forEach(classData => {
+                                const night = classData.night || 1;
+                                const nightClasses = trial.classes.filter(c => c.night === night);
+                                const classIndex = nightClasses.indexOf(classData);
+                                const classId = `n${night}c${classIndex + 1}`;
+                                
+                                const classNameInput = document.getElementById(`${classId}ClassName`);
+                                const roundsInput = document.getElementById(`${classId}Rounds`);
+                                
+                                if (classNameInput) {
+                                    classNameInput.value = classData.name || '';
+                                    if (roundsInput) {
+                                        roundsInput.value = classData.rounds ? classData.rounds.length : 1;
+                                        generateRoundsInputs(classId);
+                                        
+                                        setTimeout(() => {
+                                            if (classData.rounds) {
+                                                classData.rounds.forEach(round => {
+                                                    const roundId = `${classId}r${round.round || 1}`;
+                                                    const judgeInput = document.getElementById(`${roundId}Judge`);
+                                                    const feoInput = document.getElementById(`${roundId}FEO`);
+                                                    
+                                                    if (judgeInput) judgeInput.value = round.judge || '';
+                                                    if (feoInput) feoInput.checked = round.feoOffered || false;
+                                                });
+                                            }
+                                        }, 50);
+                                    }
+                                }
                             });
-                        }, 50);
-                    });
-                }, 50);
-            } else {
-                // League classes - more complex population
-                setTimeout(() => {
-                    trial.classes.forEach(classData => {
-                        const classId = `n${classData.night}c${trial.classes.filter(c => c.night === classData.night).indexOf(classData) + 1}`;
-                        
-                        const classNameInput = document.getElementById(`${classId}ClassName`);
-                        if (classNameInput) {
-                            classNameInput.value = classData.name;
-                            document.getElementById(`${classId}Rounds`).value = classData.rounds.length;
-                            
-                            generateRoundsInputs(classId);
-                            
-                            setTimeout(() => {
-                                classData.rounds.forEach(round => {
-                                    const roundId = `${classId}r${round.round}`;
-                                    const judgeInput = document.getElementById(`${roundId}Judge`);
-                                    const feoCheckbox = document.getElementById(`${roundId}FEO`);
-                                    
-                                    if (judgeInput) judgeInput.value = round.judge;
-                                    if (feoCheckbox) feoCheckbox.checked = round.feoOffered;
-                                });
-                            }, 50);
                         }
-                    });
-                }, 100);
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error populating class data:', error);
             }
         }
 
