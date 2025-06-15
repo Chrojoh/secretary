@@ -323,37 +323,58 @@ Thank you for entering the C-WAGS trial!
             messageDiv.style.marginTop = '1rem';
         }
 
-        // Add junior handler discount update
+        // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
             // Check for existing session first
             if (!checkExistingSession()) {
                 document.getElementById('loginModal').style.display = 'block';
             }
             
-            // Add junior handler checkbox listener
-            document.getElementById('entryJuniorHandler').addEventListener('change', updateFeeSummary);
+            // Show/hide scent reset option based on scent class selection
+            const classScent = document.getElementById('classScent');
+            if (classScent) {
+                classScent.addEventListener('change', function() {
+                    const resetGroup = document.getElementById('scentResetGroup');
+                    if (resetGroup) {
+                        resetGroup.style.display = this.checked ? 'block' : 'none';
+                    }
+                });
+            }
+            
+            // Search functionality
+            const trialSearch = document.getElementById('trialSearch');
+            if (trialSearch) {
+                trialSearch.addEventListener('input', function() {
+                    // Implementation for trial search
+                });
+            }
+            
+            const recordSearch = document.getElementById('recordSearch');
+            if (recordSearch) {
+                recordSearch.addEventListener('input', function() {
+                    // Implementation for record search
+                });
+            }
+            
+            // Scoring class selection
+            const scoringClass = document.getElementById('scoringClass');
+            if (scoringClass) {
+                scoringClass.addEventListener('change', function() {
+                    const section = document.getElementById('scoreEntrySection');
+                    if (section) {
+                        section.style.display = this.value ? 'block' : 'none';
+                    }
+                });
+            }
+
+            // Junior handler checkbox listener
+            const juniorHandler = document.getElementById('entryJuniorHandler');
+            if (juniorHandler) {
+                juniorHandler.addEventListener('change', updateFeeSummary);
+            }
             
             // Check if accessing entry form directly via URL
             checkEntryFormURL();
-            
-            // Other existing event listeners...
-            document.getElementById('classScent').addEventListener('change', function() {
-                const resetGroup = document.getElementById('scentResetGroup');
-                resetGroup.style.display = this.checked ? 'block' : 'none';
-            });
-            
-            document.getElementById('trialSearch').addEventListener('input', function() {
-                // Implementation for trial search
-            });
-            
-            document.getElementById('recordSearch').addEventListener('input', function() {
-                // Implementation for record search
-            });
-            
-            document.getElementById('scoringClass').addEventListener('change', function() {
-                const section = document.getElementById('scoreEntrySection');
-                section.style.display = this.value ? 'block' : 'none';
-            });
         });
 
         function checkEntryFormURL() {
@@ -888,21 +909,8 @@ Thank you for entering the C-WAGS trial!
             <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">C-WAGS Login</h2>
             
             <div class="form-group">
-                <label for="loginClub">Club/Organization</label>
-                <select id="loginClub" onchange="updateLoginForm()">
-                    <option value="">Select your club...</option>
-                    <option value="supervisor">🔧 Supervisor Access</option>
-                    <option value="metro_dogs">Metro Dog Training Club</option>
-                    <option value="westside_canine">Westside Canine Academy</option>
-                    <option value="northern_k9">Northern States K9</option>
-                    <option value="central_valley">Central Valley Dogs</option>
-                    <option value="desert_paws">Desert Paws Training</option>
-                    <option value="mountain_view">Mountain View Canines</option>
-                    <option value="coastal_dogs">Coastal Dog Sports</option>
-                    <option value="prairie_winds">Prairie Winds K9</option>
-                    <option value="forest_creek">Forest Creek Canines</option>
-                    <option value="lakeside_dogs">Lakeside Dog Training</option>
-                </select>
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username">
             </div>
 
             <div class="form-group">
@@ -918,7 +926,7 @@ Thank you for entering the C-WAGS trial!
                     Forgot Password?
                 </button>
                 <button class="btn" onclick="showRegistration()" style="width: 100%; background: #48bb78; color: white;">
-                    New Club? Register Here
+                    Create New Account
                 </button>
             </div>
 
@@ -933,20 +941,8 @@ Thank you for entering the C-WAGS trial!
             <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">Reset Password</h2>
             
             <div class="form-group">
-                <label for="resetClub">Club/Organization</label>
-                <select id="resetClub">
-                    <option value="">Select your club...</option>
-                    <option value="metro_dogs">Metro Dog Training Club</option>
-                    <option value="westside_canine">Westside Canine Academy</option>
-                    <option value="northern_k9">Northern States K9</option>
-                    <option value="central_valley">Central Valley Dogs</option>
-                    <option value="desert_paws">Desert Paws Training</option>
-                    <option value="mountain_view">Mountain View Canines</option>
-                    <option value="coastal_dogs">Coastal Dog Sports</option>
-                    <option value="prairie_winds">Prairie Winds K9</option>
-                    <option value="forest_creek">Forest Creek Canines</option>
-                    <option value="lakeside_dogs">Lakeside Dog Training</option>
-                </select>
+                <label for="resetUsername">Username</label>
+                <input type="text" id="resetUsername" placeholder="Enter your username">
             </div>
 
             <div class="form-group">
@@ -971,122 +967,54 @@ Thank you for entering the C-WAGS trial!
     <div id="registrationModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <span class="close" onclick="hideModal('registrationModal')">&times;</span>
-            <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">New Club Registration</h2>
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">Create New Account</h2>
             
             <div style="background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; padding: 1rem; margin-bottom: 2rem;">
-                <h4 style="color: #2c7a7b; margin-bottom: 0.5rem;">📋 Registration Process:</h4>
+                <h4 style="color: #2c7a7b; margin-bottom: 0.5rem;">📋 Account Creation:</h4>
                 <ol style="color: #2c7a7b; margin: 0; padding-left: 1.5rem;">
-                    <li>Complete this registration form</li>
-                    <li>Submit for C-WAGS review</li>
-                    <li>C-WAGS Administrator approves your club</li>
-                    <li>You receive login credentials via email</li>
-                    <li>Begin hosting C-WAGS trials!</li>
+                    <li>Choose a unique username</li>
+                    <li>Create a secure password</li>
+                    <li>Provide organization details</li>
+                    <li>Start managing C-WAGS trials!</li>
                 </ol>
             </div>
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="regClubName">Club/Organization Name *</label>
-                    <input type="text" id="regClubName" placeholder="e.g., Sunshine Dog Training Club" required>
+                    <label for="regUsername">Username *</label>
+                    <input type="text" id="regUsername" placeholder="Choose a unique username" required>
+                    <small style="color: #718096;">This will be your login username</small>
                 </div>
                 <div class="form-group">
-                    <label for="regClubType">Organization Type *</label>
-                    <select id="regClubType" required>
-                        <option value="">Select type...</option>
-                        <option value="training_club">Dog Training Club</option>
-                        <option value="kennel_club">Kennel Club</option>
-                        <option value="dog_sports">Dog Sports Club</option>
-                        <option value="rescue_org">Rescue Organization</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <label for="regPassword">Password *</label>
+                    <input type="password" id="regPassword" placeholder="Create a secure password" required>
+                    <small style="color: #718096;">At least 8 characters</small>
                 </div>
             </div>
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="regContactName">Primary Contact Name *</label>
-                    <input type="text" id="regContactName" placeholder="Full name of trial secretary" required>
+                    <label for="regClubName">Organization Name *</label>
+                    <input type="text" id="regClubName" placeholder="e.g., Sunshine Dog Training Club" required>
                 </div>
                 <div class="form-group">
-                    <label for="regContactTitle">Contact Title</label>
-                    <input type="text" id="regContactTitle" placeholder="e.g., Trial Secretary, President">
+                    <label for="regContactName">Your Name *</label>
+                    <input type="text" id="regContactName" placeholder="Your full name" required>
                 </div>
             </div>
 
             <div class="form-grid">
                 <div class="form-group">
                     <label for="regEmail">Email Address *</label>
-                    <input type="email" id="regEmail" placeholder="primary.contact@yourclub.com" required>
+                    <input type="email" id="regEmail" placeholder="your.email@example.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPhone">Phone Number *</label>
-                    <input type="tel" id="regPhone" placeholder="(555) 123-4567" required>
+                    <label for="regPhone">Phone Number</label>
+                    <input type="tel" id="regPhone" placeholder="(555) 123-4567">
                 </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="regAddress">Club Address *</label>
-                    <textarea id="regAddress" rows="3" placeholder="Street address, City, State/Province, ZIP/Postal Code" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="regWebsite">Website (Optional)</label>
-                    <input type="url" id="regWebsite" placeholder="https://www.yourclub.com">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="regExperience">Trial Hosting Experience</label>
-                <select id="regExperience">
-                    <option value="">Select your experience level...</option>
-                    <option value="none">New to hosting dog sports trials</option>
-                    <option value="other_orgs">Experience with other organizations (AKC, CKC, etc.)</option>
-                    <option value="cwags_assisted">Assisted with C-WAGS trials before</option>
-                    <option value="cwags_experienced">Experienced C-WAGS host</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="regTrainingFacility">Training Facility Details</label>
-                <textarea id="regTrainingFacility" rows="3" placeholder="Describe your training facility: indoor/outdoor, size, surface type, available equipment, etc."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="regTrialTypes">Interested Trial Types (Select all that apply)</label>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
-                    <label style="display: flex; align-items: center;">
-                        <input type="checkbox" id="regScent" style="margin-right: 0.5rem;"> Scent Detection
-                    </label>
-                    <label style="display: flex; align-items: center;">
-                        <input type="checkbox" id="regObedience" style="margin-right: 0.5rem;"> Obedience
-                    </label>
-                    <label style="display: flex; align-items: center;">
-                        <input type="checkbox" id="regRally" style="margin-right: 0.5rem;"> Rally
-                    </label>
-                    <label style="display: flex; align-items: center;">
-                        <input type="checkbox" id="regGames" style="margin-right: 0.5rem;"> Games
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="regComments">Additional Comments</label>
-                <textarea id="regComments" rows="3" placeholder="Tell us more about your club, goals, or any questions you have..."></textarea>
-            </div>
-
-            <div style="background: #fef5e7; border: 2px solid #ed8936; border-radius: 10px; padding: 1rem; margin: 2rem 0;">
-                <h4 style="color: #c05621; margin-bottom: 0.5rem;">⚠️ Important Notes:</h4>
-                <ul style="color: #c05621; margin: 0; padding-left: 1.5rem;">
-                    <li>All new clubs must be approved by C-WAGS administration</li>
-                    <li>Insurance requirements will be discussed during approval process</li>
-                    <li>Initial training/orientation may be required</li>
-                    <li>Registration is free for eligible organizations</li>
-                </ul>
-            </div>
-
-            <div style="text-align: center; margin-top: 2rem;">
+            </div>            <div style="text-align: center; margin-top: 2rem;">
                 <button class="btn btn-primary" onclick="submitRegistration()" style="width: 100%; margin-bottom: 1rem;">
-                    Submit Registration Application
+                    Create Account
                 </button>
                 <button class="btn btn-secondary" onclick="backToLoginFromReg()" style="width: 100%;">
                     Back to Login
@@ -1163,10 +1091,12 @@ Thank you for entering the C-WAGS trial!
                     <!-- Available classes will be populated here -->
                 </div>
 
-                <div id="entryFeeSummary" style="background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 2rem 0;">
-                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Entry Fee Summary</h4>
+                <div id="entryFeeSummary" style="background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 2rem 0; display: none;">
+                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Entry Information</h4>
                     <div id="entryFeeBreakdown"></div>
-                    <div id="entryFeeTotal" style="font-size: 1.2rem; font-weight: bold; color: #2d3748; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #e2e8f0;"></div>
+                    <div style="color: #718096; font-size: 0.9rem; margin-top: 1rem;">
+                        Entry fees and payment details will be provided by trial host.
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -1186,7 +1116,7 @@ Thank you for entering the C-WAGS trial!
 
                 <div style="text-align: center; margin-top: 2rem;">
                     <button class="btn btn-primary" onclick="submitEntry()" style="font-size: 1.1rem; padding: 1rem 2rem;">
-                        Submit Entry & Pay
+                        Submit Entry
                     </button>
                     <button class="btn btn-secondary" onclick="hideModal('entryFormModal')" style="margin-left: 1rem;">
                         Cancel
@@ -1689,121 +1619,52 @@ Thank you for entering the C-WAGS trial!
     </div>
 
     <script>
-        // Authentication System
+        // Authentication System - Simplified
         let currentUser = null;
-        let userPermissions = {};
-
-        // Club database with credentials and contact info
-        const clubDatabase = {
-            supervisor: {
-                name: "C-WAGS Supervisor",
-                password: "CWAGS2024Admin!",
-                email: "admin@c-wags.org",
-                permissions: ["all_access", "user_management", "system_admin"],
+        let userAccounts = {
+            'supervisor': {
+                username: 'supervisor',
+                password: 'CWAGS2024Admin!',
+                organizationName: 'C-WAGS Administration',
+                email: 'admin@c-wags.org',
+                isSupervisor: true,
                 canSeeAllTrials: true
-            },
-            metro_dogs: {
-                name: "Metro Dog Training Club",
-                password: "MetroDogs2024",
-                email: "secretary@metrodogs.com",
-                contact: "John Smith",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            westside_canine: {
-                name: "Westside Canine Academy", 
-                password: "WestsideK9_2024",
-                email: "admin@westsidecanine.org",
-                contact: "Mary Johnson",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            northern_k9: {
-                name: "Northern States K9",
-                password: "NorthK9_Secure24",
-                email: "trials@northernk9.net",
-                contact: "Bob Wilson",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            central_valley: {
-                name: "Central Valley Dogs",
-                password: "CVDogs@2024",
-                email: "secretary@centralvalleydogs.com",
-                contact: "Lisa Davis",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            desert_paws: {
-                name: "Desert Paws Training",
-                password: "DesertPaws24!",
-                email: "info@desertpaws.org",
-                contact: "Carol Brown",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            mountain_view: {
-                name: "Mountain View Canines",
-                password: "MountainView2024",
-                email: "trials@mountainviewcanines.com",
-                contact: "David Lee",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            coastal_dogs: {
-                name: "Coastal Dog Sports",
-                password: "CoastalDogs_24",
-                email: "secretary@coastaldogs.net",
-                contact: "Susan Miller",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            prairie_winds: {
-                name: "Prairie Winds K9",
-                password: "PrairieWinds24!",
-                email: "admin@prairiewinds.org",
-                contact: "Mike Taylor",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            forest_creek: {
-                name: "Forest Creek Canines",
-                password: "ForestCreek2024",
-                email: "secretary@forestcreek.com",
-                contact: "Jennifer White",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
-            },
-            lakeside_dogs: {
-                name: "Lakeside Dog Training",
-                password: "Lakeside_K9_24",
-                email: "trials@lakesidedogs.org",
-                contact: "Robert Anderson",
-                permissions: ["club_trials", "applications", "scoring", "records"],
-                canSeeAllTrials: false
             }
         };
 
-        function updateLoginForm() {
-            const clubSelect = document.getElementById('loginClub');
-            const passwordField = document.getElementById('loginPassword');
-            
-            if (clubSelect.value === 'supervisor') {
-                passwordField.placeholder = "Enter supervisor password";
-            } else if (clubSelect.value) {
-                passwordField.placeholder = "Enter club password";
-            } else {
-                passwordField.placeholder = "Enter your password";
+        function loadUserAccounts() {
+            try {
+                const savedAccounts = localStorage.getItem('cwags_user_accounts');
+                if (savedAccounts) {
+                    const accounts = JSON.parse(savedAccounts);
+                    userAccounts = { ...userAccounts, ...accounts };
+                }
+            } catch (error) {
+                console.error('Error loading user accounts:', error);
+            }
+        }
+
+        function saveUserAccounts() {
+            try {
+                // Save all accounts except supervisor to localStorage
+                const accountsToSave = {};
+                Object.keys(userAccounts).forEach(username => {
+                    if (username !== 'supervisor') {
+                        accountsToSave[username] = userAccounts[username];
+                    }
+                });
+                localStorage.setItem('cwags_user_accounts', JSON.stringify(accountsToSave));
+            } catch (error) {
+                console.error('Error saving user accounts:', error);
             }
         }
 
         function performLogin() {
-            const clubId = document.getElementById('loginClub').value;
+            const username = document.getElementById('loginUsername').value.trim().toLowerCase();
             const password = document.getElementById('loginPassword').value;
-            const errorDiv = document.getElementById('loginError');
             
-            if (!clubId) {
-                showLoginError('Please select your club/organization.');
+            if (!username) {
+                showLoginError('Please enter your username.');
                 return;
             }
             
@@ -1812,25 +1673,24 @@ Thank you for entering the C-WAGS trial!
                 return;
             }
             
-            const club = clubDatabase[clubId];
-            if (!club) {
-                showLoginError('Invalid club selection.');
+            const account = userAccounts[username];
+            if (!account) {
+                showLoginError('Username not found. Please check your username or create a new account.');
                 return;
             }
             
-            if (password !== club.password) {
+            if (password !== account.password) {
                 showLoginError('Incorrect password. Please try again.');
                 return;
             }
             
             // Successful login
             currentUser = {
-                clubId: clubId,
-                clubName: club.name,
-                email: club.email,
-                contact: club.contact,
-                permissions: club.permissions,
-                canSeeAllTrials: club.canSeeAllTrials,
+                username: account.username,
+                organizationName: account.organizationName,
+                email: account.email,
+                isSupervisor: account.isSupervisor || false,
+                canSeeAllTrials: account.canSeeAllTrials || false,
                 loginTime: new Date().toISOString()
             };
             
@@ -1842,7 +1702,7 @@ Thank you for entering the C-WAGS trial!
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('userInfo').style.display = 'block';
             document.getElementById('welcomeUser').textContent = 
-                `Welcome, ${club.name}${club.contact ? ' (' + club.contact + ')' : ''}`;
+                `Welcome, ${account.organizationName}`;
             
             // Filter UI based on permissions
             setupUserInterface();
@@ -1850,7 +1710,7 @@ Thank you for entering the C-WAGS trial!
             // Initialize data
             initializeData();
             
-            console.log(`✓ Logged in as: ${club.name}`);
+            console.log(`✓ Logged in as: ${account.organizationName}`);
         }
 
         function showLoginError(message) {
@@ -1873,20 +1733,10 @@ Thank you for entering the C-WAGS trial!
             if (currentUser.canSeeAllTrials) {
                 // Supervisor sees everything, plus admin functions
                 allTabs.forEach(tab => tab.style.display = 'block');
-                
-                // Add admin functions for supervisor
                 addSupervisorFunctions();
             } else {
-                // Club users see limited tabs
-                const allowedTabs = ['dashboard', 'trials', 'applications', 'scoring', 'records', 'calendar'];
-                allTabs.forEach(tab => {
-                    const tabName = tab.textContent.toLowerCase().replace(/\s+/g, '');
-                    if (allowedTabs.some(allowed => tabName.includes(allowed))) {
-                        tab.style.display = 'block';
-                    } else {
-                        tab.style.display = 'none';
-                    }
-                });
+                // Regular users see all tabs
+                allTabs.forEach(tab => tab.style.display = 'block');
             }
             
             // Filter trials display
@@ -1901,11 +1751,11 @@ Thank you for entering the C-WAGS trial!
                 return;
             }
             
-            // Filter trials to only show club's own trials
+            // Filter trials to only show user's own trials
             trials = trials.filter(trial => 
-                trial.clubId === currentUser.clubId || 
-                trial.host === currentUser.clubName ||
-                !trial.clubId // Legacy trials without club assignment
+                trial.username === currentUser.username || 
+                trial.organizationName === currentUser.organizationName ||
+                !trial.username // Legacy trials without user assignment
             );
         }
 
@@ -1921,7 +1771,7 @@ Thank you for entering the C-WAGS trial!
                 document.getElementById('loginModal').style.display = 'block';
                 
                 // Clear form
-                document.getElementById('loginClub').value = '';
+                document.getElementById('loginUsername').value = '';
                 document.getElementById('loginPassword').value = '';
                 document.getElementById('loginError').style.display = 'none';
                 
@@ -3032,17 +2882,17 @@ Would you like to:
                 // Generate trial ID
                 const trialId = 'T' + String(savedTrials.length + 1).padStart(3, '0');
                 
-                // Add metadata including club association
+                // Add metadata including user association
                 const fullTrialData = {
                     id: trialId,
                     ...trialData,
-                    clubId: currentUser?.clubId,
-                    clubName: currentUser?.clubName,
-                    host: currentUser?.clubName || trialData.host,
+                    username: currentUser?.username,
+                    organizationName: currentUser?.organizationName,
+                    host: currentUser?.organizationName || trialData.host,
                     status: 'draft',
                     created: new Date().toISOString(),
                     lastModified: new Date().toISOString(),
-                    createdBy: currentUser?.contact || 'Unknown'
+                    createdBy: currentUser?.contactName || currentUser?.username || 'Unknown'
                 };
                 
                 // Add to trials array
@@ -3075,9 +2925,9 @@ Would you like to:
                     if (currentUser?.canSeeAllTrials) {
                         return true; // Supervisor sees all
                     }
-                    return trial.clubId === currentUser?.clubId || 
-                           trial.clubName === currentUser?.clubName ||
-                           !trial.clubId; // Legacy trials without club assignment
+                    return trial.username === currentUser?.username || 
+                           trial.organizationName === currentUser?.organizationName ||
+                           !trial.username; // Legacy trials without user assignment
                 });
                 
                 // Merge with any existing sample trials
@@ -3544,6 +3394,10 @@ Would you like to:
                                onfocus="showEditJudgeDropdown(${classIndex}, ${round})"
                                style="position: relative;">
                         <div id="editJudgeDropdown${classIndex}_${round}" class="judge-dropdown" style="display: none;"></div>
+                        <label style="display: flex; align-items: center; margin-top: 0.5rem;">
+                            <input type="checkbox" id="editFeo${classIndex}_${round}" style="margin-right: 0.5rem;">
+                            <span style="font-size: 0.9rem; color: #718096;">FEO (For Exhibition Only) offered</span>
+                        </label>
                     </div>
                 `;
             }
