@@ -2138,6 +2138,53 @@ function createLeagueTrial() {
                         const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
                         const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
                         
+        function createLeagueTrial() {
+            const startDate = document.getElementById('leagueStartDate').value;
+            const numNights = parseInt(document.getElementById('leagueNights').value);
+            
+            if (!startDate) {
+                alert('Please select a league start date.');
+                return;
+            }
+            
+            // Collect league data with rounds
+            const nights = [];
+            const allClasses = [];
+            const allJudges = [];
+            
+            for (let night = 0; night < numNights; night++) {
+                const nightDate = document.getElementById(`leagueNight${night}Date`).value;
+                const numClasses = parseInt(document.getElementById(`leagueNight${night}Classes`).value || 0);
+                
+                if (!nightDate) {
+                    alert(`Please set a date for Night ${night + 1}.`);
+                    return;
+                }
+                
+                const nightClassDetails = [];
+                const nightClasses = [];
+                const nightJudges = [];
+                
+                for (let i = 0; i < numClasses; i++) {
+                    const className = document.getElementById(`leagueNight${night}Class${i}`)?.value;
+                    const numRounds = parseInt(document.getElementById(`leagueNight${night}Rounds${i}`)?.value || 0);
+                    
+                    if (!className) {
+                        alert(`Please select a class type for Night ${night + 1}, Class ${i + 1}.`);
+                        return;
+                    }
+                    
+                    if (!numRounds) {
+                        alert(`Please select number of rounds for Night ${night + 1}, Class ${i + 1}.`);
+                        return;
+                    }
+                    
+                    // Collect round judges for this class with FEO status
+                    const rounds = [];
+                    for (let round = 1; round <= numRounds; round++) {
+                        const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
+                        const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
+                        
                         if (!judge) {
                             alert(`Please assign a judge for Night ${night + 1}, Class ${i + 1}, Round ${round}.`);
                             return;
