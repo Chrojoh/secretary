@@ -1757,8 +1757,14 @@ Thank you for entering the C-WAGS trial!
                 const savedAccounts = localStorage.getItem('cwags_user_accounts');
                 if (savedAccounts) {
                     const accounts = JSON.parse(savedAccounts);
-                    userAccounts = { ...userAccounts, ...accounts };
+                    // Merge with supervisor account, keeping supervisor as priority
+                    Object.keys(accounts).forEach(username => {
+                        if (username !== 'supervisor') {
+                            userAccounts[username] = accounts[username];
+                        }
+                    });
                 }
+                console.log('User accounts loaded:', Object.keys(userAccounts));
             } catch (error) {
                 console.error('Error loading user accounts:', error);
             }
@@ -1774,63 +1780,73 @@ Thank you for entering the C-WAGS trial!
                     }
                 });
                 localStorage.setItem('cwags_user_accounts', JSON.stringify(accountsToSave));
+                console.log('User accounts saved:', Object.keys(accountsToSave));
             } catch (error) {
                 console.error('Error saving user accounts:', error);
             }
         }
 
         function performLogin() {
-            const username = document.getElementById('loginUsername').value.trim().toLowerCase();
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!username) {
-                showLoginError('Please enter your username.');
-                return;
+            try {
+                const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+                const password = document.getElementById('loginPassword').value;
+                
+                console.log('Login attempt for username:', username);
+                
+                if (!username) {
+                    showLoginError('Please enter your username.');
+                    return;
+                }
+                
+                if (!password) {
+                    showLoginError('Please enter your password.');
+                    return;
+                }
+                
+                const account = userAccounts[username];
+                if (!account) {
+                    showLoginError('Username not found. Please check your username or create a new account.');
+                    return;
+                }
+                
+                if (password !== account.password) {
+                    showLoginError('Incorrect password. Please try again.');
+                    return;
+                }
+                
+                // Successful login
+                currentUser = {
+                    username: account.username,
+                    organizationName: account.organizationName,
+                    email: account.email,
+                    contactName: account.contactName,
+                    isSupervisor: account.isSupervisor || false,
+                    canSeeAllTrials: account.canSeeAllTrials || false,
+                    loginTime: new Date().toISOString()
+                };
+                
+                // Save login session
+                sessionStorage.setItem('cwags_session', JSON.stringify(currentUser));
+                
+                // Hide login modal and show main app
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('welcomeUser').textContent = 
+                    `Welcome, ${account.organizationName || account.username}`;
+                
+                // Filter UI based on permissions
+                setupUserInterface();
+                
+                // Initialize data
+                initializeData();
+                
+                console.log(`✓ Logged in as: ${account.organizationName || account.username}`);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showLoginError('Login failed. Please try again.');
             }
-            
-            if (!password) {
-                showLoginError('Please enter your password.');
-                return;
-            }
-            
-            const account = userAccounts[username];
-            if (!account) {
-                showLoginError('Username not found. Please check your username or create a new account.');
-                return;
-            }
-            
-            if (password !== account.password) {
-                showLoginError('Incorrect password. Please try again.');
-                return;
-            }
-            
-            // Successful login
-            currentUser = {
-                username: account.username,
-                organizationName: account.organizationName,
-                email: account.email,
-                isSupervisor: account.isSupervisor || false,
-                canSeeAllTrials: account.canSeeAllTrials || false,
-                loginTime: new Date().toISOString()
-            };
-            
-            // Save login session
-            sessionStorage.setItem('cwags_session', JSON.stringify(currentUser));
-            
-            // Hide login modal and show main app
-            hideModal('loginModal');
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('userInfo').style.display = 'block';
-            document.getElementById('welcomeUser').textContent = 
-                `Welcome, ${account.organizationName}`;
-            
-            // Filter UI based on permissions
-            setupUserInterface();
-            
-            // Initialize data
-            initializeData();
-            
-            console.log(`✓ Logged in as: ${account.organizationName}`);
         }
 
         function showLoginError(message) {
