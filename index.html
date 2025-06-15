@@ -1,445 +1,4 @@
-// Entry Form Functions
-        let currentEntryTrial = null;
-        let selectedClasses = {};
-        let entryFees = {
-            firstClass: 25.00,
-            additionalClass: 20.00,
-            juniorDiscount: 5.00
-        };
-
-        function showEntryForm(trialId) {
-            const trial = trials.find(t => t.id === trialId);
-            if (!trial) {
-                alert('Trial not found!');
-                return;
-            }
-
-            if (trial.status !== 'approved' && trial.status !== 'pending') {
-                alert('Entry forms are only available for approved trials.');
-                return;
-            }
-
-            currentEntryTrial = trial;
-            populateEntryForm(trial);
-            showModal('entryFormModal');
-        }
-
-        function populateEntryForm(trial) {
-            // Populate trial header info
-            const header = document.getElementById('entryFormHeader');
-            const entryDeadline = calculateEntryDeadline(trial.date);
-            
-            header.innerHTML = `
-                <div style="text-align: center;">
-                    <h3 style="color: #2d3748; margin-bottom: 0.5rem;">${trial.host}</h3>
-                    <p style="color: #4a5568; margin: 0.25rem 0;"><strong>Date:</strong> ${formatDate(trial.date)}</p>
-                    <p style="color: #4a5568; margin: 0.25rem 0;"><strong>Location:</strong> ${trial.location}, ${trial.city}</p>
-                    <p style="color: #4a5568; margin: 0.25rem 0;"><strong>Contact:</strong> ${trial.contact}</p>
-                    <p style="color: #e53e3e; margin: 0.25rem 0; font-weight: bold;">Entry Deadline: ${formatDate(entryDeadline)}</p>
-                </div>
-            `;
-
-            // Populate available classes
-            populateClassSelection(trial);
-            
-            // Reset form
-            clearEntryForm();
-            updateFeeSummary();
-        }
-
-        function populateClassSelection(trial) {
-            const container = document.getElementById('entryClassSelection');
-            const availableClasses = trial.classes || [];
-            
-            if (availableClasses.length === 0) {
-                container.innerHTML = '<p style="color: #e53e3e;">No classes available for this trial.</p>';
-                return;
-            }
-
-            let html = '';
-            availableClasses.forEach((className, index) => {
-                html += `
-                    <div style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background: white;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" 
-                                   id="class_${index}" 
-                                   value="${className}"
-                                   onchange="toggleClassSelection('${className}', this.checked)"
-                                   style="margin-right: 1rem; transform: scale(1.2);">
-                            <div>
-                                <div style="font-weight: bold; font-size: 1.1rem; color: #2d3748;">${className}</div>
-                                <div style="color: #718096; font-size: 0.9rem;">
-                                    Fee: ${index === 0 ? entryFees.firstClass.toFixed(2) : entryFees.additionalClass.toFixed(2)}
-                                    ${index === 0 ? ' (First Class)' : ' (Additional Class)'}
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        function toggleClassSelection(className, isSelected) {
-            if (isSelected) {
-                selectedClasses[className] = true;
-            } else {
-                delete selectedClasses[className];
-            }
-            updateFeeSummary();
-        }
-
-        function updateFeeSummary() {
-            const selectedClassCount = Object.keys(selectedClasses).length;
-            const isJunior = document.getElementById('entryJuniorHandler').checked;
-            
-            let breakdown = '';
-            let total = 0;
-
-            if (selectedClassCount === 0) {
-                breakdown = '<p style="color: #718096;">No classes selected</p>';
-            } else {
-                // First class
-                const firstClassFee = entryFees.firstClass;
-                breakdown += `<div>First Class: ${firstClassFee.toFixed(2)}</div>`;
-                total += firstClassFee;
-
-                // Additional classes
-                if (selectedClassCount > 1) {
-                    const additionalCount = selectedClassCount - 1;
-                    const additionalFee = entryFees.additionalClass * additionalCount;
-                    breakdown += `<div>Additional Classes (${additionalCount}): ${additionalFee.toFixed(2)}</div>`;
-                    total += additionalFee;
-                }
-
-                // Junior discount
-                if (isJunior) {
-                    const discount = entryFees.juniorDiscount * selectedClassCount;
-                    breakdown += `<div style="color: #38a169;">Junior Discount: -${discount.toFixed(2)}</div>`;
-                    total -= discount;
-                }
-            }
-
-            document.getElementById('entryFeeBreakdown').innerHTML = breakdown;
-            document.getElementById('entryFeeTotal').innerHTML = `Total: ${total.toFixed(2)}`;
-        }
-
-        function clearEntryForm() {
-            document.getElementById('entryDogCall').value = '';
-            document.getElementById('entryDogFull').value = '';
-            document.getElementById('entryRegNumber').value = '';
-            document.getElementById('entryBreed').value = '';
-            document.getElementById('entryHandlerFull').value = '';
-            document.getElementById('entryHandlerEmail').value = '';
-            document.getElementById('entryHandlerPhone').value = '';
-            document.getElementById('entryHandlerAddress').value = '';
-            document.getElementById('entryJuniorHandler').checked = false;
-            document.getElementById('entryComments').value = '';
-            document.getElementById('entryAgreement').checked = false;
-            document.getElementById('entrySubmissionMessage').style.display = 'none';
-            
-            // Clear class selections
-            selectedClasses = {};
-            const checkboxes = document.querySelectorAll('#entryClassSelection input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
-        }
-
-        function submitEntry() {
-            // Validate entry form
-            const validation = validateEntry();
-            if (!validation.isValid) {
-                showEntryMessage(validation.errors.join('\n'), 'error');
-                return;
-            }
-
-            // Collect entry data
-            const entryData = {
-                trialId: currentEntryTrial.id,
-                trialName: `${currentEntryTrial.host} - ${formatDate(currentEntryTrial.date)}`,
-                submissionDate: new Date().toISOString(),
-                dog: {
-                    callName: document.getElementById('entryDogCall').value.trim(),
-                    fullName: document.getElementById('entryDogFull').value.trim(),
-                    registrationNumber: document.getElementById('entryRegNumber').value.trim(),
-                    breed: document.getElementById('entryBreed').value.trim()
-                },
-                handler: {
-                    fullName: document.getElementById('entryHandlerFull').value.trim(),
-                    email: document.getElementById('entryHandlerEmail').value.trim(),
-                    phone: document.getElementById('entryHandlerPhone').value.trim(),
-                    address: document.getElementById('entryHandlerAddress').value.trim(),
-                    isJunior: document.getElementById('entryJuniorHandler').checked
-                },
-                classes: Object.keys(selectedClasses),
-                totalFee: calculateTotalFee(),
-                comments: document.getElementById('entryComments').value.trim(),
-                status: 'submitted',
-                paymentStatus: 'pending'
-            };
-
-            // Generate entry ID
-            entryData.entryId = generateEntryId();
-
-            // Save entry
-            saveTrialEntry(entryData);
-
-            // Show success message
-            showEntrySuccessMessage(entryData);
-        }
-
-        function validateEntry() {
-            const errors = [];
-
-            // Required fields
-            if (!document.getElementById('entryDogCall').value.trim()) {
-                errors.push('Dog\'s call name is required');
-            }
-            if (!document.getElementById('entryDogFull').value.trim()) {
-                errors.push('Dog\'s full name is required');
-            }
-            if (!document.getElementById('entryHandlerFull').value.trim()) {
-                errors.push('Handler name is required');
-            }
-            if (!document.getElementById('entryHandlerEmail').value.trim()) {
-                errors.push('Handler email is required');
-            }
-
-            // Email validation
-            const email = document.getElementById('entryHandlerEmail').value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (email && !emailRegex.test(email)) {
-                errors.push('Please enter a valid email address');
-            }
-
-            // Class selection
-            if (Object.keys(selectedClasses).length === 0) {
-                errors.push('Please select at least one class');
-            }
-
-            // Agreement checkbox
-            if (!document.getElementById('entryAgreement').checked) {
-                errors.push('You must agree to the entry terms and conditions');
-            }
-
-            return {
-                isValid: errors.length === 0,
-                errors: errors
-            };
-        }
-
-        function calculateTotalFee() {
-            const selectedClassCount = Object.keys(selectedClasses).length;
-            const isJunior = document.getElementById('entryJuniorHandler').checked;
-            
-            if (selectedClassCount === 0) return 0;
-
-            let total = entryFees.firstClass; // First class
-            if (selectedClassCount > 1) {
-                total += entryFees.additionalClass * (selectedClassCount - 1); // Additional classes
-            }
-            if (isJunior) {
-                total -= entryFees.juniorDiscount * selectedClassCount; // Junior discount
-            }
-
-            return Math.max(0, total); // Ensure non-negative
-        }
-
-        function generateEntryId() {
-            const timestamp = Date.now().toString(36);
-            const random = Math.random().toString(36).substr(2, 3);
-            return `E${timestamp}${random}`.toUpperCase();
-        }
-
-        function saveTrialEntry(entryData) {
-            try {
-                // Get existing entries
-                let trialEntries = JSON.parse(localStorage.getItem('cwags_trial_entries') || '{}');
-                
-                // Initialize trial entries if not exists
-                if (!trialEntries[entryData.trialId]) {
-                    trialEntries[entryData.trialId] = [];
-                }
-                
-                // Add new entry
-                trialEntries[entryData.trialId].push(entryData);
-                
-                // Save to localStorage
-                localStorage.setItem('cwags_trial_entries', JSON.stringify(trialEntries));
-                
-                console.log(`Entry ${entryData.entryId} saved for trial ${entryData.trialId}`);
-                
-            } catch (error) {
-                console.error('Error saving entry:', error);
-            }
-        }
-
-        function showEntrySuccessMessage(entryData) {
-            const message = `
-🎉 Entry Submitted Successfully!
-
-Entry ID: ${entryData.entryId}
-Trial: ${entryData.trialName}
-Dog: ${entryData.dog.callName} (${entryData.dog.fullName})
-Handler: ${entryData.handler.fullName}
-Classes: ${entryData.classes.join(', ')}
-Total Fee: ${entryData.totalFee.toFixed(2)}
-
-📧 Confirmation email will be sent to: ${entryData.handler.email}
-
-💳 Payment Instructions:
-• Online payment link will be provided in confirmation email
-• Entry is not complete until payment is received
-• Payment deadline: 48 hours after submission
-
-📋 Next Steps:
-1. Check your email for confirmation and payment link
-2. Complete payment within 48 hours
-3. Receive final confirmation and trial packet
-4. Arrive at trial venue as instructed
-
-Thank you for entering the C-WAGS trial!
-            `;
-
-            showEntryMessage(message, 'success');
-            
-            // Clear form and close modal after delay
-            setTimeout(() => {
-                clearEntryForm();
-                hideModal('entryFormModal');
-            }, 5000);
-        }
-
-        function showEntryMessage(message, type) {
-            const messageDiv = document.getElementById('entrySubmissionMessage');
-            messageDiv.style.whiteSpace = 'pre-line';
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-            messageDiv.style.color = type === 'error' ? '#e53e3e' : '#38a169';
-            messageDiv.style.backgroundColor = type === 'error' ? '#fed7d7' : '#c6f6d5';
-            messageDiv.style.padding = '1rem';
-            messageDiv.style.borderRadius = '10px';
-            messageDiv.style.border = type === 'error' ? '2px solid #e53e3e' : '2px solid #38a169';
-            messageDiv.style.marginTop = '1rem';
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check for existing session first
-            if (!checkExistingSession()) {
-                document.getElementById('loginModal').style.display = 'block';
-            }
-            
-            // Show/hide scent reset option based on scent class selection
-            const classScent = document.getElementById('classScent');
-            if (classScent) {
-                classScent.addEventListener('change', function() {
-                    const resetGroup = document.getElementById('scentResetGroup');
-                    if (resetGroup) {
-                        resetGroup.style.display = this.checked ? 'block' : 'none';
-                    }
-                });
-            }
-            
-            // Search functionality
-            const trialSearch = document.getElementById('trialSearch');
-            if (trialSearch) {
-                trialSearch.addEventListener('input', function() {
-                    // Implementation for trial search
-                });
-            }
-            
-            const recordSearch = document.getElementById('recordSearch');
-            if (recordSearch) {
-                recordSearch.addEventListener('input', function() {
-                    // Implementation for record search
-                });
-            }
-            
-            // Scoring class selection
-            const scoringClass = document.getElementById('scoringClass');
-            if (scoringClass) {
-                scoringClass.addEventListener('change', function() {
-                    const section = document.getElementById('scoreEntrySection');
-                    if (section) {
-                        section.style.display = this.value ? 'block' : 'none';
-                    }
-                });
-            }
-
-            // Junior handler checkbox listener
-            const juniorHandler = document.getElementById('entryJuniorHandler');
-            if (juniorHandler) {
-                juniorHandler.addEventListener('change', updateFeeSummary);
-            }
-            
-            // Check if accessing entry form directly via URL
-            checkEntryFormURL();
-        });
-
-        function checkEntryFormURL() {
-            // Check if URL contains entry form parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const entryTrialId = urlParams.get('entry');
-            
-            if (entryTrialId) {
-                // Auto-open entry form for specified trial
-                setTimeout(() => {
-                    showEntryForm(entryTrialId);
-                }, 1000);
-            }
-        }
-
-        // Function for trial hosts to view entries
-        function viewTrialEntries(trialId) {
-            try {
-                const trialEntries = JSON.parse(localStorage.getItem('cwags_trial_entries') || '{}');
-                const entries = trialEntries[trialId] || [];
-                
-                if (entries.length === 0) {
-                    alert('No entries found for this trial.');
-                    return;
-                }
-                
-                const trial = trials.find(t => t.id === trialId);
-                const trialName = trial ? `${trial.host} - ${formatDate(trial.date)}` : trialId;
-                
-                let summary = `📋 Trial Entries: ${trialName}\n\n`;
-                summary += `Total Entries: ${entries.length}\n`;
-                
-                // Count by class
-                const classCounts = {};
-                entries.forEach(entry => {
-                    entry.classes.forEach(className => {
-                        classCounts[className] = (classCounts[className] || 0) + 1;
-                    });
-                });
-                
-                summary += '\nEntries by Class:\n';
-                Object.entries(classCounts).forEach(([className, count]) => {
-                    summary += `• ${className}: ${count} entries\n`;
-                });
-                
-                // Total fees
-                const totalFees = entries.reduce((sum, entry) => sum + entry.totalFee, 0);
-                summary += `\nTotal Entry Fees: ${totalFees.toFixed(2)}\n`;
-                
-                summary += '\nDetailed Entries:\n';
-                entries.forEach((entry, index) => {
-                    summary += `\n${index + 1}. ${entry.dog.callName} - ${entry.handler.fullName}\n`;
-                    summary += `   Classes: ${entry.classes.join(', ')}\n`;
-                    summary += `   Fee: ${entry.totalFee.toFixed(2)} (${entry.paymentStatus})\n`;
-                    summary += `   Email: ${entry.handler.email}\n`;
-                });
-                
-                alert(summary);
-                console.log('Trial Entries:', entries);
-                
-            } catch (error) {
-                console.error('Error loading trial entries:', error);
-                alert('Error loading trial entries.');
-            }
-        }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -909,8 +468,21 @@ Thank you for entering the C-WAGS trial!
             <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">C-WAGS Login</h2>
             
             <div class="form-group">
-                <label for="loginUsername">Username</label>
-                <input type="text" id="loginUsername" placeholder="Enter your username">
+                <label for="loginClub">Club/Organization</label>
+                <select id="loginClub" onchange="updateLoginForm()">
+                    <option value="">Select your club...</option>
+                    <option value="supervisor">🔧 Supervisor Access</option>
+                    <option value="metro_dogs">Metro Dog Training Club</option>
+                    <option value="westside_canine">Westside Canine Academy</option>
+                    <option value="northern_k9">Northern States K9</option>
+                    <option value="central_valley">Central Valley Dogs</option>
+                    <option value="desert_paws">Desert Paws Training</option>
+                    <option value="mountain_view">Mountain View Canines</option>
+                    <option value="coastal_dogs">Coastal Dog Sports</option>
+                    <option value="prairie_winds">Prairie Winds K9</option>
+                    <option value="forest_creek">Forest Creek Canines</option>
+                    <option value="lakeside_dogs">Lakeside Dog Training</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -922,11 +494,8 @@ Thank you for entering the C-WAGS trial!
                 <button class="btn btn-primary" onclick="performLogin()" style="width: 100%; margin-bottom: 1rem;">
                     Login
                 </button>
-                <button class="btn btn-secondary" onclick="showPasswordReset()" style="width: 100%; margin-bottom: 1rem;">
+                <button class="btn btn-secondary" onclick="showPasswordReset()" style="width: 100%;">
                     Forgot Password?
-                </button>
-                <button class="btn" onclick="showRegistration()" style="width: 100%; background: #48bb78; color: white;">
-                    Create New Account
                 </button>
             </div>
 
@@ -941,8 +510,20 @@ Thank you for entering the C-WAGS trial!
             <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">Reset Password</h2>
             
             <div class="form-group">
-                <label for="resetUsername">Username</label>
-                <input type="text" id="resetUsername" placeholder="Enter your username">
+                <label for="resetClub">Club/Organization</label>
+                <select id="resetClub">
+                    <option value="">Select your club...</option>
+                    <option value="metro_dogs">Metro Dog Training Club</option>
+                    <option value="westside_canine">Westside Canine Academy</option>
+                    <option value="northern_k9">Northern States K9</option>
+                    <option value="central_valley">Central Valley Dogs</option>
+                    <option value="desert_paws">Desert Paws Training</option>
+                    <option value="mountain_view">Mountain View Canines</option>
+                    <option value="coastal_dogs">Coastal Dog Sports</option>
+                    <option value="prairie_winds">Prairie Winds K9</option>
+                    <option value="forest_creek">Forest Creek Canines</option>
+                    <option value="lakeside_dogs">Lakeside Dog Training</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -963,172 +544,7 @@ Thank you for entering the C-WAGS trial!
         </div>
     </div>
 
-    <!-- Club Registration Modal -->
-    <div id="registrationModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close" onclick="hideModal('registrationModal')">&times;</span>
-            <h2 style="text-align: center; margin-bottom: 2rem; color: #4a5568;">Create New Account</h2>
-            
-            <div style="background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; padding: 1rem; margin-bottom: 2rem;">
-                <h4 style="color: #2c7a7b; margin-bottom: 0.5rem;">📋 Account Creation:</h4>
-                <ol style="color: #2c7a7b; margin: 0; padding-left: 1.5rem;">
-                    <li>Choose a unique username</li>
-                    <li>Create a secure password</li>
-                    <li>Provide organization details</li>
-                    <li>Start managing C-WAGS trials!</li>
-                </ol>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="regUsername">Username *</label>
-                    <input type="text" id="regUsername" placeholder="Choose a unique username" required>
-                    <small style="color: #718096;">This will be your login username</small>
-                </div>
-                <div class="form-group">
-                    <label for="regPassword">Password *</label>
-                    <input type="password" id="regPassword" placeholder="Create a secure password" required>
-                    <small style="color: #718096;">At least 8 characters</small>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="regClubName">Organization Name *</label>
-                    <input type="text" id="regClubName" placeholder="e.g., Sunshine Dog Training Club" required>
-                </div>
-                <div class="form-group">
-                    <label for="regContactName">Your Name *</label>
-                    <input type="text" id="regContactName" placeholder="Your full name" required>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="regEmail">Email Address *</label>
-                    <input type="email" id="regEmail" placeholder="your.email@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPhone">Phone Number</label>
-                    <input type="tel" id="regPhone" placeholder="(555) 123-4567">
-                </div>
-            </div>            <div style="text-align: center; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="submitRegistration()" style="width: 100%; margin-bottom: 1rem;">
-                    Create Account
-                </button>
-                <button class="btn btn-secondary" onclick="backToLoginFromReg()" style="width: 100%;">
-                    Back to Login
-                </button>
-            </div>
-
-            <div id="registrationMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
-        </div>
-    </div>
-
-    <!-- Entry Form Modal -->
-    <div id="entryFormModal" class="modal">
-        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
-            <span class="close" onclick="hideModal('entryFormModal')">&times;</span>
-            <div id="entryFormContent">
-                <h2 style="text-align: center; margin-bottom: 1rem; color: #4a5568;">Trial Entry Form</h2>
-                <div id="entryFormHeader" style="background: #f7fafc; padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
-                    <!-- Trial info will be populated here -->
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="entryDogCall">Dog's Call Name *</label>
-                        <input type="text" id="entryDogCall" placeholder="What you call your dog" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="entryDogFull">Dog's Full Registered Name *</label>
-                        <input type="text" id="entryDogFull" placeholder="Full registered name" required>
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="entryRegNumber">C-WAGS Registration Number</label>
-                        <input type="text" id="entryRegNumber" placeholder="XX-XXXX-XX (if registered)">
-                    </div>
-                    <div class="form-group">
-                        <label for="entryBreed">Breed</label>
-                        <input type="text" id="entryBreed" placeholder="Dog's breed">
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="entryHandlerFull">Handler Full Name *</label>
-                        <input type="text" id="entryHandlerFull" placeholder="Handler's complete name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="entryHandlerEmail">Handler Email *</label>
-                        <input type="email" id="entryHandlerEmail" placeholder="email@example.com" required>
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="entryHandlerPhone">Handler Phone</label>
-                        <input type="tel" id="entryHandlerPhone" placeholder="(555) 123-4567">
-                    </div>
-                    <div class="form-group">
-                        <label for="entryHandlerAddress">Handler Address</label>
-                        <input type="text" id="entryHandlerAddress" placeholder="City, State/Province">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="entryJuniorHandler" style="margin-right: 0.5rem;">
-                        Junior Handler (under 18) - $5 discount per class
-                    </label>
-                </div>
-
-                <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Class Entries</h3>
-                <div id="entryClassSelection">
-                    <!-- Available classes will be populated here -->
-                </div>
-
-                <div id="entryFeeSummary" style="background: #f7fafc; padding: 1.5rem; border-radius: 10px; margin: 2rem 0; display: none;">
-                    <h4 style="color: #4a5568; margin-bottom: 1rem;">Entry Information</h4>
-                    <div id="entryFeeBreakdown"></div>
-                    <div style="color: #718096; font-size: 0.9rem; margin-top: 1rem;">
-                        Entry fees and payment details will be provided by trial host.
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="entryComments">Special Requests/Comments</label>
-                    <textarea id="entryComments" rows="3" placeholder="Any special needs, requests, or comments..."></textarea>
-                </div>
-
-                <div style="background: #fef5e7; border: 2px solid #ed8936; border-radius: 10px; padding: 1rem; margin: 2rem 0;">
-                    <h4 style="color: #c05621; margin-bottom: 0.5rem;">📝 Entry Agreement</h4>
-                    <div style="color: #c05621; font-size: 0.9rem;">
-                        <label style="display: flex; align-items: flex-start; margin-bottom: 0.5rem;">
-                            <input type="checkbox" id="entryAgreement" style="margin-right: 0.5rem; margin-top: 0.2rem;" required>
-                            <span>I agree to abide by C-WAGS rules and regulations. I understand that all dogs must be healthy, current on vaccinations, and under control at all times. I assume all responsibility for my dog's actions and any damage caused.</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="btn btn-primary" onclick="submitEntry()" style="font-size: 1.1rem; padding: 1rem 2rem;">
-                        Submit Entry
-                    </button>
-                    <button class="btn btn-secondary" onclick="hideModal('entryFormModal')" style="margin-left: 1rem;">
-                        Cancel
-                    </button>
-                </div>
-
-                <div id="entrySubmissionMessage" style="text-align: center; margin-top: 1rem; display: none;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container" id="mainApp" style="display: none;">
+    <div class="container">
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
             <button class="nav-tab" onclick="showTab('trials')">Trial Management</button>
@@ -1619,536 +1035,8 @@ Thank you for entering the C-WAGS trial!
     </div>
 
     <script>
-        // Authentication System - Simplified
-        let currentUser = null;
-        let userAccounts = {
-            'supervisor': {
-                username: 'supervisor',
-                password: 'CWAGS2024Admin!',
-                organizationName: 'C-WAGS Administration',
-                email: 'admin@c-wags.org',
-                isSupervisor: true,
-                canSeeAllTrials: true
-            }
-        };
-
-        function loadUserAccounts() {
-            try {
-                const savedAccounts = localStorage.getItem('cwags_user_accounts');
-                if (savedAccounts) {
-                    const accounts = JSON.parse(savedAccounts);
-                    userAccounts = { ...userAccounts, ...accounts };
-                }
-            } catch (error) {
-                console.error('Error loading user accounts:', error);
-            }
-        }
-
-        function saveUserAccounts() {
-            try {
-                // Save all accounts except supervisor to localStorage
-                const accountsToSave = {};
-                Object.keys(userAccounts).forEach(username => {
-                    if (username !== 'supervisor') {
-                        accountsToSave[username] = userAccounts[username];
-                    }
-                });
-                localStorage.setItem('cwags_user_accounts', JSON.stringify(accountsToSave));
-            } catch (error) {
-                console.error('Error saving user accounts:', error);
-            }
-        }
-
-        function performLogin() {
-            const username = document.getElementById('loginUsername').value.trim().toLowerCase();
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!username) {
-                showLoginError('Please enter your username.');
-                return;
-            }
-            
-            if (!password) {
-                showLoginError('Please enter your password.');
-                return;
-            }
-            
-            const account = userAccounts[username];
-            if (!account) {
-                showLoginError('Username not found. Please check your username or create a new account.');
-                return;
-            }
-            
-            if (password !== account.password) {
-                showLoginError('Incorrect password. Please try again.');
-                return;
-            }
-            
-            // Successful login
-            currentUser = {
-                username: account.username,
-                organizationName: account.organizationName,
-                email: account.email,
-                isSupervisor: account.isSupervisor || false,
-                canSeeAllTrials: account.canSeeAllTrials || false,
-                loginTime: new Date().toISOString()
-            };
-            
-            // Save login session
-            sessionStorage.setItem('cwags_session', JSON.stringify(currentUser));
-            
-            // Hide login modal and show main app
-            hideModal('loginModal');
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('userInfo').style.display = 'block';
-            document.getElementById('welcomeUser').textContent = 
-                `Welcome, ${account.organizationName}`;
-            
-            // Filter UI based on permissions
-            setupUserInterface();
-            
-            // Initialize data
-            initializeData();
-            
-            console.log(`✓ Logged in as: ${account.organizationName}`);
-        }
-
-        function showLoginError(message) {
-            const errorDiv = document.getElementById('loginError');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            
-            // Clear error after 5 seconds
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function setupUserInterface() {
-            if (!currentUser) return;
-            
-            // Show/hide tabs based on permissions
-            const allTabs = document.querySelectorAll('.nav-tab');
-            
-            if (currentUser.canSeeAllTrials) {
-                // Supervisor sees everything, plus admin functions
-                allTabs.forEach(tab => tab.style.display = 'block');
-                addSupervisorFunctions();
-            } else {
-                // Regular users see all tabs
-                allTabs.forEach(tab => tab.style.display = 'block');
-            }
-            
-            // Filter trials display
-            filterTrialsForUser();
-        }
-
-        function filterTrialsForUser() {
-            if (!currentUser) return;
-            
-            if (currentUser.canSeeAllTrials) {
-                // Supervisor sees all trials
-                return;
-            }
-            
-            // Filter trials to only show user's own trials
-            trials = trials.filter(trial => 
-                trial.username === currentUser.username || 
-                trial.organizationName === currentUser.organizationName ||
-                !trial.username // Legacy trials without user assignment
-            );
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                // Clear session
-                sessionStorage.removeItem('cwags_session');
-                currentUser = null;
-                
-                // Reset UI
-                document.getElementById('mainApp').style.display = 'none';
-                document.getElementById('userInfo').style.display = 'none';
-                document.getElementById('loginModal').style.display = 'block';
-                
-                // Clear form
-                document.getElementById('loginUsername').value = '';
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('loginError').style.display = 'none';
-                
-                console.log('✓ Logged out successfully');
-            }
-        }
-
-        function showPasswordReset() {
-            hideModal('loginModal');
-            showModal('passwordResetModal');
-        }
-
-        function backToLogin() {
-            hideModal('passwordResetModal');
-            document.getElementById('loginModal').style.display = 'block';
-        }
-
-        function sendPasswordReset() {
-            const clubId = document.getElementById('resetClub').value;
-            const email = document.getElementById('resetEmail').value;
-            const messageDiv = document.getElementById('resetMessage');
-            
-            if (!clubId) {
-                showResetMessage('Please select your club.', 'error');
-                return;
-            }
-            
-            if (!email) {
-                showResetMessage('Please enter your email address.', 'error');
-                return;
-            }
-            
-            const club = clubDatabase[clubId];
-            if (!club) {
-                showResetMessage('Invalid club selection.', 'error');
-                return;
-            }
-            
-            if (email.toLowerCase() !== club.email.toLowerCase()) {
-                showResetMessage('Email address does not match our records.', 'error');
-                return;
-            }
-            
-            // Simulate sending password reset email
-            showResetMessage(
-                `Password reset instructions have been sent to ${email}. Please check your inbox and spam folder.`, 
-                'success'
-            );
-            
-            // In a real system, this would send an actual email
-            console.log(`Password reset requested for ${club.name} (${email})`);
-            console.log(`Current password for ${club.name}: ${club.password}`);
-        }
-
-        function showRegistration() {
-            hideModal('loginModal');
-            showModal('registrationModal');
-        }
-
-        function backToLoginFromReg() {
-            hideModal('registrationModal');
-            document.getElementById('loginModal').style.display = 'block';
-            clearRegistrationForm();
-        }
-
-        function clearRegistrationForm() {
-            document.getElementById('regClubName').value = '';
-            document.getElementById('regClubType').value = '';
-            document.getElementById('regContactName').value = '';
-            document.getElementById('regContactTitle').value = '';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regPhone').value = '';
-            document.getElementById('regAddress').value = '';
-            document.getElementById('regWebsite').value = '';
-            document.getElementById('regExperience').value = '';
-            document.getElementById('regTrainingFacility').value = '';
-            document.getElementById('regComments').value = '';
-            
-            // Clear checkboxes
-            document.getElementById('regScent').checked = false;
-            document.getElementById('regObedience').checked = false;
-            document.getElementById('regRally').checked = false;
-            document.getElementById('regGames').checked = false;
-            
-            document.getElementById('registrationMessage').style.display = 'none';
-        }
-
-        function submitRegistration() {
-            // Collect form data
-            const registrationData = {
-                clubName: document.getElementById('regClubName').value.trim(),
-                clubType: document.getElementById('regClubType').value,
-                contactName: document.getElementById('regContactName').value.trim(),
-                contactTitle: document.getElementById('regContactTitle').value.trim(),
-                email: document.getElementById('regEmail').value.trim(),
-                phone: document.getElementById('regPhone').value.trim(),
-                address: document.getElementById('regAddress').value.trim(),
-                website: document.getElementById('regWebsite').value.trim(),
-                experience: document.getElementById('regExperience').value,
-                trainingFacility: document.getElementById('regTrainingFacility').value.trim(),
-                comments: document.getElementById('regComments').value.trim(),
-                trialTypes: {
-                    scent: document.getElementById('regScent').checked,
-                    obedience: document.getElementById('regObedience').checked,
-                    rally: document.getElementById('regRally').checked,
-                    games: document.getElementById('regGames').checked
-                },
-                submittedDate: new Date().toISOString(),
-                status: 'pending_review'
-            };
-
-            // Validate required fields
-            const validationErrors = validateRegistration(registrationData);
-            if (validationErrors.length > 0) {
-                showRegistrationMessage(
-                    'Please fix the following errors:\n• ' + validationErrors.join('\n• '), 
-                    'error'
-                );
-                return;
-            }
-
-            // Check if club name already exists
-            if (isClubNameTaken(registrationData.clubName)) {
-                showRegistrationMessage(
-                    'A club with this name is already registered. Please choose a different name or contact C-WAGS if this is your organization.',
-                    'error'
-                );
-                return;
-            }
-
-            // Save registration to pending list
-            saveRegistrationApplication(registrationData);
-
-            // Show success message
-            showRegistrationMessage(
-                `✅ Registration submitted successfully!\n\nYour application for "${registrationData.clubName}" has been submitted for review.\n\nNext steps:\n1. C-WAGS administrators will review your application\n2. You will receive an email within 3-5 business days\n3. Upon approval, login credentials will be provided\n\nThank you for your interest in C-WAGS!`,
-                'success'
-            );
-
-            // Simulate sending notification to C-WAGS admin
-            console.log('📧 Registration notification sent to C-WAGS Admin:');
-            console.log('New club registration pending review:');
-            console.log(`Club: ${registrationData.clubName}`);
-            console.log(`Contact: ${registrationData.contactName} (${registrationData.email})`);
-            console.log(`Type: ${registrationData.clubType}`);
-            console.log(`Experience: ${registrationData.experience}`);
-            
-            // Clear form after successful submission
-            setTimeout(() => {
-                clearRegistrationForm();
-                backToLoginFromReg();
-            }, 8000);
-        }
-
-        function validateRegistration(data) {
-            const errors = [];
-            
-            if (!data.clubName) errors.push('Club/Organization Name is required');
-            if (!data.clubType) errors.push('Organization Type is required');
-            if (!data.contactName) errors.push('Primary Contact Name is required');
-            if (!data.email) errors.push('Email Address is required');
-            if (!data.phone) errors.push('Phone Number is required');
-            if (!data.address) errors.push('Club Address is required');
-            
-            // Email format validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (data.email && !emailRegex.test(data.email)) {
-                errors.push('Please enter a valid email address');
-            }
-            
-            // Check if at least one trial type is selected
-            const hasTrialType = Object.values(data.trialTypes).some(type => type);
-            if (!hasTrialType) {
-                errors.push('Please select at least one trial type you are interested in');
-            }
-            
-            return errors;
-        }
-
-        function isClubNameTaken(clubName) {
-            const normalizedName = clubName.toLowerCase().replace(/[^a-z0-9]/g, '');
-            
-            // Check against existing clubs
-            const existingClubs = Object.values(clubDatabase).map(club => 
-                club.name.toLowerCase().replace(/[^a-z0-9]/g, '')
-            );
-            
-            return existingClubs.includes(normalizedName);
-        }
-
-        function saveRegistrationApplication(registrationData) {
-            try {
-                // Get existing pending registrations
-                let pendingRegistrations = JSON.parse(localStorage.getItem('cwags_pending_registrations') || '[]');
-                
-                // Add new registration
-                registrationData.id = 'REG' + String(pendingRegistrations.length + 1).padStart(3, '0');
-                pendingRegistrations.push(registrationData);
-                
-                // Save to localStorage
-                localStorage.setItem('cwags_pending_registrations', JSON.stringify(pendingRegistrations));
-                
-                console.log(`Registration ${registrationData.id} saved for admin review`);
-                
-            } catch (error) {
-                console.error('Error saving registration:', error);
-            }
-        }
-
-        function showRegistrationMessage(message, type) {
-            const messageDiv = document.getElementById('registrationMessage');
-            messageDiv.style.whiteSpace = 'pre-line'; // Preserve line breaks
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-            messageDiv.style.color = type === 'error' ? '#e53e3e' : '#38a169';
-            messageDiv.style.backgroundColor = type === 'error' ? '#fed7d7' : '#c6f6d5';
-            messageDiv.style.padding = '1rem';
-            messageDiv.style.borderRadius = '10px';
-            messageDiv.style.border = type === 'error' ? '2px solid #e53e3e' : '2px solid #38a169';
-        }
-
-        // Function for supervisors to view pending registrations
-        function viewPendingRegistrations() {
-            if (!currentUser?.canSeeAllTrials) {
-                alert('Access denied. Supervisor privileges required.');
-                return;
-            }
-            
-            try {
-                const pendingRegistrations = JSON.parse(localStorage.getItem('cwags_pending_registrations') || '[]');
-                
-                if (pendingRegistrations.length === 0) {
-                    alert('No pending registrations.');
-                    return;
-                }
-                
-                console.log('📋 Pending Club Registrations:');
-                pendingRegistrations.forEach(reg => {
-                    console.log(`\n${reg.id}: ${reg.clubName}`);
-                    console.log(`Contact: ${reg.contactName} (${reg.email})`);
-                    console.log(`Type: ${reg.clubType}`);
-                    console.log(`Submitted: ${new Date(reg.submittedDate).toLocaleDateString()}`);
-                    console.log(`Status: ${reg.status}`);
-                });
-                
-                alert(`Found ${pendingRegistrations.length} pending registration(s). Check browser console for details.`);
-                
-            } catch (error) {
-                console.error('Error loading pending registrations:', error);
-                alert('Error loading pending registrations.');
-            }
-        }
-
-        function addSupervisorFunctions() {
-            // Add a special admin button to the header for supervisors
-            const userInfo = document.getElementById('userInfo');
-            const adminBtn = document.createElement('button');
-            adminBtn.className = 'btn btn-secondary';
-            adminBtn.style.cssText = 'padding: 0.5rem 1rem; margin-right: 1rem; background: #805ad5; color: white;';
-            adminBtn.textContent = '👑 Admin Functions';
-            adminBtn.onclick = showAdminFunctions;
-            
-            userInfo.insertBefore(adminBtn, userInfo.firstChild);
-        }
-
-        function showAdminFunctions() {
-            const functions = [
-                '1. View Pending Registrations',
-                '2. Approve New Clubs', 
-                '3. Reset Club Passwords',
-                '4. View All Club Activity',
-                '5. System Statistics'
-            ];
-            
-            const choice = prompt(`👑 C-WAGS Administrator Functions:\n\n${functions.join('\n')}\n\nEnter number (1-5):`);
-            
-            switch(choice) {
-                case '1':
-                    viewPendingRegistrations();
-                    break;
-                case '2':
-                    alert('Approve New Clubs:\nThis would show pending registrations with approve/deny buttons.\n(Feature ready for Phase 2 implementation)');
-                    break;
-                case '3':
-                    alert('Reset Club Passwords:\nThis would allow password resets for any club.\n(Feature ready for Phase 2 implementation)');
-                    break;
-                case '4':
-                    alert(`All Club Activity:\nTotal Clubs: ${Object.keys(clubDatabase).length - 1}\nTotal Trials: ${trials.length}\nActive Sessions: ${sessionStorage.getItem('cwags_session') ? '1' : '0'}`);
-                    break;
-                case '5':
-                    showSystemStatistics();
-                    break;
-                default:
-                    if (choice !== null) alert('Invalid selection. Please choose 1-5.');
-            }
-        }
-
-        function showSystemStatistics() {
-            try {
-                const pendingRegs = JSON.parse(localStorage.getItem('cwags_pending_registrations') || '[]');
-                const allTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
-                
-                const stats = `📊 C-WAGS System Statistics:
-
-🏢 Clubs:
-• Registered Clubs: ${Object.keys(clubDatabase).length - 1}
-• Pending Registrations: ${pendingRegs.length}
-• Total Organizations: ${Object.keys(clubDatabase).length - 1 + pendingRegs.length}
-
-🎯 Trials:
-• Total Trials Created: ${allTrials.length}
-• Draft Trials: ${allTrials.filter(t => t.status === 'draft').length}
-• Approved Trials: ${allTrials.filter(t => t.status === 'approved').length}
-• Completed Trials: ${allTrials.filter(t => t.status === 'completed').length}
-
-👥 Activity:
-• Current Session: ${currentUser?.clubName}
-• Session Time: ${currentUser?.loginTime ? new Date(currentUser.loginTime).toLocaleString() : 'Unknown'}
-• System Version: Phase 1 (GitHub Pages)
-
-📋 Records:
-• Dog Records: ${records.length}
-• Available Classes: ${availableClasses.length}
-• Available Judges: ${availableJudges.length}`;
-
-                alert(stats);
-                console.log('📊 System Statistics:', {
-                    clubs: Object.keys(clubDatabase).length - 1,
-                    pendingRegistrations: pendingRegs.length,
-                    trials: allTrials.length,
-                    records: records.length,
-                    classes: availableClasses.length,
-                    judges: availableJudges.length
-                });
-                
-            } catch (error) {
-                console.error('Error generating statistics:', error);
-                alert('Error generating system statistics.');
-            }
-        }
-        function checkExistingSession() {
-            try {
-                const savedSession = sessionStorage.getItem('cwags_session');
-                if (savedSession) {
-                    currentUser = JSON.parse(savedSession);
-                    
-                    // Verify session is still valid (less than 8 hours old)
-                    const loginTime = new Date(currentUser.loginTime);
-                    const now = new Date();
-                    const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-                    
-                    if (hoursDiff < 8) {
-                        // Valid session - auto login
-                        document.getElementById('loginModal').style.display = 'none';
-                        document.getElementById('mainApp').style.display = 'block';
-                        document.getElementById('userInfo').style.display = 'block';
-                        document.getElementById('welcomeUser').textContent = 
-                            `Welcome back, ${currentUser.clubName}`;
-                        
-                        setupUserInterface();
-                        initializeData();
-                        
-                        console.log(`✓ Restored session for: ${currentUser.clubName}`);
-                        return true;
-                    } else {
-                        // Session expired
-                        sessionStorage.removeItem('cwags_session');
-                        currentUser = null;
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking session:', error);
-                sessionStorage.removeItem('cwags_session');
-            }
-            
-            return false;
-        }
+        // Global state management
+        let currentTab = 'dashboard';
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let trials = [];
@@ -2498,12 +1386,7 @@ Thank you for entering the C-WAGS trial!
                     <td>
                         <button class="btn btn-secondary" onclick="editTrial('${trial.id}')">Edit</button>
                         <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="margin-left: 0.5rem;">View</button>
-                        ${trial.status === 'approved' || trial.status === 'pending' ? 
-                            `<br style="margin: 0.5rem 0;"><button class="btn btn-primary" onclick="showEntryForm('${trial.id}')" style="background: #48bb78; margin-right: 0.5rem;">Entry Form</button>
-                            <button class="btn btn-secondary" onclick="viewTrialEntries('${trial.id}')">View Entries</button>` : 
-                            ''
-                        }
-                        <br style="margin: 0.5rem 0;"><button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')">Duplicate</button>
+                        <button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')" style="margin-left: 0.5rem;">Duplicate</button>
                     </td>
                 `;
             });
@@ -2575,138 +1458,26 @@ Thank you for entering the C-WAGS trial!
             };
 
             if (validateTrialApplication(formData)) {
-                // Find existing trial if created from modal, or create new one
-                let trial = null;
-                if (window.currentTrialConfig) {
-                    // Update existing trial with application details
-                    trial = trials.find(t => t.date === window.currentTrialConfig.date && t.status === 'draft');
-                    if (trial) {
-                        Object.assign(trial, formData);
-                        trial.status = 'pending';
-                        trial.lastModified = new Date().toISOString();
-                        updateTrialInStorage(trial);
-                    }
-                } 
-                
-                if (!trial) {
-                    // Create new trial from application form
-                    const newTrial = {
-                        id: 'T' + String(trials.length + 1).padStart(3, '0'),
-                        ...formData,
-                        clubId: currentUser?.clubId,
-                        clubName: currentUser?.clubName,
-                        host: formData.host || currentUser?.clubName,
-                        judge: formData.judges.split('\n')[0] || 'TBD',
-                        status: 'pending',
-                        contact: formData.email,
-                        phone: formData.phone,
-                        created: new Date().toISOString(),
-                        lastModified: new Date().toISOString(),
-                        createdBy: currentUser?.contact || 'Unknown'
-                    };
-                    
-                    trials.push(newTrial);
-                    saveTrialToStorage(newTrial);
-                    trial = newTrial;
-                }
+                // Add to trials array
+                const newTrial = {
+                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
+                    date: formData.date,
+                    host: formData.host,
+                    location: formData.location,
+                    city: formData.city,
+                    classes: formData.classes,
+                    judge: formData.judges.split('\n')[0] || 'TBD',
+                    status: 'pending',
+                    contact: formData.email,
+                    phone: formData.phone
+                };
 
-                // Generate entry form link
-                const entryFormUrl = generateEntryFormLink(trial);
-                
+                trials.push(newTrial);
                 updateDashboardStats();
                 populateTrialsTable();
                 
-                // Show success message with entry form link
-                showTrialSubmissionSuccess(trial, entryFormUrl);
+                alert('Trial application submitted successfully!');
                 clearForm();
-                window.currentTrialConfig = null;
-            }
-        }
-
-        function generateEntryFormLink(trial) {
-            // In Phase 1, create a local URL. In Phase 2, this would be a real URL
-            const baseUrl = window.location.origin + window.location.pathname;
-            const entryUrl = `${baseUrl}?entry=${trial.id}`;
-            
-            // Store the trial entry info
-            const entryFormData = {
-                trialId: trial.id,
-                trialName: `${trial.host} - ${formatDate(trial.date)}`,
-                trialDate: trial.date,
-                location: `${trial.location}, ${trial.city}`,
-                host: trial.host,
-                contact: trial.contact,
-                classes: trial.classes || [],
-                judges: trial.judges,
-                status: 'accepting_entries',
-                entryDeadline: calculateEntryDeadline(trial.date),
-                fees: calculateTrialFees(trial.classes),
-                created: new Date().toISOString()
-            };
-            
-            // Save entry form data
-            let entryForms = JSON.parse(localStorage.getItem('cwags_entry_forms') || '{}');
-            entryForms[trial.id] = entryFormData;
-            localStorage.setItem('cwags_entry_forms', JSON.stringify(entryForms));
-            
-            return entryUrl;
-        }
-
-        function calculateEntryDeadline(trialDate) {
-            const trial = new Date(trialDate);
-            const deadline = new Date(trial);
-            deadline.setDate(trial.getDate() - 7); // 7 days before trial
-            return deadline.toISOString().split('T')[0];
-        }
-
-        function calculateTrialFees(classes) {
-            // Standard C-WAGS entry fees
-            return {
-                firstClass: 25.00,
-                additionalClass: 20.00,
-                juniorDiscount: 5.00, // $5 off for junior handlers
-                multiDayDiscount: 10.00 // $10 off for multi-day events
-            };
-        }
-
-        function showTrialSubmissionSuccess(trial, entryFormUrl) {
-            const message = `
-🎉 Trial Application Submitted Successfully!
-
-Trial ID: ${trial.id}
-Status: Pending C-WAGS Approval
-
-📝 ENTRY FORM LINK GENERATED:
-${entryFormUrl}
-
-📋 Next Steps:
-1. C-WAGS will review your application
-2. Upon approval, share the entry form link with participants
-3. Participants can register and pay online
-4. You'll receive entry summaries and payment reports
-
-💡 TIP: Bookmark the entry form link and include it in your trial premium!
-
-Would you like to:
-• Copy the entry form link to clipboard
-• Test the entry form
-• Continue to trial management
-            `;
-            
-            if (confirm(message + '\n\nClick OK to copy entry form link to clipboard, Cancel to continue.')) {
-                // Copy to clipboard
-                navigator.clipboard.writeText(entryFormUrl).then(() => {
-                    alert('Entry form link copied to clipboard! 📋\n\nShare this link with participants after your trial is approved.');
-                }).catch(() => {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = entryFormUrl;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    alert('Entry form link copied to clipboard! 📋');
-                });
             }
         }
 
@@ -2873,7 +1644,8 @@ Would you like to:
             classes: []
         };
 
-        // Trial storage - now includes club association
+        // Trial storage - in Phase 1, stored in browser localStorage
+        // In Phase 2, this would be saved to database
         function saveTrialToStorage(trialData) {
             try {
                 // Get existing trials from localStorage
@@ -2882,17 +1654,13 @@ Would you like to:
                 // Generate trial ID
                 const trialId = 'T' + String(savedTrials.length + 1).padStart(3, '0');
                 
-                // Add metadata including user association
+                // Add metadata
                 const fullTrialData = {
                     id: trialId,
                     ...trialData,
-                    username: currentUser?.username,
-                    organizationName: currentUser?.organizationName,
-                    host: currentUser?.organizationName || trialData.host,
                     status: 'draft',
                     created: new Date().toISOString(),
-                    lastModified: new Date().toISOString(),
-                    createdBy: currentUser?.contactName || currentUser?.username || 'Unknown'
+                    lastModified: new Date().toISOString()
                 };
                 
                 // Add to trials array
@@ -2906,7 +1674,7 @@ Would you like to:
                 updateDashboardStats();
                 populateTrialsTable();
                 
-                console.log(`Trial ${trialId} saved for ${currentUser?.clubName}`);
+                console.log(`Trial ${trialId} saved to local storage`);
                 return trialId;
                 
             } catch (error) {
@@ -2915,24 +1683,13 @@ Would you like to:
             }
         }
 
-        // Load trials with user filtering
+        // Load trials from localStorage on startup
         function loadStoredTrials() {
             try {
                 const savedTrials = JSON.parse(localStorage.getItem('cwags_trials') || '[]');
-                
-                // Filter trials based on user permissions
-                const userTrials = savedTrials.filter(trial => {
-                    if (currentUser?.canSeeAllTrials) {
-                        return true; // Supervisor sees all
-                    }
-                    return trial.username === currentUser?.username || 
-                           trial.organizationName === currentUser?.organizationName ||
-                           !trial.username; // Legacy trials without user assignment
-                });
-                
                 // Merge with any existing sample trials
-                trials = [...trials, ...userTrials];
-                console.log(`Loaded ${userTrials.length} trials for ${currentUser?.clubName || 'user'}`);
+                trials = [...trials, ...savedTrials];
+                console.log(`Loaded ${savedTrials.length} trials from local storage`);
             } catch (error) {
                 console.error('Error loading stored trials:', error);
             }
@@ -3243,24 +2000,6 @@ Would you like to:
             
             // Store the detailed configuration for later use
             window.currentTrialConfig = trialData;
-            
-            // Add entry form generation info
-            const entryFormNote = document.createElement('div');
-            entryFormNote.style.cssText = `
-                background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; 
-                padding: 1rem; margin-top: 2rem; text-align: center;
-            `;
-            entryFormNote.innerHTML = `
-                <h4 style="color: #2c7a7b; margin-bottom: 0.5rem;">📝 Next Steps</h4>
-                <p style="color: #2c7a7b; margin: 0;">
-                    After submitting your trial application, an <strong>Entry Form Link</strong> will be generated.<br>
-                    Share this link with participants to register for your trial!
-                </p>
-            `;
-            
-            // Insert after the advocates field
-            const advocatesField = document.getElementById('advocates').parentNode.parentNode;
-            advocatesField.parentNode.insertBefore(entryFormNote, advocatesField.nextSibling);
         }
 
         // Trial editing functionality
@@ -3394,10 +2133,6 @@ Would you like to:
                                onfocus="showEditJudgeDropdown(${classIndex}, ${round})"
                                style="position: relative;">
                         <div id="editJudgeDropdown${classIndex}_${round}" class="judge-dropdown" style="display: none;"></div>
-                        <label style="display: flex; align-items: center; margin-top: 0.5rem;">
-                            <input type="checkbox" id="editFeo${classIndex}_${round}" style="margin-right: 0.5rem;">
-                            <span style="font-size: 0.9rem; color: #718096;">FEO (For Exhibition Only) offered</span>
-                        </label>
                     </div>
                 `;
             }
@@ -3617,11 +2352,7 @@ Would you like to:
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for existing session first
-            if (!checkExistingSession()) {
-                // No valid session, show login
-                document.getElementById('loginModal').style.display = 'block';
-            }
+            initializeData();
             
             // Show/hide scent reset option based on scent class selection
             document.getElementById('classScent').addEventListener('change', function() {
