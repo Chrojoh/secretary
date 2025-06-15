@@ -1,52 +1,4 @@
-function createLeagueTrial() {
-            const startDate = document.getElementById('leagueStartDate').value;
-            const numNights = parseInt(document.getElementById('leagueNights').value);
-            
-            if (!startDate) {
-                alert('Please select a league start date.');
-                return;
-            }
-            
-            // Collect league data with rounds
-            const nights = [];
-            const allClasses = [];
-            const allJudges = [];
-            
-            for (let night = 0; night < numNights; night++) {
-                const nightDate = document.getElementById(`leagueNight${night}Date`).value;
-                const numClasses = parseInt(document.getElementById(`leagueNight${night}Classes`).value || 0);
-                
-                if (!nightDate) {
-                    alert(`Please set a date for Night ${night + 1}.`);
-                    return;
-                }
-                
-                const nightClassDetails = [];
-                const nightClasses = [];
-                const nightJudges = [];
-                
-                for (let i = 0; i < numClasses; i++) {
-                    const className = document.getElementById(`leagueNight${night}Class${i}`)?.value;
-                    const numRounds = parseInt(document.getElementById(`leagueNight${night}Rounds${i}`)?.value || 0);
-                    
-                    if (!className) {
-                        alert(`Please select a class type for Night ${night + 1}, Class ${i + 1}.`);
-                        return;
-                    }
-                    
-                    if (!numRounds) {
-                        alert(`Please select number of rounds for Night ${night + 1}, Class ${i + 1}.`);
-                        return;
-                    }
-                    
-                    // Collect round judges for this class with FEO status
-                    const rounds = [];
-                    for (let round = 1; round <= numRounds; round++) {
-                        const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
-                        const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
-                        
-                        if (!judge) {
-                            <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -335,51 +287,6 @@ function createLeagueTrial() {
             font-weight: 600;
         }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 1rem;
-        }
-
-        .calendar-header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .calendar-day {
-            background: white;
-            padding: 1rem;
-            min-height: 100px;
-            position: relative;
-            transition: background 0.3s ease;
-        }
-
-        .calendar-day:hover {
-            background: #f7fafc;
-        }
-
-        .calendar-day.other-month {
-            background: #f8f9fa;
-            color: #a0aec0;
-        }
-
-        .trial-event {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-            cursor: pointer;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -398,7 +305,7 @@ function createLeagueTrial() {
             padding: 2rem;
             border-radius: 20px;
             width: 90%;
-            max-width: 600px;
+            max-width: 900px;
             max-height: 80vh;
             overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
@@ -452,31 +359,6 @@ function createLeagueTrial() {
             color: #a0aec0;
         }
 
-        .loading {
-            display: none;
-            text-align: center;
-            color: #4a5568;
-            font-size: 1.1rem;
-            margin: 2rem 0;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .data-freshness {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            font-size: 0.875rem;
-            color: #718096;
-            z-index: 1000;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -506,13 +388,9 @@ function createLeagueTrial() {
     <div class="header">
         <h1>C-WAGS Trial Management System</h1>
         <p class="header-subtitle">Canine-Work And Games | 17 Years of Excellence</p>
-        <div id="userInfo" style="display: none; text-align: right; margin-top: 0.5rem;">
-            <span id="welcomeUser" style="color: #4a5568; margin-right: 1rem;"></span>
-            <button class="btn btn-secondary" onclick="logout()" style="padding: 0.5rem 1rem;">Logout</button>
-        </div>
     </div>
 
-    <div class="container" id="mainApp">
+    <div class="container">
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('dashboard')">Dashboard</button>
             <button class="nav-tab" onclick="showTab('trials')">Trials</button>
@@ -594,7 +472,7 @@ function createLeagueTrial() {
                 <input type="text" placeholder="Search trials by host, location, or date..." id="trialSearch">
             </div>
 
-            <button class="btn btn-primary" onclick="showModal('newTrialModal')" style="margin-bottom: 2rem;">
+            <button class="btn btn-primary" onclick="createNewTrial()" style="margin-bottom: 2rem;">
                 + Create New Trial
             </button>
 
@@ -619,102 +497,6 @@ function createLeagueTrial() {
             </div>
         </div>
 
-        <!-- New Trial Modal -->
-        <div id="newTrialModal" class="modal">
-            <div class="modal-content" style="max-width: 900px;">
-                <span class="close" onclick="hideModal('newTrialModal')">&times;</span>
-                <h2>Create New Trial</h2>
-                
-                <!-- Step 1: Trial Type -->
-                <div id="trialTypeStep">
-                    <h3 style="margin-bottom: 1rem; color: #4a5568;">Select Trial Type</h3>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; margin-bottom: 1rem; cursor: pointer; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px; transition: all 0.3s ease;">
-                            <input type="radio" name="trialType" value="standalone" style="margin-right: 1rem;" checked onchange="updateTrialTypeInfo()">
-                            <div>
-                                <span style="font-size: 1.1rem; font-weight: 600;">Standalone Event</span>
-                                <div style="color: #718096; font-size: 0.9rem; margin-top: 0.25rem;">Single day trial with multiple classes</div>
-                            </div>
-                        </label>
-                        <label style="display: flex; align-items: center; cursor: pointer; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px; transition: all 0.3s ease;">
-                            <input type="radio" name="trialType" value="league" style="margin-right: 1rem;" onchange="updateTrialTypeInfo()">
-                            <div>
-                                <span style="font-size: 1.1rem; font-weight: 600;">League Event</span>
-                                <div style="color: #718096; font-size: 0.9rem; margin-top: 0.25rem;">Multiple night event with classes each night</div>
-                            </div>
-                        </label>
-                    </div>
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button class="btn btn-primary" onclick="nextTrialStep()">Next</button>
-                        <button class="btn btn-secondary" onclick="hideModal('newTrialModal')" style="margin-left: 1rem;">Cancel</button>
-                    </div>
-                </div>
-
-                <!-- Step 2: Standalone Configuration -->
-                <div id="standaloneStep" style="display: none;">
-                    <h3 style="margin-bottom: 1rem; color: #4a5568;">Standalone Trial Setup</h3>
-                    
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="standaloneDate">Trial Date</label>
-                            <input type="date" id="standaloneDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="standaloneClasses">Number of Classes</label>
-                            <select id="standaloneClasses" onchange="generateStandaloneClasses()">
-                                <option value="">Select...</option>
-                                <option value="1">1 Class</option>
-                                <option value="2">2 Classes</option>
-                                <option value="3">3 Classes</option>
-                                <option value="4">4 Classes</option>
-                                <option value="5">5 Classes</option>
-                                <option value="6">6 Classes</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="standaloneClassConfig" style="margin-top: 2rem;"></div>
-
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button class="btn btn-secondary" onclick="previousTrialStep()">Back</button>
-                        <button class="btn btn-primary" onclick="createStandaloneTrial()" id="createStandaloneBtn" style="display: none; margin-left: 1rem;">Create Trial</button>
-                    </div>
-                </div>
-
-                <!-- Step 3: League Configuration -->
-                <div id="leagueStep" style="display: none;">
-                    <h3 style="margin-bottom: 1rem; color: #4a5568;">League Trial Setup</h3>
-                    
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="leagueStartDate">League Start Date</label>
-                            <input type="date" id="leagueStartDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="leagueNights">Number of Nights</label>
-                            <select id="leagueNights" onchange="generateLeagueNights()">
-                                <option value="">Select...</option>
-                                <option value="2">2 Nights</option>
-                                <option value="3">3 Nights</option>
-                                <option value="4">4 Nights</option>
-                                <option value="5">5 Nights</option>
-                                <option value="6">6 Nights</option>
-                                <option value="7">7 Nights</option>
-                                <option value="8">8 Nights</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="leagueNightConfig" style="margin-top: 2rem;"></div>
-
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button class="btn btn-secondary" onclick="previousTrialStep()">Back</button>
-                        <button class="btn btn-primary" onclick="createLeagueTrial()" id="createLeagueBtn" style="display: none; margin-left: 1rem;">Create League Trial</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Applications Tab -->
         <div id="applications" class="tab-content">
             <h2 style="margin-bottom: 2rem; color: #4a5568;">Trial Applications</h2>
@@ -736,90 +518,6 @@ function createLeagueTrial() {
                     <label for="cityState">City, State/Province</label>
                     <input type="text" id="cityState" placeholder="City, State" required>
                 </div>
-                <div class="form-group">
-                    <label for="contactName">Contact Name</label>
-                    <input type="text" id="contactName" placeholder="Trial contact person" required>
-                </div>
-                <div class="form-group">
-                    <label for="contactEmail">Contact Email</label>
-                    <input type="email" id="contactEmail" placeholder="email@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="contactPhone">Contact Phone</label>
-                    <input type="tel" id="contactPhone" placeholder="(555) 123-4567">
-                </div>
-                <div class="form-group">
-                    <label for="premiumWebsite">Premium Website</label>
-                    <input type="url" id="premiumWebsite" placeholder="https://...">
-                </div>
-            </div>
-
-            <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Class Configuration</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="classObedience"> Obedience
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="classRally"> Rally
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="classScent"> Scent
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="classGames"> Games
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="judges">Judges</label>
-                    <textarea id="judges" rows="3" placeholder="List judges for each class"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="advocates">C-WAGS Advocates</label>
-                    <textarea id="advocates" rows="3" placeholder="List assigned advocates"></textarea>
-                </div>
-            </div>
-
-            <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Trial Details</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="trialType">Trial Type</label>
-                    <select id="trialType">
-                        <option value="inside">Inside</option>
-                        <option value="outside">Outside</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="ringSurface">Ring Surface</label>
-                    <input type="text" id="ringSurface" placeholder="e.g., Matting, Grass, Dirt">
-                </div>
-                <div class="form-group">
-                    <label for="numRings">Number of Rings/Search Areas</label>
-                    <input type="number" id="numRings" min="1" value="1">
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="isLeague"> League Trial
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="insuranceExpiration">Insurance Expiration Date</label>
-                    <input type="date" id="insuranceExpiration" required>
-                </div>
-                <div class="form-group" id="scentResetGroup" style="display: none;">
-                    <label>
-                        <input type="checkbox" id="scentResets"> Scent Resets Offered
-                    </label>
-                </div>
             </div>
 
             <div style="text-align: center; margin-top: 2rem;">
@@ -831,51 +529,7 @@ function createLeagueTrial() {
         <!-- Scoring Tab -->
         <div id="scoring" class="tab-content">
             <h2 style="margin-bottom: 2rem; color: #4a5568;">Score Entry & Management</h2>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="scoringTrial">Select Trial</label>
-                    <select id="scoringTrial">
-                        <option value="">Choose a trial...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="scoringClass">Select Class</label>
-                    <select id="scoringClass">
-                        <option value="">Choose a class...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="judge">Judge</label>
-                    <input type="text" id="judge" placeholder="Judge name">
-                </div>
-            </div>
-
-            <div id="scoreEntrySection" style="display: none;">
-                <h3 style="margin: 2rem 0 1rem 0; color: #4a5568;">Score Entry</h3>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Team #</th>
-                                <th>Dog</th>
-                                <th>Handler</th>
-                                <th>Score</th>
-                                <th>Time</th>
-                                <th>Result</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scoreEntryTable">
-                            <!-- Score entry rows will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="btn btn-primary" onclick="saveScores()">Save Scores</button>
-                    <button class="btn btn-secondary" onclick="generateScoreSheet()" style="margin-left: 1rem;">Generate Score Sheet PDF</button>
-                </div>
-            </div>
+            <p>Score entry functionality will be implemented here.</p>
         </div>
 
         <!-- Records Tab -->
@@ -886,8 +540,6 @@ function createLeagueTrial() {
                 <span class="search-icon">🔍</span>
                 <input type="text" placeholder="Search by dog name, handler, or registration number..." id="recordSearch">
             </div>
-
-            <div class="loading" id="recordsLoading">Loading records...</div>
 
             <div class="table-container">
                 <table class="table">
@@ -912,201 +564,102 @@ function createLeagueTrial() {
         <!-- Calendar Tab -->
         <div id="calendar" class="tab-content">
             <h2 style="margin-bottom: 2rem; color: #4a5568;">Trial Calendar</h2>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <button class="btn btn-secondary" onclick="previousMonth()">← Previous</button>
-                <h3 id="calendarMonth" style="color: #4a5568;">Loading...</h3>
-                <button class="btn btn-secondary" onclick="nextMonth()">Next →</button>
-            </div>
-
-            <div class="calendar-grid" id="calendarGrid">
-                <!-- Calendar will be populated here -->
-            </div>
-
-            <div style="margin-top: 2rem;">
-                <h3 style="color: #4a5568; margin-bottom: 1rem;">Legend</h3>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #f093fb, #f5576c); border-radius: 5px;"></div>
-                        <span>Scheduled Trial</span>
-                    </div>
-                </div>
-            </div>
+            <p>Calendar functionality will be implemented here.</p>
         </div>
 
         <!-- Reports Tab -->
         <div id="reports" class="tab-content">
             <h2 style="margin-bottom: 2rem; color: #4a5568;">Reports & Analytics</h2>
-            
-            <div class="dashboard-grid">
-                <div class="dashboard-card" onclick="generateTrialRecap()">
-                    <h3>Trial Recap</h3>
-                    <p>Generate comprehensive trial summary reports with all results and statistics.</p>
-                </div>
-                <div class="dashboard-card" onclick="generateJudgeEvaluation()">
-                    <h3>Judge Evaluation</h3>
-                    <p>Create judge evaluation forms and compile feedback from trial hosts.</p>
-                </div>
-                <div class="dashboard-card" onclick="generateClassResults()">
-                    <h3>Class Results</h3>
-                    <p>Generate official class results reports with judge signatures.</p>
-                </div>
-                <div class="dashboard-card" onclick="generateAnalytics()">
-                    <h3>Trial Analytics</h3>
-                    <p>View participation trends, success rates, and organizational metrics.</p>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <h3 style="padding: 1rem; margin: 0; background: #f7fafc; color: #4a5568;">Recent Reports</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Report Type</th>
-                            <th>Trial/Period</th>
-                            <th>Generated</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportsTable">
-                        <!-- Reports will be populated here -->
-                    </tbody>
-                </table>
-            </div>
+            <p>Reports functionality will be implemented here.</p>
         </div>
     </div>
 
-    <!-- Edit Trial Modal -->
-    <div id="editTrialModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
-            <span class="close" onclick="hideModal('editTrialModal')">&times;</span>
-            <h2 id="editTrialTitle">Edit Trial</h2>
+    <!-- New Trial Modal -->
+    <div id="newTrialModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="hideModal('newTrialModal')">&times;</span>
+            <h2>Create New Trial</h2>
             
-            <div id="editTrialContent">
-                <!-- Trial basic info -->
-                <div class="form-grid" style="margin-bottom: 2rem;">
+            <!-- Step 1: Trial Type -->
+            <div id="trialTypeStep">
+                <h3 style="margin-bottom: 1rem; color: #4a5568;">Select Trial Type</h3>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; margin-bottom: 1rem; cursor: pointer; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px;">
+                        <input type="radio" name="trialType" value="standalone" style="margin-right: 1rem;" checked>
+                        <div>
+                            <span style="font-size: 1.1rem; font-weight: 600;">Standalone Event</span>
+                            <div style="color: #718096; font-size: 0.9rem;">Single day trial with multiple classes</div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer; padding: 1rem; border: 2px solid #e2e8f0; border-radius: 10px;">
+                        <input type="radio" name="trialType" value="league" style="margin-right: 1rem;">
+                        <div>
+                            <span style="font-size: 1.1rem; font-weight: 600;">League Event</span>
+                            <div style="color: #718096; font-size: 0.9rem;">Multiple night event with classes each night</div>
+                        </div>
+                    </label>
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="nextTrialStep()">Next</button>
+                    <button class="btn btn-secondary" onclick="hideModal('newTrialModal')" style="margin-left: 1rem;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Standalone Configuration -->
+            <div id="standaloneStep" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #4a5568;">Standalone Trial Setup</h3>
+                
+                <div class="form-grid">
                     <div class="form-group">
-                        <label for="editTrialDate">Trial Date</label>
-                        <input type="date" id="editTrialDate" required>
+                        <label for="standaloneDate">Trial Date</label>
+                        <input type="date" id="standaloneDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="editTrialStatus">Status</label>
-                        <select id="editTrialStatus">
-                            <option value="draft">Draft</option>
-                            <option value="pending">Pending Approval</option>
-                            <option value="approved">Approved</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
+                        <label for="standaloneClasses">Number of Classes</label>
+                        <select id="standaloneClasses" onchange="generateStandaloneClasses()">
+                            <option value="">Select...</option>
+                            <option value="1">1 Class</option>
+                            <option value="2">2 Classes</option>
+                            <option value="3">3 Classes</option>
+                            <option value="4">4 Classes</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="form-grid" style="margin-bottom: 2rem;">
-                    <div class="form-group">
-                        <label for="editHostName">Host Name</label>
-                        <input type="text" id="editHostName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTrialLocation">Location</label>
-                        <input type="text" id="editTrialLocation" required>
-                    </div>
-                </div>
+                <div id="standaloneClassConfig" style="margin-top: 2rem;"></div>
 
-                <div class="form-grid" style="margin-bottom: 2rem;">
-                    <div class="form-group">
-                        <label for="editCityState">City, State/Province</label>
-                        <input type="text" id="editCityState" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editContactEmail">Contact Email</label>
-                        <input type="email" id="editContactEmail" required>
-                    </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="previousTrialStep()">Back</button>
+                    <button class="btn btn-primary" onclick="createStandaloneTrial()" id="createStandaloneBtn" style="display: none; margin-left: 1rem;">Create Trial</button>
                 </div>
+            </div>
 
-                <div class="form-grid" style="margin-bottom: 2rem;">
-                    <div class="form-group">
-                        <label for="editContactPhone">Contact Phone</label>
-                        <input type="tel" id="editContactPhone">
-                    </div>
-                    <div class="form-group">
-                        <label for="editJudge">Judge</label>
-                        <input type="text" id="editJudge">
-                    </div>
-                </div>
-
-                <!-- Classes configuration -->
-                <div id="editClassesContainer">
-                    <h3 style="color: #4a5568; margin-bottom: 1rem;">Classes Offered</h3>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="editClassObedience"> Obedience
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="editClassRally"> Rally
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="editClassScent"> Scent
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="editClassGames"> Games
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-grid" style="margin-top: 2rem;">
-                    <div class="form-group">
-                        <label for="editJudges">Judges List</label>
-                        <textarea id="editJudges" rows="3" placeholder="List all judges for this trial"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="editAdvocates">C-WAGS Advocates</label>
-                        <textarea id="editAdvocates" rows="3" placeholder="List assigned advocates"></textarea>
-                    </div>
-                </div>
-
-                <!-- Trial details -->
-                <h3 style="color: #4a5568; margin: 2rem 0 1rem 0;">Trial Details</h3>
+            <!-- Step 3: League Configuration -->
+            <div id="leagueStep" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #4a5568;">League Trial Setup</h3>
+                
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="editTrialType">Trial Type</label>
-                        <select id="editTrialType">
-                            <option value="inside">Inside</option>
-                            <option value="outside">Outside</option>
+                        <label for="leagueStartDate">League Start Date</label>
+                        <input type="date" id="leagueStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leagueNights">Number of Nights</label>
+                        <select id="leagueNights" onchange="generateLeagueNights()">
+                            <option value="">Select...</option>
+                            <option value="2">2 Nights</option>
+                            <option value="3">3 Nights</option>
+                            <option value="4">4 Nights</option>
+                            <option value="5">5 Nights</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="editRingSurface">Ring Surface</label>
-                        <input type="text" id="editRingSurface" placeholder="e.g., Matting, Grass, Dirt">
-                    </div>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="editNumRings">Number of Rings/Search Areas</label>
-                        <input type="number" id="editNumRings" min="1" value="1">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="editIsLeague"> League Trial
-                        </label>
-                    </div>
-                </div>
+                <div id="leagueNightConfig" style="margin-top: 2rem;"></div>
 
-                <!-- Action buttons -->
-                <div style="text-align: center; margin-top: 2rem; border-top: 2px solid #e2e8f0; padding-top: 2rem;">
-                    <button class="btn btn-primary" onclick="saveTrialChanges()">Save Changes</button>
-                    <button class="btn btn-secondary" onclick="hideModal('editTrialModal')" style="margin-left: 1rem;">Cancel</button>
-                    <button class="btn" onclick="deleteTrialConfirm()" style="margin-left: 1rem; background: #fc8181; color: white;">Delete Trial</button>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="previousTrialStep()">Back</button>
+                    <button class="btn btn-primary" onclick="createLeagueTrial()" id="createLeagueBtn" style="display: none; margin-left: 1rem;">Create League Trial</button>
                 </div>
             </div>
         </div>
@@ -1115,264 +668,61 @@ function createLeagueTrial() {
     <script>
         // Global Variables
         let currentUser = "Demo User";
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
         let trials = [];
         let records = [];
-        let reports = [];
-        let availableClasses = [];
-        let availableJudges = [];
-        let currentEditingTrial = null;
+        let availableClasses = ['Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 'Super Sleuth Level 4'];
+        let availableJudges = ['Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer'];
         let currentTrialStep = 1;
-        let trialConfiguration = {
-            type: 'standalone',
-            nights: [],
-            classes: []
-        };
+        let currentEditingTrial = null;
 
-        // Data initialization - loads from JSON files automatically
+        // Initialize data on page load
         async function initializeData() {
-            showLoadingState();
+            console.log('Initializing C-WAGS system...');
             
-            try {
-                // Load data from JSON files generated by GitHub Actions
-                await Promise.all([
-                    loadRecordsData(),
-                    loadTrialsData(),
-                    loadReportsData()
-                ]);
-                
-                // Load any stored trials from localStorage
-                loadStoredTrials();
-                
-                updateDashboardStats();
-                populateTrialsTable();
-                populateReportsTable();
-                generateCalendar();
-                
-                hideLoadingState();
-                console.log('✓ Data loaded successfully');
-                console.log(`✓ Available classes: ${availableClasses.length}`);
-                console.log(`✓ Available judges: ${availableJudges.length}`);
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                loadFallbackData();
-                hideLoadingState();
-            }
-        }
-
-        // Load records from auto-generated JSON file
-        async function loadRecordsData() {
-            try {
-                const response = await fetch('data/records.json');
-                if (!response.ok) throw new Error('Records file not found');
-                
-                const data = await response.json();
-                console.log(`Loading ${data.totalRecords} records from ${data.lastUpdated}`);
-                
-                // Transform the data for the application
-                records = data.records.map(record => ({
-                    id: record.id,
-                    dogName: record.callName ? `${record.callName} (${record.fullName})` : record.fullName,
-                    handler: record.handlerFullName || `${record.handlerFirstName} ${record.handlerLastName}`.trim(),
-                    currentLevel: record.className || 'Unknown',
-                    judge: record.judgeName || 'Unknown',
-                    registrationNumber: record.id
-                })).filter(record => record.id && record.dogName);
-                
-                // Extract unique classes and judges
-                availableClasses = [...new Set(data.records.map(r => r.className).filter(c => c))];
-                availableJudges = [...new Set(data.records.map(r => r.judgeName).filter(j => j))];
-                
-                populateRecordsTable();
-                
-                // Update data freshness indicator
-                updateDataFreshness(data.lastUpdated);
-                
-            } catch (error) {
-                console.error('Failed to load records data:', error);
-                // Fall back to sample data
-                records = getSampleRecords();
-                availableClasses = getSampleClasses();
-                availableJudges = getSampleJudges();
-            }
-        }
-
-        // Load trials data
-        async function loadTrialsData() {
-            try {
-                const response = await fetch('data/trials.json');
-                if (response.ok) {
-                    const data = await response.json();
-                    trials = data.trials || [];
-                } else {
-                    trials = generateSampleTrials();
-                }
-            } catch (error) {
-                console.error('Failed to load trials data:', error);
-                trials = generateSampleTrials();
-            }
-        }
-
-        // Load reports data
-        async function loadReportsData() {
-            try {
-                const response = await fetch('data/reports.json');
-                if (response.ok) {
-                    const data = await response.json();
-                    reports = data.reports || [];
-                } else {
-                    reports = getSampleReports();
-                }
-            } catch (error) {
-                console.error('Failed to load reports data:', error);
-                reports = getSampleReports();
-            }
-        }
-
-        // Generate sample trials from records data
-        function generateSampleTrials() {
-            const hosts = ['Metro Dog Training Club', 'Westside Canine Academy', 'Northern States K9', 'Central Valley Dogs'];
-            
-            return [
+            // Load sample data
+            trials = [
                 {
                     id: 'T001',
                     date: '2024-12-15',
-                    host: hosts[0],
+                    host: 'Metro Dog Training Club',
                     location: 'Downtown Training Center',
                     city: 'Chicago, IL',
                     classes: ['Patrol Level 1', 'Detective Level 2'],
-                    judge: availableJudges[0] || 'Linda Alberda',
-                    status: 'approved',
-                    contact: 'contact@metro.com',
-                    phone: '(555) 123-4567'
+                    judge: 'Linda Alberda',
+                    status: 'approved'
                 },
                 {
                     id: 'T002',
                     date: '2024-12-22',
-                    host: hosts[1],
-                    location: 'Outdoor Training Facility', 
+                    host: 'Westside Canine Academy',
+                    location: 'Outdoor Training Facility',
                     city: 'Denver, CO',
-                    classes: ['Investigator Level 3', 'Super Sleuth Level 4'],
-                    judge: availableJudges[1] || 'Ginger Alpine',
-                    status: 'pending',
-                    contact: 'info@westside.com',
-                    phone: '(555) 987-6543'
+                    classes: ['Investigator Level 3'],
+                    judge: 'Ginger Alpine',
+                    status: 'pending'
                 }
             ];
-        }
-
-        // Fallback sample data
-        function getSampleRecords() {
-            return [
+            
+            records = [
                 {
                     id: '07-0001-01',
                     dogName: 'BJ (Jed\'s Black Jack)',
                     handler: 'Shirley Ottmer',
                     currentLevel: 'Patrol 1',
-                    judge: 'Linda Alberda',
-                    registrationNumber: '07-0001-01'
+                    judge: 'Linda Alberda'
                 },
                 {
-                    id: '07-0001-02', 
+                    id: '07-0001-02',
                     dogName: 'Jaidon (Romyldale\'s Jaidon)',
                     handler: 'Shirley Ottmer',
                     currentLevel: 'Detective 2',
-                    judge: 'Ginger Alpine',
-                    registrationNumber: '07-0001-02'
+                    judge: 'Ginger Alpine'
                 }
             ];
-        }
 
-        function getSampleClasses() {
-            return ['Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 'Super Sleuth Level 4'];
-        }
-
-        function getSampleJudges() {
-            return ['Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer'];
-        }
-
-        function getSampleReports() {
-            return [
-                {
-                    type: 'Trial Recap',
-                    trial: 'Metro Dog Training Club - Dec 15',
-                    generated: '2024-12-16',
-                    status: 'completed'
-                },
-                {
-                    type: 'Judge Evaluation',
-                    trial: 'Linda Alberda - Multiple Trials', 
-                    generated: '2024-12-10',
-                    status: 'pending'
-                }
-            ];
-        }
-
-        function loadFallbackData() {
-            console.log('Loading fallback sample data...');
-            records = getSampleRecords();
-            trials = generateSampleTrials();
-            reports = getSampleReports();
-            availableClasses = getSampleClasses();
-            availableJudges = getSampleJudges();
+            updateDashboardStats();
+            populateTrialsTable();
             populateRecordsTable();
-        }
-
-        // Loading state management
-        function showLoadingState() {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = 'loadingState';
-            loadingDiv.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                            background: rgba(255,255,255,0.9); z-index: 3000; 
-                            display: flex; align-items: center; justify-content: center;">
-                    <div style="text-align: center; color: #4a5568;">
-                        <div style="font-size: 2rem; margin-bottom: 1rem;">🐕</div>
-                        <div style="font-size: 1.2rem; font-weight: 600;">Loading C-WAGS Data...</div>
-                        <div style="margin-top: 0.5rem;">Fetching latest records from repository</div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(loadingDiv);
-        }
-
-        function hideLoadingState() {
-            const loadingDiv = document.getElementById('loadingState');
-            if (loadingDiv) {
-                loadingDiv.remove();
-            }
-        }
-
-        // Data freshness indicator
-        function updateDataFreshness(lastUpdated) {
-            const dataInfo = document.createElement('div');
-            dataInfo.className = 'data-freshness';
-            
-            const updateDate = new Date(lastUpdated);
-            const now = new Date();
-            const diffHours = Math.floor((now - updateDate) / (1000 * 60 * 60));
-            
-            let timeAgo;
-            if (diffHours < 1) timeAgo = 'just updated';
-            else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
-            else timeAgo = `${Math.floor(diffHours / 24)}d ago`;
-            
-            dataInfo.innerHTML = `📊 Data updated ${timeAgo}`;
-            
-            // Remove existing indicator
-            const existing = document.querySelector('.data-freshness');
-            if (existing) existing.remove();
-            
-            document.body.appendChild(dataInfo);
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                if (dataInfo.parentNode) {
-                    dataInfo.style.opacity = '0.5';
-                }
-            }, 5000);
         }
 
         // Tab management
@@ -1390,13 +740,6 @@ function createLeagueTrial() {
             // Show selected tab
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
-            
-            // Load tab-specific data
-            if (tabName === 'calendar') {
-                generateCalendar();
-            } else if (tabName === 'scoring') {
-                populateScoringTrials();
-            }
         }
 
         // Dashboard functions
@@ -1405,7 +748,6 @@ function createLeagueTrial() {
             document.getElementById('activeTrials').textContent = trials.filter(t => t.status !== 'completed').length;
             document.getElementById('totalDogs').textContent = records.length;
             
-            // Calculate unique handlers
             const uniqueHandlers = new Set(records.map(r => r.handler));
             document.getElementById('totalHandlers').textContent = uniqueHandlers.size;
             
@@ -1416,11 +758,7 @@ function createLeagueTrial() {
             const tbody = document.getElementById('upcomingTrialsTable');
             tbody.innerHTML = '';
             
-            const upcomingTrials = trials.filter(trial => {
-                const trialDate = new Date(trial.date);
-                const today = new Date();
-                return trialDate >= today;
-            }).slice(0, 5);
+            const upcomingTrials = trials.slice(0, 5);
             
             upcomingTrials.forEach(trial => {
                 const row = tbody.insertRow();
@@ -1443,16 +781,9 @@ function createLeagueTrial() {
             
             trials.forEach(trial => {
                 const row = tbody.insertRow();
-                
-                // Format date display for leagues
-                let dateDisplay = formatDate(trial.date);
-                if (trial.type === 'league' && trial.endDate) {
-                    dateDisplay += ` - ${formatDate(trial.endDate)} (${trial.totalNights} nights)`;
-                }
-                
                 row.innerHTML = `
-                    <td>${trial.id}${trial.type === 'league' ? ' 🏆' : ''}</td>
-                    <td>${dateDisplay}</td>
+                    <td>${trial.id}</td>
+                    <td>${formatDate(trial.date)}</td>
                     <td>${trial.host}</td>
                     <td>${trial.city}</td>
                     <td>${trial.classes.join(', ')}</td>
@@ -1461,7 +792,6 @@ function createLeagueTrial() {
                     <td>
                         <button class="btn btn-secondary" onclick="editTrial('${trial.id}')">Edit</button>
                         <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="margin-left: 0.5rem;">View</button>
-                        <button class="btn btn-secondary" onclick="duplicateTrial('${trial.id}')" style="margin-left: 0.5rem;">Duplicate</button>
                     </td>
                 `;
             });
@@ -1474,7 +804,7 @@ function createLeagueTrial() {
             records.forEach(record => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
-                    <td>${record.registrationNumber}</td>
+                    <td>${record.id}</td>
                     <td>${record.dogName}</td>
                     <td>${record.handler}</td>
                     <td>${record.currentLevel}</td>
@@ -1487,197 +817,10 @@ function createLeagueTrial() {
             });
         }
 
-        function populateReportsTable() {
-            const tbody = document.getElementById('reportsTable');
-            tbody.innerHTML = '';
-            
-            reports.forEach(report => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${report.type}</td>
-                    <td>${report.trial}</td>
-                    <td>${formatDate(report.generated)}</td>
-                    <td><span class="status-badge status-${report.status}">${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</span></td>
-                    <td>
-                        <button class="btn btn-secondary" onclick="downloadReport('${report.type}')">Download</button>
-                    </td>
-                `;
-            });
-        }
-
-        // Trial application functions
-        function submitTrialApplication() {
-            const formData = {
-                date: document.getElementById('trialDates').value,
-                host: document.getElementById('hostName').value,
-                location: document.getElementById('trialLocation').value,
-                city: document.getElementById('cityState').value,
-                contact: document.getElementById('contactName').value,
-                email: document.getElementById('contactEmail').value,
-                phone: document.getElementById('contactPhone').value,
-                website: document.getElementById('premiumWebsite').value,
-                classes: getSelectedClasses(),
-                judges: document.getElementById('judges').value,
-                advocates: document.getElementById('advocates').value,
-                type: document.getElementById('trialType').value,
-                surface: document.getElementById('ringSurface').value,
-                rings: document.getElementById('numRings').value,
-                league: document.getElementById('isLeague').checked,
-                insurance: document.getElementById('insuranceExpiration').value,
-                scentResets: document.getElementById('scentResets').checked
-            };
-
-            if (validateTrialApplication(formData)) {
-                const newTrial = {
-                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
-                    ...formData,
-                    status: 'pending',
-                    contact: formData.email,
-                    phone: formData.phone,
-                    created: new Date().toISOString(),
-                    lastModified: new Date().toISOString()
-                };
-                
-                trials.push(newTrial);
-                saveTrialsToStorage();
-                
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                alert(`Trial application submitted successfully! Trial ID: ${newTrial.id}`);
-                clearForm();
-            }
-        }
-
-        function getSelectedClasses() {
-            const classes = [];
-            if (document.getElementById('classObedience').checked) classes.push('Obedience');
-            if (document.getElementById('classRally').checked) classes.push('Rally');
-            if (document.getElementById('classScent').checked) classes.push('Scent');
-            if (document.getElementById('classGames').checked) classes.push('Games');
-            return classes;
-        }
-
-        function validateTrialApplication(data) {
-            if (!data.date || !data.host || !data.location || !data.contact || !data.email) {
-                alert('Please fill in all required fields.');
-                return false;
-            }
-            if (data.classes.length === 0) {
-                alert('Please select at least one class type.');
-                return false;
-            }
-            return true;
-        }
-
-        function clearForm() {
-            const inputs = document.querySelectorAll('#applications input, #applications select, #applications textarea');
-            inputs.forEach(input => {
-                if (input.type === 'checkbox') {
-                    input.checked = false;
-                } else {
-                    input.value = '';
-                }
-            });
-        }
-
-        // Calendar functions
-        function generateCalendar() {
-            const calendar = document.getElementById('calendarGrid');
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"];
-            
-            document.getElementById('calendarMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-            
-            calendar.innerHTML = '';
-            
-            // Add day headers
-            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            dayHeaders.forEach(day => {
-                const header = document.createElement('div');
-                header.className = 'calendar-header';
-                header.textContent = day;
-                calendar.appendChild(header);
-            });
-            
-            // Get first day of month and number of days
-            const firstDay = new Date(currentYear, currentMonth, 1);
-            const lastDay = new Date(currentYear, currentMonth + 1, 0);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
-            // Generate calendar days
-            for (let i = 0; i < 42; i++) {
-                const date = new Date(startDate);
-                date.setDate(startDate.getDate() + i);
-                
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                if (date.getMonth() !== currentMonth) {
-                    dayElement.classList.add('other-month');
-                }
-                
-                dayElement.innerHTML = `<div>${date.getDate()}</div>`;
-                
-                // Add trial events
-                const dateString = date.toISOString().split('T')[0];
-                const dayTrials = trials.filter(trial => trial.date === dateString);
-                dayTrials.forEach(trial => {
-                    const event = document.createElement('div');
-                    event.className = 'trial-event';
-                    event.textContent = trial.host;
-                    event.onclick = () => viewTrial(trial.id);
-                    dayElement.appendChild(event);
-                });
-                
-                calendar.appendChild(dayElement);
-            }
-        }
-
-        function previousMonth() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            generateCalendar();
-        }
-
-        function nextMonth() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            generateCalendar();
-        }
-
-        // Scoring functions
-        function populateScoringTrials() {
-            const select = document.getElementById('scoringTrial');
-            select.innerHTML = '<option value="">Choose a trial...</option>';
-            
-            trials.forEach(trial => {
-                const option = document.createElement('option');
-                option.value = trial.id;
-                option.textContent = `${trial.host} - ${formatDate(trial.date)}`;
-                select.appendChild(option);
-            });
-        }
-
-        function saveScores() {
-            alert('Scores saved successfully!');
-        }
-
-        function generateScoreSheet() {
-            alert('Score sheet PDF generated!');
-        }
-
-        // Trial management functions
+        // Trial creation functions
         function createNewTrial() {
-            // Reset modal state
             currentTrialStep = 1;
-            trialConfiguration = { type: 'standalone', nights: [], classes: [] };
+            currentEditingTrial = null;
             
             // Reset modal steps
             document.getElementById('trialTypeStep').style.display = 'block';
@@ -1696,24 +839,8 @@ function createLeagueTrial() {
             showModal('newTrialModal');
         }
 
-        function updateTrialTypeInfo() {
-            // Add visual feedback for selected trial type
-            const labels = document.querySelectorAll('label');
-            labels.forEach(label => {
-                const radio = label.querySelector('input[type="radio"]');
-                if (radio && radio.checked) {
-                    label.style.borderColor = '#667eea';
-                    label.style.backgroundColor = '#f0f4ff';
-                } else if (radio) {
-                    label.style.borderColor = '#e2e8f0';
-                    label.style.backgroundColor = 'white';
-                }
-            });
-        }
-
         function nextTrialStep() {
             const selectedType = document.querySelector('input[name="trialType"]:checked').value;
-            trialConfiguration.type = selectedType;
             
             document.getElementById('trialTypeStep').style.display = 'none';
             
@@ -1759,10 +886,6 @@ function createLeagueTrial() {
                                 <select id="standaloneClass${i}" required>
                                     <option value="">Select Class...</option>
                                     ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                                    <option value="Patrol Level 1">Patrol Level 1</option>
-                                    <option value="Detective Level 2">Detective Level 2</option>
-                                    <option value="Investigator Level 3">Investigator Level 3</option>
-                                    <option value="Super Sleuth Level 4">Super Sleuth Level 4</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1779,12 +902,6 @@ function createLeagueTrial() {
                         
                         <div id="standaloneRoundsConfig${i}" style="margin-top: 1rem;">
                             <!-- Round configurations will be generated here -->
-                        </div>
-                        
-                        <div class="form-group" style="margin-top: 1rem;">
-                            <div style="background: #f7fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <small style="color: #4a5568; font-weight: 600;">Note: FEO options are set per round above</small>
-                            </div>
                         </div>
                     </div>
                 `;
@@ -1818,9 +935,6 @@ function createLeagueTrial() {
                                required>
                         <datalist id="judgeList${classIndex}_${round}">
                             ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
-                            <option value="Linda Alberda">
-                            <option value="Ginger Alpine">
-                            <option value="Shirley Ottmer">
                         </datalist>
                         <label style="display: flex; align-items: center; margin-top: 0.5rem;">
                             <input type="checkbox" id="standaloneFEO${classIndex}_${round}" style="margin-right: 0.5rem;">
@@ -1888,60 +1002,29 @@ function createLeagueTrial() {
                 allClasses.push(className);
             }
             
-            if (currentEditingTrial) {
-                // Update existing trial
-                Object.assign(currentEditingTrial, {
-                    date: date,
-                    classes: allClasses,
-                    classDetails: classDetails,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    lastModified: new Date().toISOString()
-                });
-                
-                saveTrialsToStorage();
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                hideModal('newTrialModal');
-                alert(`Trial ${currentEditingTrial.id} updated successfully!`);
-                
-                // Reset editing state
-                currentEditingTrial = null;
-                document.querySelector('#newTrialModal h2').textContent = 'Create New Trial';
-                document.getElementById('createStandaloneBtn').textContent = 'Create Trial';
-                
-            } else {
-                // Create new trial
-                const newTrial = {
-                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
-                    type: 'standalone',
-                    date: date,
-                    host: 'Host Organization', // Will be filled in application form
-                    location: 'TBD',
-                    city: 'TBD',
-                    classes: allClasses,
-                    classDetails: classDetails,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    status: 'draft',
-                    created: new Date().toISOString(),
-                    lastModified: new Date().toISOString(),
-                    email: '',
-                    phone: ''
-                };
-                
-                trials.push(newTrial);
-                saveTrialsToStorage();
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                hideModal('newTrialModal');
-                alert(`Standalone trial ${newTrial.id} created successfully with ${classDetails.length} classes and ${allJudges.length} judges! You can now edit it to add more details.`);
-                
-                // Auto-open edit modal for basic details
-                setTimeout(() => editTrialInEditModal(newTrial), 500);
-            }
+            // Create trial object
+            const newTrial = {
+                id: 'T' + String(trials.length + 1).padStart(3, '0'),
+                type: 'standalone',
+                date: date,
+                host: 'Host Organization',
+                location: 'TBD',
+                city: 'TBD',
+                classes: allClasses,
+                classDetails: classDetails,
+                judge: allJudges[0] || 'TBD',
+                judges: allJudges.join(', '),
+                status: 'draft',
+                created: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            trials.push(newTrial);
+            updateDashboardStats();
+            populateTrialsTable();
+            
+            hideModal('newTrialModal');
+            alert(`Standalone trial ${newTrial.id} created successfully!`);
         }
 
         // League Trial Functions
@@ -1961,7 +1044,7 @@ function createLeagueTrial() {
             
             for (let night = 0; night < numNights; night++) {
                 const nightDate = new Date(startDate);
-                nightDate.setDate(nightDate.getDate() + (night * 7)); // Assuming weekly league
+                nightDate.setDate(nightDate.getDate() + (night * 7));
                 
                 html += `
                     <div style="border: 2px solid #e2e8f0; border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem; background: #f0f4ff;">
@@ -1980,8 +1063,6 @@ function createLeagueTrial() {
                                 <option value="2">2 Classes</option>
                                 <option value="3">3 Classes</option>
                                 <option value="4">4 Classes</option>
-                                <option value="5">5 Classes</option>
-                                <option value="6">6 Classes</option>
                             </select>
                         </div>
                         
@@ -2015,10 +1096,6 @@ function createLeagueTrial() {
                                 <select id="leagueNight${nightIndex}Class${i}" required>
                                     <option value="">Select Class...</option>
                                     ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                                    <option value="Patrol Level 1">Patrol Level 1</option>
-                                    <option value="Detective Level 2">Detective Level 2</option>
-                                    <option value="Investigator Level 3">Investigator Level 3</option>
-                                    <option value="Super Sleuth Level 4">Super Sleuth Level 4</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -2035,12 +1112,6 @@ function createLeagueTrial() {
                         
                         <div id="leagueNight${nightIndex}RoundsConfig${i}" style="margin-top: 1rem;">
                             <!-- Round configurations will be generated here -->
-                        </div>
-                        
-                        <div class="form-group" style="margin-top: 1rem;">
-                            <div style="background: #f7fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <small style="color: #4a5568; font-weight: 600;">Note: FEO options are set per round above</small>
-                            </div>
                         </div>
                     </div>
                 `;
@@ -2074,9 +1145,6 @@ function createLeagueTrial() {
                                required>
                         <datalist id="judgeListLeague${nightIndex}_${classIndex}_${round}">
                             ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
-                            <option value="Linda Alberda">
-                            <option value="Ginger Alpine">
-                            <option value="Shirley Ottmer">
                         </datalist>
                         <label style="display: flex; align-items: center; margin-top: 0.5rem;">
                             <input type="checkbox" id="leagueNight${nightIndex}FEO${classIndex}_${round}" style="margin-right: 0.5rem;">
@@ -2099,55 +1167,7 @@ function createLeagueTrial() {
                 return;
             }
             
-            // Collect league data with rounds
-            const nights = [];
-            const allClasses = [];
-            const allJudges = [];
-            
-            for (let night = 0; night < numNights; night++) {
-                const nightDate = document.getElementById(`leagueNight${night}Date`).value;
-                const numClasses = parseInt(document.getElementById(`leagueNight${night}Classes`).value || 0);
-                
-                if (!nightDate) {
-                    alert(`Please set a date for Night ${night + 1}.`);
-                    return;
-                }
-                
-                const nightClassDetails = [];
-                const nightClasses = [];
-                const nightJudges = [];
-                
-                for (let i = 0; i < numClasses; i++) {
-                    const className = document.getElementById(`leagueNight${night}Class${i}`)?.value;
-                    const numRounds = parseInt(document.getElementById(`leagueNight${night}Rounds${i}`)?.value || 0);
-                    const feoOffered = document.getElementById(`leagueNight${night}FEO${i}`)?.checked;
-                    
-                    if (!className) {
-                        alert(`Please select a class type for Night ${night + 1}, Class ${i + 1}.`);
-                        return;
-                    }
-                    
-                    if (!numRounds) {
-                        alert(`Please select number of rounds for Night ${night + 1}, Class ${i + 1}.`);
-                        return;
-                    }
-                    
-                    // Collect round judges for this class with FEO status
-                    const rounds = [];
-                    for (let round = 1; round <= numRounds; round++) {
-                        const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
-                        const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
-                        
-        function createLeagueTrial() {
-            const startDate = document.getElementById('leagueStartDate').value;
-            const numNights = parseInt(document.getElementById('leagueNights').value);
-            
-            if (!startDate) {
-                alert('Please select a league start date.');
-                return;
-            }
-            
-            // Collect league data with rounds
+            // Collect league data
             const nights = [];
             const allClasses = [];
             const allJudges = [];
@@ -2179,7 +1199,7 @@ function createLeagueTrial() {
                         return;
                     }
                     
-                    // Collect round judges for this class with FEO status
+                    // Collect round judges
                     const rounds = [];
                     for (let round = 1; round <= numRounds; round++) {
                         const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
@@ -2215,354 +1235,73 @@ function createLeagueTrial() {
                 });
             }
             
-            if (currentEditingTrial) {
-                // Update existing league trial
-                const endDate = nights[nights.length - 1].date;
-                Object.assign(currentEditingTrial, {
-                    date: startDate,
-                    endDate: endDate,
-                    classes: allClasses,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    nights: nights,
-                    totalNights: numNights,
-                    lastModified: new Date().toISOString()
-                });
-                
-                saveTrialsToStorage();
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                hideModal('newTrialModal');
-                
-                // Calculate total rounds for update message
-                const totalRounds = nights.reduce((sum, night) => {
-                    return sum + night.classDetails.reduce((nightSum, classDetail) => {
-                        return nightSum + classDetail.rounds.length;
-                    }, 0);
-                }, 0);
-                
-                alert(`League trial ${currentEditingTrial.id} updated successfully!\n\n• ${numNights} nights\n• ${allClasses.length} different classes\n• ${totalRounds} total rounds\n• ${allJudges.length} judges`);
-                
-                // Reset editing state
-                currentEditingTrial = null;
-                document.querySelector('#newTrialModal h2').textContent = 'Create New Trial';
-                document.getElementById('createLeagueBtn').textContent = 'Create League Trial';
-                
-            } else {
-                // Create new league trial
-                const endDate = nights[nights.length - 1].date;
-                const newTrial = {
-                    id: 'L' + String(trials.length + 1).padStart(3, '0'),
-                    type: 'league',
-                    date: startDate,
-                    endDate: endDate,
-                    host: 'Host Organization', // Will be filled in application form
-                    location: 'TBD',
-                    city: 'TBD',
-                    classes: allClasses,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    status: 'draft',
-                    league: true,
-                    nights: nights,
-                    totalNights: numNights,
-                    created: new Date().toISOString(),
-                    lastModified: new Date().toISOString(),
-                    email: '',
-                    phone: ''
-                };
-                
-                trials.push(newTrial);
-                saveTrialsToStorage();
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                hideModal('newTrialModal');
-                
-                // Calculate total rounds and classes
-                const totalRounds = nights.reduce((sum, night) => {
-                    return sum + night.classDetails.reduce((nightSum, classDetail) => {
-                        return nightSum + classDetail.rounds.length;
-                    }, 0);
-                }, 0);
-                
-                alert(`League trial ${newTrial.id} created successfully!\n\n• ${numNights} nights\n• ${allClasses.length} different classes\n• ${totalRounds} total rounds\n• ${allJudges.length} judges\n\nYou can now edit it to add more details.`);
-                
-                // Auto-open edit modal for basic details
-                setTimeout(() => editTrialInEditModal(newTrial), 500);
-            }
-        }
-
-        function editTrial(trialId) {
-            // Find the trial to edit
-            const trial = trials.find(t => t.id === trialId);
-            if (!trial) {
-                alert('Trial not found!');
-                return;
-            }
-
-            // Check if this is a trial with detailed configuration (classDetails)
-            if (trial.classDetails || trial.nights) {
-                // This trial has round/class details - edit in creation modal
-                editTrialInCreationModal(trial);
-            } else {
-                // This is a basic trial - edit in simple edit modal
-                editTrialInEditModal(trial);
-            }
-        }
-
-        function editTrialInCreationModal(trial) {
-            // Reset and configure the creation modal for editing
-            currentEditingTrial = trial;
-            currentTrialStep = trial.type === 'standalone' ? 2 : 3;
-            trialConfiguration = { type: trial.type, nights: trial.nights || [], classes: trial.classDetails || [] };
-            
-            // Reset modal steps
-            document.getElementById('trialTypeStep').style.display = 'none';
-            document.getElementById('standaloneStep').style.display = 'none';
-            document.getElementById('leagueStep').style.display = 'none';
-            
-            // Configure modal title
-            document.querySelector('#newTrialModal h2').textContent = `Edit Trial ${trial.id}`;
-            
-            if (trial.type === 'standalone') {
-                // Populate standalone trial data
-                document.getElementById('standaloneStep').style.display = 'block';
-                document.getElementById('standaloneDate').value = trial.date || '';
-                
-                if (trial.classDetails) {
-                    document.getElementById('standaloneClasses').value = trial.classDetails.length;
-                    generateStandaloneClasses();
-                    
-                    // Populate class details
-                    setTimeout(() => {
-                        trial.classDetails.forEach((classDetail, i) => {
-                            document.getElementById(`standaloneClass${i}`).value = classDetail.name;
-                            document.getElementById(`standaloneRounds${i}`).value = classDetail.rounds.length;
-                            generateStandaloneRounds(i);
-                            
-                            // Populate round details
-                            setTimeout(() => {
-                                classDetail.rounds.forEach((round, roundIndex) => {
-                                    const roundNum = round.round;
-                                    document.getElementById(`standaloneJudge${i}_${roundNum}`).value = round.judge;
-                                    document.getElementById(`standaloneFEO${i}_${roundNum}`).checked = round.feoOffered || false;
-                                });
-                            }, 100);
-                        });
-                    }, 100);
-                }
-                
-                // Change button to update
-                document.getElementById('createStandaloneBtn').textContent = 'Update Trial';
-                document.getElementById('createStandaloneBtn').style.display = 'inline-block';
-                
-            } else if (trial.type === 'league') {
-                // Populate league trial data
-                document.getElementById('leagueStep').style.display = 'block';
-                document.getElementById('leagueStartDate').value = trial.date || '';
-                
-                if (trial.nights) {
-                    document.getElementById('leagueNights').value = trial.nights.length;
-                    generateLeagueNights();
-                    
-                    // Populate night details
-                    setTimeout(() => {
-                        trial.nights.forEach((night, nightIndex) => {
-                            document.getElementById(`leagueNight${nightIndex}Date`).value = night.date;
-                            if (night.classDetails) {
-                                document.getElementById(`leagueNight${nightIndex}Classes`).value = night.classDetails.length;
-                                generateLeagueNightClasses(nightIndex);
-                                
-                                // Populate class and round details
-                                setTimeout(() => {
-                                    night.classDetails.forEach((classDetail, classIndex) => {
-                                        document.getElementById(`leagueNight${nightIndex}Class${classIndex}`).value = classDetail.name;
-                                        document.getElementById(`leagueNight${nightIndex}Rounds${classIndex}`).value = classDetail.rounds.length;
-                                        generateLeagueRounds(nightIndex, classIndex);
-                                        
-                                        // Populate round details
-                                        setTimeout(() => {
-                                            classDetail.rounds.forEach((round) => {
-                                                const roundNum = round.round;
-                                                document.getElementById(`leagueNight${nightIndex}Judge${classIndex}_${roundNum}`).value = round.judge;
-                                                document.getElementById(`leagueNight${nightIndex}FEO${classIndex}_${roundNum}`).checked = round.feoOffered || false;
-                                            });
-                                        }, 100);
-                                    });
-                                }, 100);
-                            }
-                        });
-                    }, 100);
-                }
-                
-                // Change button to update
-                document.getElementById('createLeagueBtn').textContent = 'Update Trial';
-                document.getElementById('createLeagueBtn').style.display = 'inline-block';
-            }
-            
-            showModal('newTrialModal');
-        }
-
-        function editTrialInEditModal(trial) {
-            // Use the existing edit modal for basic trials
-            currentEditingTrial = trial;
-            
-            // Populate edit modal with trial data
-            document.getElementById('editTrialTitle').textContent = `Edit Trial ${trial.id}`;
-            document.getElementById('editTrialDate').value = trial.date || '';
-            document.getElementById('editTrialStatus').value = trial.status || 'draft';
-            document.getElementById('editHostName').value = trial.host || '';
-            document.getElementById('editTrialLocation').value = trial.location || '';
-            document.getElementById('editCityState').value = trial.city || '';
-            document.getElementById('editContactEmail').value = trial.email || trial.contact || '';
-            document.getElementById('editContactPhone').value = trial.phone || '';
-            document.getElementById('editJudge').value = trial.judge || '';
-            document.getElementById('editJudges').value = trial.judges || '';
-            document.getElementById('editAdvocates').value = trial.advocates || '';
-            document.getElementById('editTrialType').value = trial.type || 'inside';
-            document.getElementById('editRingSurface').value = trial.surface || '';
-            document.getElementById('editNumRings').value = trial.rings || 1;
-            document.getElementById('editIsLeague').checked = trial.league || false;
-
-            // Set class checkboxes
-            document.getElementById('editClassObedience').checked = trial.classes && trial.classes.includes('Obedience');
-            document.getElementById('editClassRally').checked = trial.classes && trial.classes.includes('Rally');
-            document.getElementById('editClassScent').checked = trial.classes && trial.classes.includes('Scent');
-            document.getElementById('editClassGames').checked = trial.classes && trial.classes.includes('Games');
-            
-            // Show modal
-            showModal('editTrialModal');
-        }
-
-        function saveTrialChanges() {
-            if (!currentEditingTrial) return;
-            
-            // Collect updated trial data
-            const updatedData = {
-                date: document.getElementById('editTrialDate').value,
-                status: document.getElementById('editTrialStatus').value,
-                host: document.getElementById('editHostName').value,
-                location: document.getElementById('editTrialLocation').value,
-                city: document.getElementById('editCityState').value,
-                email: document.getElementById('editContactEmail').value,
-                contact: document.getElementById('editContactEmail').value,
-                phone: document.getElementById('editContactPhone').value,
-                judge: document.getElementById('editJudge').value,
-                judges: document.getElementById('editJudges').value,
-                advocates: document.getElementById('editAdvocates').value,
-                type: document.getElementById('editTrialType').value,
-                surface: document.getElementById('editRingSurface').value,
-                rings: document.getElementById('editNumRings').value,
-                league: document.getElementById('editIsLeague').checked,
-                classes: getEditSelectedClasses(),
-                lastModified: new Date().toISOString()
+            // Create league trial
+            const endDate = nights[nights.length - 1].date;
+            const newTrial = {
+                id: 'L' + String(trials.length + 1).padStart(3, '0'),
+                type: 'league',
+                date: startDate,
+                endDate: endDate,
+                host: 'Host Organization',
+                location: 'TBD',
+                city: 'TBD',
+                classes: allClasses,
+                judge: allJudges[0] || 'TBD',
+                judges: allJudges.join(', '),
+                status: 'draft',
+                league: true,
+                nights: nights,
+                totalNights: numNights,
+                created: new Date().toISOString()
             };
             
-            // Validate required fields
-            if (!updatedData.date || !updatedData.host || !updatedData.location || !updatedData.city) {
-                alert('Please fill in all required fields (Date, Host, Location, City).');
-                return;
-            }
-            
-            if (updatedData.classes.length === 0) {
-                alert('Please select at least one class type.');
-                return;
-            }
-            
-            // Update the trial in the trials array
-            Object.assign(currentEditingTrial, updatedData);
-            
-            // Save to localStorage for persistence
-            saveTrialsToStorage();
-            
-            // Refresh the displays
+            trials.push(newTrial);
             updateDashboardStats();
             populateTrialsTable();
             
-            // Close modal
-            hideModal('editTrialModal');
-            
-            alert(`Trial ${currentEditingTrial.id} updated successfully!`);
-            currentEditingTrial = null;
+            hideModal('newTrialModal');
+            alert(`League trial ${newTrial.id} created successfully with ${numNights} nights!`);
         }
 
-        function getEditSelectedClasses() {
-            const classes = [];
-            if (document.getElementById('editClassObedience').checked) classes.push('Obedience');
-            if (document.getElementById('editClassRally').checked) classes.push('Rally');
-            if (document.getElementById('editClassScent').checked) classes.push('Scent');
-            if (document.getElementById('editClassGames').checked) classes.push('Games');
-            return classes;
+        // Trial management functions
+        function editTrial(trialId) {
+            alert(`Edit functionality for trial ${trialId} will be implemented.`);
         }
 
-        function deleteTrialConfirm() {
-            if (!currentEditingTrial) return;
-            
-            const trialId = currentEditingTrial.id;
-            const trialName = `${currentEditingTrial.host} - ${formatDate(currentEditingTrial.date)}`;
-            
-            if (confirm(`Are you sure you want to delete trial ${trialId} (${trialName})?\n\nThis action cannot be undone.`)) {
-                // Remove from trials array
-                const index = trials.findIndex(t => t.id === trialId);
-                if (index > -1) {
-                    trials.splice(index, 1);
-                }
-                
-                // Save to localStorage
-                saveTrialsToStorage();
-                
-                // Refresh displays
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                // Close modal
-                hideModal('editTrialModal');
-                
-                alert(`Trial ${trialId} deleted successfully.`);
-                currentEditingTrial = null;
+        function viewTrial(trialId) {
+            const trial = trials.find(t => t.id === trialId);
+            if (trial) {
+                alert(`Trial: ${trial.host}\nDate: ${formatDate(trial.date)}\nLocation: ${trial.city}\nStatus: ${trial.status}`);
             }
         }
 
-        function duplicateTrial(trialId) {
-            const trial = trials.find(t => t.id === trialId);
-            if (!trial) {
-                alert('Trial not found!');
+        function viewRecord(recordId) {
+            alert(`Viewing record ${recordId}`);
+        }
+
+        // Application functions
+        function submitTrialApplication() {
+            const formData = {
+                date: document.getElementById('trialDates').value,
+                host: document.getElementById('hostName').value,
+                location: document.getElementById('trialLocation').value,
+                city: document.getElementById('cityState').value
+            };
+
+            if (!formData.date || !formData.host || !formData.location || !formData.city) {
+                alert('Please fill in all required fields.');
                 return;
             }
-            
-            if (confirm(`Create a copy of trial ${trialId}?`)) {
-                const duplicatedTrial = {
-                    ...trial,
-                    id: 'T' + String(trials.length + 1).padStart(3, '0'),
-                    date: '', // Clear date so they have to set new one
-                    status: 'draft',
-                    created: new Date().toISOString(),
-                    lastModified: new Date().toISOString()
-                };
-                
-                trials.push(duplicatedTrial);
-                saveTrialsToStorage();
-                updateDashboardStats();
-                populateTrialsTable();
-                
-                alert(`Trial duplicated as ${duplicatedTrial.id}! Please edit to set the new trial date.`);
-                
-                // Auto-open edit modal for the new trial
-                editTrial(duplicatedTrial.id);
-            }
+
+            alert('Trial application submitted successfully!');
+            clearForm();
         }
 
-        function saveTrialsToStorage() {
-            try {
-                // Save user-created trials to localStorage
-                const userTrials = trials.filter(t => t.created); // Only save trials with created timestamp
-                localStorage.setItem('cwags_trials', JSON.stringify(userTrials));
-                console.log(`Saved ${userTrials.length} trials to localStorage`);
-            } catch (error) {
-                console.error('Error saving trials to storage:', error);
-            }
+        function clearForm() {
+            document.getElementById('trialDates').value = '';
+            document.getElementById('hostName').value = '';
+            document.getElementById('trialLocation').value = '';
+            document.getElementById('cityState').value = '';
         }
 
         // Modal management
@@ -2572,59 +1311,6 @@ function createLeagueTrial() {
 
         function hideModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-        }
-
-        function viewTrial(trialId) {
-            const trial = trials.find(t => t.id === trialId);
-            if (trial) {
-                alert(`Trial: ${trial.host}\nDate: ${formatDate(trial.date)}\nLocation: ${trial.location}, ${trial.city}\nStatus: ${trial.status}`);
-            }
-        }
-
-        function viewRecord(recordId) {
-            alert(`Viewing record ${recordId}`);
-        }
-
-        // Report functions
-        function generateTrialRecap() {
-            alert('Trial Recap report generated!');
-        }
-
-        function generateJudgeEvaluation() {
-            alert('Judge Evaluation form generated!');
-        }
-
-        function generateClassResults() {
-            alert('Class Results report generated!');
-        }
-
-        function generateAnalytics() {
-            alert('Analytics report generated!');
-        }
-
-        function downloadReport(reportType) {
-            alert(`Downloading ${reportType} report`);
-        }
-
-        // Storage functions
-        function loadStoredTrials() {
-            try {
-                const storedTrials = localStorage.getItem('cwags_trials');
-                if (storedTrials) {
-                    const userTrials = JSON.parse(storedTrials);
-                    trials = [...trials, ...userTrials];
-                    console.log(`Loaded ${userTrials.length} trials from localStorage`);
-                }
-            } catch (error) {
-                console.error('Error loading stored trials:', error);
-            }
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                // In a real system, this would clear authentication
-                alert('Logged out successfully');
-            }
         }
 
         // Utility functions
@@ -2637,49 +1323,10 @@ function createLeagueTrial() {
             });
         }
 
-        // Event listeners
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the application
             initializeData();
-            
-            // Show/hide scent reset option based on scent class selection
-            const classScent = document.getElementById('classScent');
-            if (classScent) {
-                classScent.addEventListener('change', function() {
-                    const resetGroup = document.getElementById('scentResetGroup');
-                    if (resetGroup) {
-                        resetGroup.style.display = this.checked ? 'block' : 'none';
-                    }
-                });
-            }
-            
-            // Search functionality
-            const trialSearch = document.getElementById('trialSearch');
-            if (trialSearch) {
-                trialSearch.addEventListener('input', function() {
-                    // Implementation for trial search
-                    console.log('Searching trials:', this.value);
-                });
-            }
-            
-            const recordSearch = document.getElementById('recordSearch');
-            if (recordSearch) {
-                recordSearch.addEventListener('input', function() {
-                    // Implementation for record search
-                    console.log('Searching records:', this.value);
-                });
-            }
-            
-            // Scoring class selection
-            const scoringClass = document.getElementById('scoringClass');
-            if (scoringClass) {
-                scoringClass.addEventListener('change', function() {
-                    const section = document.getElementById('scoreEntrySection');
-                    if (section) {
-                        section.style.display = this.value ? 'block' : 'none';
-                    }
-                });
-            }
+            console.log('C-WAGS Trial Management System loaded successfully!');
         });
 
         // Close modals when clicking outside
