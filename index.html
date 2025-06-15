@@ -1,1163 +1,4 @@
-<div class="form-group">
-                    <label for="editTrialLocation">Location</label>
-                    <input type="text" id="editTrialLocation" required>
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="editCityState">City, State/Province</label>
-                    <input type="text" id="editCityState" required>
-                </div>
-                <div class="form-group">
-                    <label for="editContactEmail">Contact Email</label>
-                    <input type="email" id="editContactEmail" required>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 2rem;">
-                <button class="btn btn-primary" onclick="saveTrialChanges()">Save Changes</button>
-                <button class="btn btn-secondary" onclick="hideModal('editTrialModal')" style="margin-left: 1rem;">Cancel</button>
-                <button class="btn" onclick="deleteTrialConfirm()" style="margin-left: 1rem; background: #fc8181; color: white;">Delete Trial</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Global Variables
-        let currentUser = "Demo User";
-        let trials = [];
-        let records = [];
-        let availableClasses = ['Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 'Super Sleuth Level 4'];
-        let availableJudges = ['Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer', 'Nancy Hatcher', 'Susan Mills'];
-        let currentTrialStep = 1;
-        let currentEditingTrial = null;
-        let isEditMode = false;
-
-        // Initialize data on page load
-        async function initializeData() {
-            console.log('🐕 Initializing C-WAGS system...');
-            
-            try {
-                // Try to load from JSON files first
-                await loadDataFromJSON();
-            } catch (error) {
-                console.log('JSON data not available, loading sample data...');
-                loadSampleData();
-            }
-            
-            // Load stored trials from localStorage
-            loadStoredTrials();
-            
-            updateDashboardStats();
-            populateTrialsTable();
-            populateRecordsTable();
-            
-            console.log('✅ C-WAGS system initialized successfully!');
-        }
-
-        // Try to load real data from JSON files
-        async function loadDataFromJSON() {
-            try {
-                const response = await fetch('data/records.json');
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(`📊 Loading ${data.totalRecords} records from ${data.lastUpdated}`);
-                    
-                    records = data.records.map(record => ({
-                        id: record.id,
-                        dogName: record.callName ? `${record.callName} (${record.fullName})` : record.fullName,
-                        handler: record.handlerFullName || `${record.handlerFirstName} ${record.handlerLastName}`.trim(),
-                        currentLevel: record.className || 'Unknown',
-                        judge: record.judgeName || 'Unknown',
-                        registrationNumber: record.id
-                    })).filter(record => record.id && record.dogName);
-                    
-                    // Extract unique classes and judges
-                    availableClasses = [...new Set(data.records.map(r => r.className).filter(c => c))];
-                    availableJudges = [...new Set(data.records.map(r => r.judgeName).filter(j => j))];
-                    
-                    updateDataFreshness(data.lastUpdated);
-                } else {
-                    throw new Error('No JSON data available');
-                }
-            } catch (error) {
-                throw error;
-            }
-        }
-
-        // Load sample data for development/testing
-        function loadSampleData() {
-            console.log('📋 Loading sample data...');
-            
-            trials = [
-                {
-                    id: 'T001',
-                    date: '2024-12-15',
-                    host: 'Metro Dog Training Club',
-                    location: 'Downtown Training Center',
-                    city: 'Chicago, IL',
-                    classes: ['Patrol Level 1', 'Detective Level 2'],
-                    judge: 'Linda Alberda',
-                    status: 'approved',
-                    contact: 'contact@metro.com',
-                    phone: '(555) 123-4567',
-                    created: new Date().toISOString()
-                },
-                {
-                    id: 'T002',
-                    date: '2024-12-22',
-                    host: 'Westside Canine Academy',
-                    location: 'Outdoor Training Facility',
-                    city: 'Denver, CO',
-                    classes: ['Investigator Level 3'],
-                    judge: 'Ginger Alpine',
-                    status: 'pending',
-                    contact: 'info@westside.com',
-                    phone: '(555) 987-6543',
-                    created: new Date().toISOString()
-                },
-                {
-                    id: 'L001',
-                    type: 'league',
-                    date: '2025-01-15',
-                    endDate: '2025-02-05',
-                    host: 'Northern States K9',
-                    location: 'Multi-Purpose Training Center',
-                    city: 'Minneapolis, MN',
-                    classes: ['Patrol Level 1', 'Detective Level 2', 'Investigator Level 3'],
-                    judge: 'Nancy Hatcher',
-                    status: 'draft',
-                    league: true,
-                    totalNights: 4,
-                    contact: 'league@northernk9.com',
-                    phone: '(555) 456-7890',
-                    created: new Date().toISOString()
-                }
-            ];
-            
-            records = [
-                {
-                    id: '07-0001-01',
-                    dogName: 'BJ (Jed\'s Black Jack)',
-                    handler: 'Shirley Ottmer',
-                    currentLevel: 'Patrol Level 1',
-                    judge: 'Linda Alberda',
-                    registrationNumber: '07-0001-01'
-                },
-                {
-                    id: '07-0001-02',
-                    dogName: 'Jaidon (Romyldale\'s Jaidon)',
-                    handler: 'Shirley Ottmer',
-                    currentLevel: 'Detective Level 2',
-                    judge: 'Ginger Alpine',
-                    registrationNumber: '07-0001-02'
-                },
-                {
-                    id: '08-0102-01',
-                    dogName: 'Zeus (Mighty Zeus of Thunder)',
-                    handler: 'Mike Johnson',
-                    currentLevel: 'Investigator Level 3',
-                    judge: 'Nancy Hatcher',
-                    registrationNumber: '08-0102-01'
-                }
-            ];
-        }
-
-        // Load stored trials from localStorage
-        function loadStoredTrials() {
-            try {
-                const storedTrials = localStorage.getItem('cwags_trials');
-                if (storedTrials) {
-                    const userTrials = JSON.parse(storedTrials);
-                    trials = [...trials, ...userTrials];
-                    console.log(`📥 Loaded ${userTrials.length} stored trials`);
-                }
-            } catch (error) {
-                console.error('Error loading stored trials:', error);
-            }
-        }
-
-        // Save trials to localStorage
-        function saveTrialsToStorage() {
-            try {
-                const userTrials = trials.filter(t => t.created);
-                localStorage.setItem('cwags_trials', JSON.stringify(userTrials));
-                console.log(`💾 Saved ${userTrials.length} trials to storage`);
-            } catch (error) {
-                console.error('Error saving trials:', error);
-            }
-        }
-
-        // Update data freshness indicator
-        function updateDataFreshness(lastUpdated) {
-            const dataInfo = document.createElement('div');
-            dataInfo.style.cssText = `
-                position: fixed; bottom: 20px; right: 20px; 
-                background: rgba(255,255,255,0.9); padding: 0.5rem 1rem;
-                border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                font-size: 0.875rem; color: #718096; z-index: 1000;
-            `;
-            
-            const updateDate = new Date(lastUpdated);
-            const now = new Date();
-            const diffHours = Math.floor((now - updateDate) / (1000 * 60 * 60));
-            
-            let timeAgo;
-            if (diffHours < 1) timeAgo = 'just updated';
-            else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
-            else timeAgo = `${Math.floor(diffHours / 24)}d ago`;
-            
-            dataInfo.innerHTML = `📊 Data updated ${timeAgo}`;
-            document.body.appendChild(dataInfo);
-            
-            setTimeout(() => {
-                if (dataInfo.parentNode) {
-                    dataInfo.style.opacity = '0.5';
-                }
-            }, 5000);
-        }
-
-        // Tab management
-        function showTab(tabName) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all nav tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        // Dashboard functions
-        function updateDashboardStats() {
-            document.getElementById('totalTrials').textContent = trials.length;
-            document.getElementById('activeTrials').textContent = trials.filter(t => t.status !== 'completed').length;
-            document.getElementById('totalDogs').textContent = records.length;
-            
-            const uniqueHandlers = new Set(records.map(r => r.handler));
-            document.getElementById('totalHandlers').textContent = uniqueHandlers.size;
-            
-            populateUpcomingTrials();
-        }
-
-        function populateUpcomingTrials() {
-            const tbody = document.getElementById('upcomingTrialsTable');
-            tbody.innerHTML = '';
-            
-            const upcomingTrials = trials.filter(trial => {
-                const trialDate = new Date(trial.date);
-                const today = new Date();
-                return trialDate >= today;
-            }).slice(0, 5);
-            
-            if (upcomingTrials.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #718096;">No upcoming trials found</td></tr>';
-                return;
-            }
-            
-            upcomingTrials.forEach(trial => {
-                const row = tbody.insertRow();
-                let dateDisplay = formatDate(trial.date);
-                if (trial.type === 'league' && trial.endDate) {
-                    dateDisplay += ` - ${formatDate(trial.endDate)}`;
-                }
-                
-                row.innerHTML = `
-                    <td>${dateDisplay}</td>
-                    <td>${trial.host}${trial.type === 'league' ? ' 🏆' : ''}</td>
-                    <td>${trial.city}</td>
-                    <td>${trial.classes.join(', ')}</td>
-                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
-                    <td>
-                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="padding: 0.5rem 1rem;">View</button>
-                    </td>
-                `;
-            });
-        }
-
-        function populateTrialsTable() {
-            const tbody = document.getElementById('trialsTable');
-            tbody.innerHTML = '';
-            
-            if (trials.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #718096;">No trials found. Create your first trial!</td></tr>';
-                return;
-            }
-            
-            trials.forEach(trial => {
-                const row = tbody.insertRow();
-                let dateDisplay = formatDate(trial.date);
-                if (trial.type === 'league' && trial.endDate) {
-                    dateDisplay += ` - ${formatDate(trial.endDate)} (${trial.totalNights} nights)`;
-                }
-                
-                row.innerHTML = `
-                    <td>${trial.id}${trial.type === 'league' ? ' 🏆' : ''}</td>
-                    <td>${dateDisplay}</td>
-                    <td>${trial.host}</td>
-                    <td>${trial.city}</td>
-                    <td>${trial.classes.join(', ')}</td>
-                    <td>${trial.judge}</td>
-                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
-                    <td>
-                        <button class="btn btn-secondary" onclick="editTrial('${trial.id}')" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
-                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="padding: 0.5rem 1rem;">View</button>
-                    </td>
-                `;
-            });
-        }
-
-        function populateRecordsTable() {
-            const tbody = document.getElementById('recordsTable');
-            tbody.innerHTML = '';
-            
-            if (records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #718096;">No records found. Records will load from dataforsite.xlsx when deployed.</td></tr>';
-                return;
-            }
-            
-            records.forEach(record => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${record.registrationNumber}</td>
-                    <td>${record.dogName}</td>
-                    <td>${record.handler}</td>
-                    <td>${record.currentLevel}</td>
-                    <td>Recent Trial</td>
-                    <td>${record.judge}</td>
-                    <td>
-                        <button class="btn btn-secondary" onclick="viewRecord('${record.id}')" style="padding: 0.5rem 1rem;">View</button>
-                    </td>
-                `;
-            });
-        }
-
-        // Trial creation functions
-        function createNewTrial() {
-            currentTrialStep = 1;
-            currentEditingTrial = null;
-            isEditMode = false;
-            
-            // Reset modal
-            document.getElementById('modalTitle').textContent = 'Create New Trial';
-            document.getElementById('trialTypeStep').style.display = 'block';
-            document.getElementById('standaloneStep').style.display = 'none';
-            document.getElementById('leagueStep').style.display = 'none';
-            
-            // Reset form values
-            document.querySelector('input[name="trialType"][value="standalone"]').checked = true;
-            document.getElementById('standaloneDate').value = '';
-            document.getElementById('standaloneClasses').value = '';
-            document.getElementById('leagueStartDate').value = '';
-            document.getElementById('leagueNights').value = '';
-            document.getElementById('standaloneClassConfig').innerHTML = '';
-            document.getElementById('leagueNightConfig').innerHTML = '';
-            document.getElementById('createStandaloneBtn').textContent = 'Create Trial';
-            document.getElementById('createLeagueBtn').textContent = 'Create League Trial';
-            
-            showModal('newTrialModal');
-        }
-
-        function nextTrialStep() {
-            const selectedType = document.querySelector('input[name="trialType"]:checked').value;
-            
-            document.getElementById('trialTypeStep').style.display = 'none';
-            
-            if (selectedType === 'standalone') {
-                document.getElementById('standaloneStep').style.display = 'block';
-                currentTrialStep = 2;
-            } else {
-                document.getElementById('leagueStep').style.display = 'block';
-                currentTrialStep = 3;
-            }
-        }
-
-        function previousTrialStep() {
-            if (currentTrialStep === 2 || currentTrialStep === 3) {
-                document.getElementById('standaloneStep').style.display = 'none';
-                document.getElementById('leagueStep').style.display = 'none';
-                document.getElementById('trialTypeStep').style.display = 'block';
-                currentTrialStep = 1;
-            }
-        }
-
-        // Standalone Trial Functions
-        function generateStandaloneClasses() {
-            const numClasses = parseInt(document.getElementById('standaloneClasses').value);
-            const container = document.getElementById('standaloneClassConfig');
-            const createBtn = document.getElementById('createStandaloneBtn');
-            
-            if (!numClasses) {
-                container.innerHTML = '';
-                createBtn.style.display = 'none';
-                return;
-            }
-
-            let html = '<h4 style="margin-bottom: 1rem; color: #4a5568;">Class Configuration</h4>';
-            
-            for (let i = 0; i < numClasses; i++) {
-                html += `
-                    <div style="border: 2px solid #e2e8f0; border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem; background: #f7fafc;">
-                        <h5 style="margin-bottom: 1rem; color: #4a5568;">Class ${i + 1}</h5>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="standaloneClass${i}">Class Type</label>
-                                <select id="standaloneClass${i}" required>
-                                    <option value="">Select Class...</option>
-                                    ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="standaloneRounds${i}">Number of Rounds</label>
-                                <select id="standaloneRounds${i}" onchange="generateStandaloneRounds(${i})" required>
-                                    <option value="">Select...</option>
-                                    <option value="1">1 Round</option>
-                                    <option value="2">2 Rounds</option>
-                                    <option value="3">3 Rounds</option>
-                                    <option value="4">4 Rounds</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="standaloneRoundsConfig${i}" style="margin-top: 1rem;">
-                            <!-- Round configurations will be generated here -->
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
-            createBtn.style.display = 'inline-block';
-        }
-
-        function generateStandaloneRounds(classIndex) {
-            const numRounds = parseInt(document.getElementById(`standaloneRounds${classIndex}`).value);
-            const container = document.getElementById(`standaloneRoundsConfig${classIndex}`);
-            
-            if (!numRounds) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '<div style="background: #f0f4ff; padding: 1rem; border-radius: 10px; margin-top: 1rem;">';
-            html += '<h6 style="margin-bottom: 1rem; color: #4a5568;">Round Assignments</h6>';
-            html += '<div class="form-grid">';
-            
-            for (let round = 1; round <= numRounds; round++) {
-                html += `
-                    <div class="form-group">
-                        <label for="standaloneJudge${classIndex}_${round}">Round ${round} Judge</label>
-                        <input type="text" 
-                               id="standaloneJudge${classIndex}_${round}" 
-                               placeholder="Judge name" 
-                               list="judgeList${classIndex}_${round}"
-                               required>
-                        <datalist id="judgeList${classIndex}_${round}">
-                            ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
-                        </datalist>
-                        <label style="display: flex; align-items: center; margin-top: 0.5rem;">
-                            <input type="checkbox" id="standaloneFEO${classIndex}_${round}" style="margin-right: 0.5rem;">
-                            <span style="font-size: 0.9rem;">FEO offered for Round ${round}</span>
-                        </label>
-                    </div>
-                `;
-            }
-            
-            html += '</div></div>';
-            container.innerHTML = html;
-        }
-
-        // League Trial Functions
-        function generateLeagueNights() {
-            const numNights = parseInt(document.getElementById('leagueNights').value);
-            const container = document.getElementById('leagueNightConfig');
-            const createBtn = document.getElementById('createLeagueBtn');
-            
-            if (!numNights) {
-                container.innerHTML = '';
-                createBtn.style.display = 'none';
-                return;
-            }
-
-            const startDate = document.getElementById('leagueStartDate').value;
-            let html = '<h4 style="margin-bottom: 1rem; color: #4a5568;">League Night Configuration</h4>';
-            
-            for (let night = 0; night < numNights; night++) {
-                const nightDate = new Date(startDate);
-                nightDate.setDate(nightDate.getDate() + (night * 7));
-                
-                html += `
-                    <div style="border: 2px solid #e2e8f0; border-radius: 15px; padding: 1.5rem; margin-bottom: 1.5rem; background: #f0f4ff;">
-                        <h5 style="margin-bottom: 1rem; color: #4a5568;">Night ${night + 1} - ${startDate ? formatDate(nightDate.toISOString().split('T')[0]) : 'Date TBD'}</h5>
-                        
-                        <div class="form-group" style="margin-bottom: 1rem;">
-                            <label for="leagueNight${night}Date">Date</label>
-                            <input type="date" id="leagueNight${night}Date" value="${nightDate.toISOString().split('T')[0]}">
-                        </div>
-                        
-                        <div class="form-group" style="margin-bottom: 1rem;">
-                            <label for="leagueNight${night}Classes">Number of Classes</label>
-                            <select id="leagueNight${night}Classes" onchange="generateLeagueNightClasses(${night})">
-                                <option value="">Select...</option>
-                                <option value="1">1 Class</option>
-                                <option value="2">2 Classes</option>
-                                <option value="3">3 Classes</option>
-                                <option value="4">4 Classes</option>
-                            </select>
-                        </div>
-                        
-                        <div id="leagueNight${night}ClassConfig"></div>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
-            createBtn.style.display = 'inline-block';
-        }
-
-        function generateLeagueNightClasses(nightIndex) {
-            const numClasses = parseInt(document.getElementById(`leagueNight${nightIndex}Classes`).value);
-            const container = document.getElementById(`leagueNight${nightIndex}ClassConfig`);
-            
-            if (!numClasses) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">';
-            
-            for (let i = 0; i < numClasses; i++) {
-                html += `
-                    <div style="border: 1px solid #cbd5e0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background: white;">
-                        <h6 style="margin-bottom: 0.5rem; color: #4a5568;">Class ${i + 1}</h6>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="leagueNight${nightIndex}Class${i}">Class Type</label>
-                                <select id="leagueNight${nightIndex}Class${i}" required>
-                                    <option value="">Select Class...</option>
-                                    ${availableClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="leagueNight${nightIndex}Rounds${i}">Number of Rounds</label>
-                                <select id="leagueNight${nightIndex}Rounds${i}" onchange="generateLeagueRounds(${nightIndex}, ${i})" required>
-                                    <option value="">Select...</option>
-                                    <option value="1">1 Round</option>
-                                    <option value="2">2 Rounds</option>
-                                    <option value="3">3 Rounds</option>
-                                    <option value="4">4 Rounds</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="leagueNight${nightIndex}RoundsConfig${i}" style="margin-top: 1rem;">
-                            <!-- Round configurations will be generated here -->
-                        </div>
-                    </div>
-                `;
-            }
-            
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        function generateLeagueRounds(nightIndex, classIndex) {
-            const numRounds = parseInt(document.getElementById(`leagueNight${nightIndex}Rounds${classIndex}`).value);
-            const container = document.getElementById(`leagueNight${nightIndex}RoundsConfig${classIndex}`);
-            
-            if (!numRounds) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '<div style="background: #f0f4ff; padding: 1rem; border-radius: 10px; margin-top: 1rem;">';
-            html += '<h6 style="margin-bottom: 1rem; color: #4a5568;">Round Assignments</h6>';
-            html += '<div class="form-grid">';
-            
-            for (let round = 1; round <= numRounds; round++) {
-                html += `
-                    <div class="form-group">
-                        <label for="leagueNight${nightIndex}Judge${classIndex}_${round}">Round ${round} Judge</label>
-                        <input type="text" 
-                               id="leagueNight${nightIndex}Judge${classIndex}_${round}" 
-                               placeholder="Judge name" 
-                               list="judgeListLeague${nightIndex}_${classIndex}_${round}"
-                               required>
-                        <datalist id="judgeListLeague${nightIndex}_${classIndex}_${round}">
-                            ${availableJudges.map(judge => `<option value="${judge}">`).join('')}
-                        </datalist>
-                        <label style="display: flex; align-items: center; margin-top: 0.5rem;">
-                            <input type="checkbox" id="leagueNight${nightIndex}FEO${classIndex}_${round}" style="margin-right: 0.5rem;">
-                            <span style="font-size: 0.9rem;">FEO offered for Round ${round}</span>
-                        </label>
-                    </div>
-                `;
-            }
-            
-            html += '</div></div>';
-            container.innerHTML = html;
-        }
-
-        // Save trial configuration (handles both create and edit)
-        function saveTrialConfiguration() {
-            const selectedType = document.querySelector('input[name="trialType"]:checked').value;
-            
-            if (selectedType === 'standalone') {
-                saveStandaloneTrial();
-            } else {
-                saveLeagueTrial();
-            }
-        }
-
-        function saveStandaloneTrial() {
-            const date = document.getElementById('standaloneDate').value;
-            const numClasses = parseInt(document.getElementById('standaloneClasses').value);
-            
-            if (!date) {
-                alert('Please select a trial date.');
-                return;
-            }
-            
-            // Collect class data with rounds
-            const classDetails = [];
-            const allClasses = [];
-            const allJudges = [];
-            
-            for (let i = 0; i < numClasses; i++) {
-                const className = document.getElementById(`standaloneClass${i}`).value;
-                const numRounds = parseInt(document.getElementById(`standaloneRounds${i}`).value || 0);
-                
-                if (!className) {
-                    alert(`Please select a class type for Class ${i + 1}.`);
-                    return;
-                }
-                
-                if (!numRounds) {
-                    alert(`Please select number of rounds for Class ${i + 1}.`);
-                    return;
-                }
-                
-                // Collect round judges with FEO status
-                const rounds = [];
-                for (let round = 1; round <= numRounds; round++) {
-                    const judge = document.getElementById(`standaloneJudge${i}_${round}`).value;
-                    const feoOffered = document.getElementById(`standaloneFEO${i}_${round}`).checked;
-                    
-                    if (!judge) {
-                        alert(`Please assign a judge for Class ${i + 1}, Round ${round}.`);
-                        return;
-                    }
-                    rounds.push({ 
-                        round: round, 
-                        judge: judge, 
-                        feoOffered: feoOffered 
-                    });
-                    if (!allJudges.includes(judge)) allJudges.push(judge);
-                }
-                
-                classDetails.push({
-                    name: className,
-                    rounds: rounds
-                });
-                
-                allClasses.push(className);
-            }
-            
-            if (isEditMode && currentEditingTrial) {
-                // Update existing trial
-                Object.assign(currentEditingTrial, {
-                    date: date,
-                    classes: allClasses,
-                    classDetails: classDetails,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    status: 'draft',
-                    created: new Date().toISOString(),
-                    lastModified: new Date().toISOString(),
-                    contact: '',
-                    phone: ''
-                };
-                
-                trials.push(newTrial);
-                alert(`Standalone trial ${newTrial.id} created successfully!`);
-            }
-            
-            saveTrialsToStorage();
-            updateDashboardStats();
-            populateTrialsTable();
-            hideModal('newTrialModal');
-        }
-
-        function saveLeagueTrial() {
-            const startDate = document.getElementById('leagueStartDate').value;
-            const numNights = parseInt(document.getElementById('leagueNights').value);
-            
-            if (!startDate) {
-                alert('Please select a league start date.');
-                return;
-            }
-            
-            // Collect league data
-            const nights = [];
-            const allClasses = [];
-            const allJudges = [];
-            
-            for (let night = 0; night < numNights; night++) {
-                const nightDate = document.getElementById(`leagueNight${night}Date`).value;
-                const numClasses = parseInt(document.getElementById(`leagueNight${night}Classes`).value || 0);
-                
-                if (!nightDate) {
-                    alert(`Please set a date for Night ${night + 1}.`);
-                    return;
-                }
-                
-                const nightClassDetails = [];
-                const nightClasses = [];
-                const nightJudges = [];
-                
-                for (let i = 0; i < numClasses; i++) {
-                    const className = document.getElementById(`leagueNight${night}Class${i}`)?.value;
-                    const numRounds = parseInt(document.getElementById(`leagueNight${night}Rounds${i}`)?.value || 0);
-                    
-                    if (!className) {
-                        alert(`Please select a class type for Night ${night + 1}, Class ${i + 1}.`);
-                        return;
-                    }
-                    
-                    if (!numRounds) {
-                        alert(`Please select number of rounds for Night ${night + 1}, Class ${i + 1}.`);
-                        return;
-                    }
-                    
-                    // Collect round judges
-                    const rounds = [];
-                    for (let round = 1; round <= numRounds; round++) {
-                        const judge = document.getElementById(`leagueNight${night}Judge${i}_${round}`)?.value;
-                        const feoOffered = document.getElementById(`leagueNight${night}FEO${i}_${round}`)?.checked;
-                        
-                        if (!judge) {
-                            alert(`Please assign a judge for Night ${night + 1}, Class ${i + 1}, Round ${round}.`);
-                            return;
-                        }
-                        rounds.push({ 
-                            round: round, 
-                            judge: judge, 
-                            feoOffered: feoOffered 
-                        });
-                        if (!nightJudges.includes(judge)) nightJudges.push(judge);
-                        if (!allJudges.includes(judge)) allJudges.push(judge);
-                    }
-                    
-                    nightClassDetails.push({
-                        name: className,
-                        rounds: rounds
-                    });
-                    
-                    nightClasses.push(className);
-                    if (!allClasses.includes(className)) allClasses.push(className);
-                }
-                
-                nights.push({
-                    date: nightDate,
-                    classes: nightClasses,
-                    classDetails: nightClassDetails,
-                    judges: nightJudges
-                });
-            }
-            
-            if (isEditMode && currentEditingTrial) {
-                // Update existing league trial
-                const endDate = nights[nights.length - 1].date;
-                Object.assign(currentEditingTrial, {
-                    date: startDate,
-                    endDate: endDate,
-                    classes: allClasses,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    nights: nights,
-                    totalNights: numNights,
-                    lastModified: new Date().toISOString()
-                });
-                
-                alert(`League trial ${currentEditingTrial.id} updated successfully!`);
-            } else {
-                // Create new league trial
-                const endDate = nights[nights.length - 1].date;
-                const newTrial = {
-                    id: 'L' + String(trials.filter(t => t.id.startsWith('L')).length + 1).padStart(3, '0'),
-                    type: 'league',
-                    date: startDate,
-                    endDate: endDate,
-                    host: 'Host Organization',
-                    location: 'TBD',
-                    city: 'TBD',
-                    classes: allClasses,
-                    judge: allJudges[0] || 'TBD',
-                    judges: allJudges.join(', '),
-                    status: 'draft',
-                    league: true,
-                    nights: nights,
-                    totalNights: numNights,
-                    created: new Date().toISOString(),
-                    contact: '',
-                    phone: ''
-                };
-                
-                trials.push(newTrial);
-                alert(`League trial ${newTrial.id} created successfully with ${numNights} nights!`);
-            }
-            
-            saveTrialsToStorage();
-            updateDashboardStats();
-            populateTrialsTable();
-            hideModal('newTrialModal');
-        }
-
-        // Trial editing functions
-        function editTrial(trialId) {
-            const trial = trials.find(t => t.id === trialId);
-            if (!trial) {
-                alert('Trial not found!');
-                return;
-            }
-
-            currentEditingTrial = trial;
-
-            // Check if this trial has detailed configuration
-            if (trial.classDetails || trial.nights) {
-                // Edit in creation modal
-                editTrialInCreationModal(trial);
-            } else {
-                // Edit in simple modal
-                editTrialInSimpleModal(trial);
-            }
-        }
-
-        function editTrialInCreationModal(trial) {
-            isEditMode = true;
-            currentEditingTrial = trial;
-            
-            // Configure modal for editing
-            document.getElementById('modalTitle').textContent = `Edit Trial ${trial.id}`;
-            document.getElementById('trialTypeStep').style.display = 'none';
-            
-            if (trial.type === 'league') {
-                // Edit league trial
-                document.getElementById('leagueStep').style.display = 'block';
-                document.getElementById('standaloneStep').style.display = 'none';
-                document.getElementById('createLeagueBtn').textContent = 'Update Trial';
-                document.getElementById('createLeagueBtn').style.display = 'inline-block';
-                currentTrialStep = 3;
-                
-                // Populate league data
-                document.getElementById('leagueStartDate').value = trial.date || '';
-                if (trial.nights) {
-                    document.getElementById('leagueNights').value = trial.nights.length;
-                    generateLeagueNights();
-                    
-                    // Populate night details after a delay to ensure DOM is ready
-                    setTimeout(() => populateLeagueEditData(trial), 100);
-                }
-            } else {
-                // Edit standalone trial
-                document.getElementById('standaloneStep').style.display = 'block';
-                document.getElementById('leagueStep').style.display = 'none';
-                document.getElementById('createStandaloneBtn').textContent = 'Update Trial';
-                document.getElementById('createStandaloneBtn').style.display = 'inline-block';
-                currentTrialStep = 2;
-                
-                // Populate standalone data
-                document.getElementById('standaloneDate').value = trial.date || '';
-                if (trial.classDetails) {
-                    document.getElementById('standaloneClasses').value = trial.classDetails.length;
-                    generateStandaloneClasses();
-                    
-                    // Populate class details after a delay
-                    setTimeout(() => populateStandaloneEditData(trial), 100);
-                }
-            }
-            
-            showModal('newTrialModal');
-        }
-
-        function populateStandaloneEditData(trial) {
-            trial.classDetails.forEach((classDetail, i) => {
-                document.getElementById(`standaloneClass${i}`).value = classDetail.name;
-                document.getElementById(`standaloneRounds${i}`).value = classDetail.rounds.length;
-                generateStandaloneRounds(i);
-                
-                // Populate round details
-                setTimeout(() => {
-                    classDetail.rounds.forEach((round) => {
-                        const roundNum = round.round;
-                        document.getElementById(`standaloneJudge${i}_${roundNum}`).value = round.judge;
-                        document.getElementById(`standaloneFEO${i}_${roundNum}`).checked = round.feoOffered || false;
-                    });
-                }, 50);
-            });
-        }
-
-        function populateLeagueEditData(trial) {
-            trial.nights.forEach((night, nightIndex) => {
-                document.getElementById(`leagueNight${nightIndex}Date`).value = night.date;
-                if (night.classDetails) {
-                    document.getElementById(`leagueNight${nightIndex}Classes`).value = night.classDetails.length;
-                    generateLeagueNightClasses(nightIndex);
-                    
-                    setTimeout(() => {
-                        night.classDetails.forEach((classDetail, classIndex) => {
-                            document.getElementById(`leagueNight${nightIndex}Class${classIndex}`).value = classDetail.name;
-                            document.getElementById(`leagueNight${nightIndex}Rounds${classIndex}`).value = classDetail.rounds.length;
-                            generateLeagueRounds(nightIndex, classIndex);
-                            
-                            setTimeout(() => {
-                                classDetail.rounds.forEach((round) => {
-                                    const roundNum = round.round;
-                                    document.getElementById(`leagueNight${nightIndex}Judge${classIndex}_${roundNum}`).value = round.judge;
-                                    document.getElementById(`leagueNight${nightIndex}FEO${classIndex}_${roundNum}`).checked = round.feoOffered || false;
-                                });
-                            }, 50);
-                        });
-                    }, 50);
-                }
-            });
-        }
-
-        function editTrialInSimpleModal(trial) {
-            currentEditingTrial = trial;
-            
-            // Populate simple edit modal
-            document.getElementById('editTrialTitle').textContent = `Edit Trial ${trial.id}`;
-            document.getElementById('editTrialDate').value = trial.date || '';
-            document.getElementById('editTrialStatus').value = trial.status || 'draft';
-            document.getElementById('editHostName').value = trial.host || '';
-            document.getElementById('editTrialLocation').value = trial.location || '';
-            document.getElementById('editCityState').value = trial.city || '';
-            document.getElementById('editContactEmail').value = trial.contact || '';
-            
-            showModal('editTrialModal');
-        }
-
-        function saveTrialChanges() {
-            if (!currentEditingTrial) return;
-            
-            // Update trial with simple edit data
-            const updatedData = {
-                date: document.getElementById('editTrialDate').value,
-                status: document.getElementById('editTrialStatus').value,
-                host: document.getElementById('editHostName').value,
-                location: document.getElementById('editTrialLocation').value,
-                city: document.getElementById('editCityState').value,
-                contact: document.getElementById('editContactEmail').value,
-                lastModified: new Date().toISOString()
-            };
-            
-            // Validate required fields
-            if (!updatedData.date || !updatedData.host || !updatedData.location || !updatedData.city) {
-                alert('Please fill in all required fields.');
-                return;
-            }
-            
-            Object.assign(currentEditingTrial, updatedData);
-            
-            saveTrialsToStorage();
-            updateDashboardStats();
-            populateTrialsTable();
-            hideModal('editTrialModal');
-            
-            alert(`Trial ${currentEditingTrial.id} updated successfully!`);
-            currentEditingTrial = null;
-        }
-
-        function deleteTrialConfirm() {
-            if (!currentEditingTrial) return;
-            
-            const trialId = currentEditingTrial.id;
-            
-            if (confirm(`Are you sure you want to delete trial ${trialId}? This cannot be undone.`)) {
-                const index = trials.findIndex(t => t.id === trialId);
-                if (index > -1) {
-                    trials.splice(index, 1);
-                    saveTrialsToStorage();
-                    updateDashboardStats();
-                    populateTrialsTable();
-                    hideModal('editTrialModal');
-                    alert(`Trial ${trialId} deleted successfully.`);
-                    currentEditingTrial = null;
-                }
-            }
-        }
-
-        function viewTrial(trialId) {
-            const trial = trials.find(t => t.id === trialId);
-            if (trial) {
-                let details = `Trial: ${trial.host}\n`;
-                details += `Date: ${formatDate(trial.date)}`;
-                if (trial.endDate) details += ` - ${formatDate(trial.endDate)}`;
-                details += `\nLocation: ${trial.city}\nStatus: ${trial.status}`;
-                details += `\nClasses: ${trial.classes.join(', ')}`;
-                if (trial.type === 'league') details += `\nType: League (${trial.totalNights} nights)`;
-                
-                alert(details);
-            }
-        }
-
-        function viewRecord(recordId) {
-            const record = records.find(r => r.id === recordId);
-            if (record) {
-                alert(`Dog: ${record.dogName}\nHandler: ${record.handler}\nLevel: ${record.currentLevel}\nJudge: ${record.judge}`);
-            }
-        }
-
-        // Application functions
-        function submitTrialApplication() {
-            const formData = {
-                date: document.getElementById('trialDates').value,
-                host: document.getElementById('hostName').value,
-                location: document.getElementById('trialLocation').value,
-                city: document.getElementById('cityState').value,
-                contact: document.getElementById('contactName').value,
-                email: document.getElementById('contactEmail').value,
-                phone: document.getElementById('contactPhone').value,
-                website: document.getElementById('premiumWebsite').value,
-                classes: getSelectedClasses(),
-                judges: document.getElementById('judges').value,
-                advocates: document.getElementById('advocates').value,
-                type: document.getElementById('trialType').value,
-                surface: document.getElementById('ringSurface').value,
-                rings: document.getElementById('numRings').value,
-                league: document.getElementById('isLeague').checked,
-                insurance: document.getElementById('insuranceExpiration').value,
-                scentResets: document.getElementById('scentResets').checked
-            };
-
-            if (!formData.date || !formData.host || !formData.location || !formData.city || !formData.contact || !formData.email) {
-                alert('Please fill in all required fields.');
-                return;
-            }
-
-            if (formData.classes.length === 0) {
-                alert('Please select at least one class type.');
-                return;
-            }
-
-            // Create new trial from application
-            const newTrial = {
-                id: 'A' + String(trials.filter(t => t.id.startsWith('A')).length + 1).padStart(3, '0'),
-                ...formData,
-                status: 'pending',
-                judge: 'TBD',
-                created: new Date().toISOString(),
-                lastModified: new Date().toISOString()
-            };
-
-            trials.push(newTrial);
-            saveTrialsToStorage();
-            updateDashboardStats();
-            populateTrialsTable();
-
-            alert(`Trial application ${newTrial.id} submitted successfully!`);
-            clearApplicationForm();
-        }
-
-        function getSelectedClasses() {
-            const classes = [];
-            if (document.getElementById('classObedience').checked) classes.push('Obedience');
-            if (document.getElementById('classRally').checked) classes.push('Rally');
-            if (document.getElementById('classScent').checked) classes.push('Scent');
-            if (document.getElementById('classGames').checked) classes.push('Games');
-            return classes;
-        }
-
-        function clearApplicationForm() {
-            const inputs = document.querySelectorAll('#applications input, #applications select, #applications textarea');
-            inputs.forEach(input => {
-                if (input.type === 'checkbox') {
-                    input.checked = false;
-                } else {
-                    input.value = '';
-                }
-            });
-        }
-
-        // Modal management
-        function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        function hideModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            
-            // Reset editing state when closing modals
-            if (modalId === 'newTrialModal' || modalId === 'editTrialModal') {
-                currentEditingTrial = null;
-                isEditMode = false;
-            }
-        }
-
-        // Utility functions
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeData();
-            
-            // Show/hide scent reset option based on scent class selection
-            const classScent = document.getElementById('classScent');
-            if (classScent) {
-                classScent.addEventListener('change', function() {
-                    const resetGroup = document.getElementById('scentResetGroup');
-                    if (resetGroup) {
-                        resetGroup.style.display = this.checked ? 'block' : 'none';
-                    }
-                });
-            }
-            
-            console.log('✅ C-WAGS Trial Management System loaded successfully!');
-        });
-
-        // Close modals when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                currentEditingTrial = null;
-                isEditMode = false;
-            }
-        });
-    </script>
-</body>
-</html>D',
-                    judges: allJudges.join(', '),
-                    lastModified: new Date().toISOString()
-                });
-                
-                alert(`Trial ${currentEditingTrial.id} updated successfully!`);
-            } else {
-                // Create new trial
-                const newTrial = {
-                    id: 'T' + String(trials.filter(t => t.id.startsWith('T')).length + 1).padStart(3, '0'),
-                    type: 'standalone',
-                    date: date,
-                    host: 'Host Organization',
-                    location: 'TBD',
-                    city: 'TBD',
-                    classes: allClasses,
-                    classDetails: classDetails,
-                    judge: allJudges[0] || 'TB<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1866,94 +707,480 @@
                 </div>
             </div>
 
-            <!-- Step 2: Standalone Configuration -->
-            <div id="standaloneStep" style="display: none;">
-                <h3 style="margin-bottom: 1rem; color: #4a5568;">Standalone Trial Setup</h3>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="standaloneDate">Trial Date</label>
-                        <input type="date" id="standaloneDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="standaloneClasses">Number of Classes</label>
-                        <select id="standaloneClasses" onchange="generateStandaloneClasses()">
-                            <option value="">Select...</option>
-                            <option value="1">1 Class</option>
-                            <option value="2">2 Classes</option>
-                            <option value="3">3 Classes</option>
-                            <option value="4">4 Classes</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="standaloneClassConfig" style="margin-top: 2rem;"></div>
-
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="previousTrialStep()">Back</button>
-                    <button class="btn btn-primary" onclick="saveTrialConfiguration()" id="createStandaloneBtn" style="display: none; margin-left: 1rem;">Create Trial</button>
-                </div>
-            </div>
-
-            <!-- Step 3: League Configuration -->
-            <div id="leagueStep" style="display: none;">
-                <h3 style="margin-bottom: 1rem; color: #4a5568;">League Trial Setup</h3>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="leagueStartDate">League Start Date</label>
-                        <input type="date" id="leagueStartDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="leagueNights">Number of Nights</label>
-                        <select id="leagueNights" onchange="generateLeagueNights()">
-                            <option value="">Select...</option>
-                            <option value="2">2 Nights</option>
-                            <option value="3">3 Nights</option>
-                            <option value="4">4 Nights</option>
-                            <option value="5">5 Nights</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="leagueNightConfig" style="margin-top: 2rem;"></div>
-
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="btn btn-secondary" onclick="previousTrialStep()">Back</button>
-                    <button class="btn btn-primary" onclick="saveTrialConfiguration()" id="createLeagueBtn" style="display: none; margin-left: 1rem;">Create League Trial</button>
-                </div>
-            </div>
+            <!-- Other steps would be added here -->
         </div>
     </div>
 
-    <!-- Edit Trial Modal -->
-    <div id="editTrialModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="hideModal('editTrialModal')">&times;</span>
-            <h2 id="editTrialTitle">Edit Trial</h2>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="editTrialDate">Trial Date</label>
-                    <input type="date" id="editTrialDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="editTrialStatus">Status</label>
-                    <select id="editTrialStatus">
-                        <option value="draft">Draft</option>
-                        <option value="pending">Pending Approval</option>
-                        <option value="approved">Approved</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                </div>
-            </div>
+    <script>
+        // Global Variables
+        let currentUser = "Demo User";
+        let trials = [];
+        let records = [];
+        let availableClasses = ['Patrol Level 1', 'Detective Level 2', 'Investigator Level 3', 'Super Sleuth Level 4'];
+        let availableJudges = ['Linda Alberda', 'Ginger Alpine', 'Shirley Ottmer', 'Nancy Hatcher', 'Susan Mills'];
+        let currentTrialStep = 1;
+        let currentEditingTrial = null;
+        let isEditMode = false;
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="editHostName">Host Name</label>
-                    <input type="text" id="editHostName" required>
-                </div>
-                <div class="form-group">
-                    <label for="editTrialLocation">Location</label>
-                    <input type="
+        // Initialize data on page load
+        async function initializeData() {
+            console.log('🐕 Initializing C-WAGS system...');
+            
+            try {
+                // Try to load from JSON files first
+                await loadDataFromJSON();
+            } catch (error) {
+                console.log('JSON data not available, loading sample data...');
+                loadSampleData();
+            }
+            
+            // Load stored trials from localStorage
+            loadStoredTrials();
+            
+            updateDashboardStats();
+            populateTrialsTable();
+            populateRecordsTable();
+            
+            console.log('✅ C-WAGS system initialized successfully!');
+        }
+
+        // Try to load real data from JSON files
+        async function loadDataFromJSON() {
+            try {
+                const response = await fetch('data/records.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`📊 Loading ${data.totalRecords} records from ${data.lastUpdated}`);
+                    
+                    records = data.records.map(record => ({
+                        id: record.id,
+                        dogName: record.callName ? `${record.callName} (${record.fullName})` : record.fullName,
+                        handler: record.handlerFullName || `${record.handlerFirstName} ${record.handlerLastName}`.trim(),
+                        currentLevel: record.className || 'Unknown',
+                        judge: record.judgeName || 'Unknown',
+                        registrationNumber: record.id
+                    })).filter(record => record.id && record.dogName);
+                    
+                    // Extract unique classes and judges
+                    availableClasses = [...new Set(data.records.map(r => r.className).filter(c => c))];
+                    availableJudges = [...new Set(data.records.map(r => r.judgeName).filter(j => j))];
+                    
+                    updateDataFreshness(data.lastUpdated);
+                } else {
+                    throw new Error('No JSON data available');
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Load sample data for development/testing
+        function loadSampleData() {
+            console.log('📋 Loading sample data...');
+            
+            trials = [
+                {
+                    id: 'T001',
+                    date: '2024-12-15',
+                    host: 'Metro Dog Training Club',
+                    location: 'Downtown Training Center',
+                    city: 'Chicago, IL',
+                    classes: ['Patrol Level 1', 'Detective Level 2'],
+                    judge: 'Linda Alberda',
+                    status: 'approved',
+                    contact: 'contact@metro.com',
+                    phone: '(555) 123-4567',
+                    created: new Date().toISOString()
+                },
+                {
+                    id: 'T002',
+                    date: '2024-12-22',
+                    host: 'Westside Canine Academy',
+                    location: 'Outdoor Training Facility',
+                    city: 'Denver, CO',
+                    classes: ['Investigator Level 3'],
+                    judge: 'Ginger Alpine',
+                    status: 'pending',
+                    contact: 'info@westside.com',
+                    phone: '(555) 987-6543',
+                    created: new Date().toISOString()
+                }
+            ];
+            
+            records = [
+                {
+                    id: '07-0001-01',
+                    dogName: 'BJ (Jed\'s Black Jack)',
+                    handler: 'Shirley Ottmer',
+                    currentLevel: 'Patrol Level 1',
+                    judge: 'Linda Alberda',
+                    registrationNumber: '07-0001-01'
+                },
+                {
+                    id: '07-0001-02',
+                    dogName: 'Jaidon (Romyldale\'s Jaidon)',
+                    handler: 'Shirley Ottmer',
+                    currentLevel: 'Detective Level 2',
+                    judge: 'Ginger Alpine',
+                    registrationNumber: '07-0001-02'
+                },
+                {
+                    id: '08-0102-01',
+                    dogName: 'Zeus (Mighty Zeus of Thunder)',
+                    handler: 'Mike Johnson',
+                    currentLevel: 'Investigator Level 3',
+                    judge: 'Nancy Hatcher',
+                    registrationNumber: '08-0102-01'
+                }
+            ];
+        }
+
+        // Load stored trials from localStorage
+        function loadStoredTrials() {
+            try {
+                const storedTrials = localStorage.getItem('cwags_trials');
+                if (storedTrials) {
+                    const userTrials = JSON.parse(storedTrials);
+                    trials = [...trials, ...userTrials];
+                    console.log(`📥 Loaded ${userTrials.length} stored trials`);
+                }
+            } catch (error) {
+                console.error('Error loading stored trials:', error);
+            }
+        }
+
+        // Save trials to localStorage
+        function saveTrialsToStorage() {
+            try {
+                const userTrials = trials.filter(t => t.created);
+                localStorage.setItem('cwags_trials', JSON.stringify(userTrials));
+                console.log(`💾 Saved ${userTrials.length} trials to storage`);
+            } catch (error) {
+                console.error('Error saving trials:', error);
+            }
+        }
+
+        // Update data freshness indicator
+        function updateDataFreshness(lastUpdated) {
+            const dataInfo = document.createElement('div');
+            dataInfo.style.cssText = `
+                position: fixed; bottom: 20px; right: 20px; 
+                background: rgba(255,255,255,0.9); padding: 0.5rem 1rem;
+                border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                font-size: 0.875rem; color: #718096; z-index: 1000;
+            `;
+            
+            const updateDate = new Date(lastUpdated);
+            const now = new Date();
+            const diffHours = Math.floor((now - updateDate) / (1000 * 60 * 60));
+            
+            let timeAgo;
+            if (diffHours < 1) timeAgo = 'just updated';
+            else if (diffHours < 24) timeAgo = `${diffHours}h ago`;
+            else timeAgo = `${Math.floor(diffHours / 24)}d ago`;
+            
+            dataInfo.innerHTML = `📊 Data updated ${timeAgo}`;
+            document.body.appendChild(dataInfo);
+            
+            setTimeout(() => {
+                if (dataInfo.parentNode) {
+                    dataInfo.style.opacity = '0.5';
+                }
+            }, 5000);
+        }
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Dashboard functions
+        function updateDashboardStats() {
+            document.getElementById('totalTrials').textContent = trials.length;
+            document.getElementById('activeTrials').textContent = trials.filter(t => t.status !== 'completed').length;
+            document.getElementById('totalDogs').textContent = records.length;
+            
+            const uniqueHandlers = new Set(records.map(r => r.handler));
+            document.getElementById('totalHandlers').textContent = uniqueHandlers.size;
+            
+            populateUpcomingTrials();
+        }
+
+        function populateUpcomingTrials() {
+            const tbody = document.getElementById('upcomingTrialsTable');
+            tbody.innerHTML = '';
+            
+            const upcomingTrials = trials.filter(trial => {
+                const trialDate = new Date(trial.date);
+                const today = new Date();
+                return trialDate >= today;
+            }).slice(0, 5);
+            
+            if (upcomingTrials.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #718096;">No upcoming trials found</td></tr>';
+                return;
+            }
+            
+            upcomingTrials.forEach(trial => {
+                const row = tbody.insertRow();
+                let dateDisplay = formatDate(trial.date);
+                
+                row.innerHTML = `
+                    <td>${dateDisplay}</td>
+                    <td>${trial.host}</td>
+                    <td>${trial.city}</td>
+                    <td>${trial.classes.join(', ')}</td>
+                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="padding: 0.5rem 1rem;">View</button>
+                    </td>
+                `;
+            });
+        }
+
+        function populateTrialsTable() {
+            const tbody = document.getElementById('trialsTable');
+            tbody.innerHTML = '';
+            
+            if (trials.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #718096;">No trials found. Create your first trial!</td></tr>';
+                return;
+            }
+            
+            trials.forEach(trial => {
+                const row = tbody.insertRow();
+                let dateDisplay = formatDate(trial.date);
+                
+                row.innerHTML = `
+                    <td>${trial.id}</td>
+                    <td>${dateDisplay}</td>
+                    <td>${trial.host}</td>
+                    <td>${trial.city}</td>
+                    <td>${trial.classes.join(', ')}</td>
+                    <td>${trial.judge}</td>
+                    <td><span class="status-badge status-${trial.status}">${trial.status.charAt(0).toUpperCase() + trial.status.slice(1)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editTrial('${trial.id}')" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">Edit</button>
+                        <button class="btn btn-secondary" onclick="viewTrial('${trial.id}')" style="padding: 0.5rem 1rem;">View</button>
+                    </td>
+                `;
+            });
+        }
+
+        function populateRecordsTable() {
+            const tbody = document.getElementById('recordsTable');
+            tbody.innerHTML = '';
+            
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #718096;">No records found. Records will load from dataforsite.xlsx when deployed.</td></tr>';
+                return;
+            }
+            
+            records.forEach(record => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${record.registrationNumber}</td>
+                    <td>${record.dogName}</td>
+                    <td>${record.handler}</td>
+                    <td>${record.currentLevel}</td>
+                    <td>Recent Trial</td>
+                    <td>${record.judge}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewRecord('${record.id}')" style="padding: 0.5rem 1rem;">View</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Trial creation functions
+        function createNewTrial() {
+            currentTrialStep = 1;
+            currentEditingTrial = null;
+            isEditMode = false;
+            
+            // Reset modal
+            document.getElementById('modalTitle').textContent = 'Create New Trial';
+            document.getElementById('trialTypeStep').style.display = 'block';
+            
+            // Reset form values
+            document.querySelector('input[name="trialType"][value="standalone"]').checked = true;
+            
+            showModal('newTrialModal');
+        }
+
+        function nextTrialStep() {
+            const selectedType = document.querySelector('input[name="trialType"]:checked').value;
+            
+            document.getElementById('trialTypeStep').style.display = 'none';
+            
+            // For demo purposes, just show an alert
+            alert(`You selected: ${selectedType} trial type. Full trial creation wizard will be implemented.`);
+            hideModal('newTrialModal');
+        }
+
+        function editTrial(trialId) {
+            const trial = trials.find(t => t.id === trialId);
+            if (!trial) {
+                alert('Trial not found!');
+                return;
+            }
+
+            alert(`Edit functionality for trial ${trialId} will be implemented.`);
+        }
+
+        function viewTrial(trialId) {
+            const trial = trials.find(t => t.id === trialId);
+            if (trial) {
+                let details = `Trial: ${trial.host}\n`;
+                details += `Date: ${formatDate(trial.date)}\n`;
+                details += `Location: ${trial.city}\nStatus: ${trial.status}`;
+                details += `\nClasses: ${trial.classes.join(', ')}`;
+                
+                alert(details);
+            }
+        }
+
+        function viewRecord(recordId) {
+            const record = records.find(r => r.id === recordId);
+            if (record) {
+                alert(`Dog: ${record.dogName}\nHandler: ${record.handler}\nLevel: ${record.currentLevel}\nJudge: ${record.judge}`);
+            }
+        }
+
+        // Application functions
+        function submitTrialApplication() {
+            const formData = {
+                date: document.getElementById('trialDates').value,
+                host: document.getElementById('hostName').value,
+                location: document.getElementById('trialLocation').value,
+                city: document.getElementById('cityState').value,
+                contact: document.getElementById('contactName').value,
+                email: document.getElementById('contactEmail').value,
+                phone: document.getElementById('contactPhone').value,
+                website: document.getElementById('premiumWebsite').value,
+                classes: getSelectedClasses(),
+                judges: document.getElementById('judges').value,
+                advocates: document.getElementById('advocates').value,
+                type: document.getElementById('trialType').value,
+                surface: document.getElementById('ringSurface').value,
+                rings: document.getElementById('numRings').value,
+                league: document.getElementById('isLeague').checked,
+                insurance: document.getElementById('insuranceExpiration').value,
+                scentResets: document.getElementById('scentResets').checked
+            };
+
+            if (!formData.date || !formData.host || !formData.location || !formData.city || !formData.contact || !formData.email) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            if (formData.classes.length === 0) {
+                alert('Please select at least one class type.');
+                return;
+            }
+
+            // Create new trial from application
+            const newTrial = {
+                id: 'A' + String(trials.filter(t => t.id.startsWith('A')).length + 1).padStart(3, '0'),
+                ...formData,
+                status: 'pending',
+                judge: 'TBD',
+                created: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+
+            trials.push(newTrial);
+            saveTrialsToStorage();
+            updateDashboardStats();
+            populateTrialsTable();
+
+            alert(`Trial application ${newTrial.id} submitted successfully!`);
+            clearApplicationForm();
+        }
+
+        function getSelectedClasses() {
+            const classes = [];
+            if (document.getElementById('classObedience').checked) classes.push('Obedience');
+            if (document.getElementById('classRally').checked) classes.push('Rally');
+            if (document.getElementById('classScent').checked) classes.push('Scent');
+            if (document.getElementById('classGames').checked) classes.push('Games');
+            return classes;
+        }
+
+        function clearApplicationForm() {
+            const inputs = document.querySelectorAll('#applications input, #applications select, #applications textarea');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+
+        // Modal management
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Reset editing state when closing modals
+            if (modalId === 'newTrialModal') {
+                currentEditingTrial = null;
+                isEditMode = false;
+            }
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            
+            // Show/hide scent reset option based on scent class selection
+            const classScent = document.getElementById('classScent');
+            if (classScent) {
+                classScent.addEventListener('change', function() {
+                    const resetGroup = document.getElementById('scentResetGroup');
+                    if (resetGroup) {
+                        resetGroup.style.display = this.checked ? 'block' : 'none';
+                    }
+                });
+            }
+            
+            console.log('✅ C-WAGS Trial Management System loaded successfully!');
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                currentEditingTrial = null;
+                isEditMode = false;
+            }
+        });
+    </script>
+</body>
+</html>
